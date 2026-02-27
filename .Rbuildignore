@@ -1,3 +1,6 @@
+^\.github$
+^codecov\.yml$
 ^CBM4r\.Rproj$
 ^\.Rproj\.user$
-wip/
+^man-roxygen$
+^wip/
