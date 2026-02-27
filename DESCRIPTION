@@ -1,0 +1,24 @@
+Package: CBM4r
+Title: CBM4 in R
+Version: 0.0.0.9000
+Authors@R: 
+    person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
+Description: R interface to CBM4 Python applications. 
+License: GPL-3
+Depends: R (>= 4.1.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports:
+  arrow,
+  data.table (>= 1.18.0),
+  dplyr,
+  reticulate,
+  RSQLite,
+  terra
+Suggests:
+  covr,
+  devtools,
+  testthat (>= 3.0.0),
+  withr
+Config/testthat/edition: 3
