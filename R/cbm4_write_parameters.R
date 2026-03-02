@@ -167,6 +167,10 @@ cbm4_format_increments <- function(classifiers, gcMeta, gcIncr, long = TRUE, cbm
   check_table_columns_all("gcMeta", gcMeta, c("gcID", classifiers, "sw"))
   check_table_columns_all("gcIncr", gcIncr, c("gcID", "age", "merch_inc", "foliage_inc", "other_inc"))
 
+  if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
+  if (!all((sapply(gcMeta, is.character) | sapply(gcMeta, is.integer))[classifiers])) stop(
+    "classifiers must be character or integer")
+
   # Check for data gaps
   if (any(do.call(c, lapply(split(gcIncr$age, gcIncr[["gcID"]]), diff)) > 1)) stop(
     "gcIncr must have increments for every year")
