@@ -91,7 +91,7 @@ distEvents <- rbind(
 )
 
 
-## TEST ----
+## SIMULATE ----
 
 test_that("cbm4_write_inventory", {
 
@@ -164,4 +164,22 @@ test_that("cbm4_step", {
 
 })
 
+
+## READ RESULTS ----
+
+test_that("cbm4_results_emissions_by_timestep", {
+
+  cbm4_summary <- cbm4_results_emissions_by_timestep(cbm4_data)
+
+  expect_s3_class(cbm4_summary, "data.table")
+
+})
+
+test_that("cbm4_results_products_by_timestep", {
+
+  cbm4_summary <- cbm4_results_products_by_timestep(cbm4_data)
+
+  expect_s3_class(cbm4_summary, "data.table")
+
+})
 

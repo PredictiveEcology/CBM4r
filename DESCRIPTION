@@ -19,6 +19,7 @@ Imports:
 Suggests:
   covr,
   devtools,
+  gert,
   testthat (>= 3.0.0),
   withr
 Config/testthat/edition: 3
