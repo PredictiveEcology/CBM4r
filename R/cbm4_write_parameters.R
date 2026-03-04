@@ -31,7 +31,7 @@ cbm4_write_spinup_parameters <- function(
     template_name   = template_name,
     template_path   = template_path,
     cbm_defaults_db = cbm_defaults_db,
-    long            = FALSE,
+    spinup          = TRUE,
     ...
   )
 }
@@ -69,18 +69,18 @@ cbm4_write_step_parameters <- function(
     template_name   = template_name,
     template_path   = template_path,
     cbm_defaults_db = cbm_defaults_db,
-    long            = TRUE,
+    spinup          = FALSE,
     ...
   )
 }
 
 
-# Helper function: write increments long or wide
+# Helper function: write parameters
 cbm4_write_parameters <- function(
     cbm4_data = NULL,
     dataset_name,
     cbm_defaults_db,
-    long,
+    spinup,
     grid_rast     = NULL,
     grid_chunks   = 1,
     template_name = NULL,
@@ -92,7 +92,7 @@ cbm4_write_parameters <- function(
   # Format increments
   incTable <- cbm4_format_increments(
     cbm_defaults_db = cbm_defaults_db,
-    long = long,
+    long = !spinup,
     ...
   )
 
@@ -109,7 +109,7 @@ cbm4_write_parameters <- function(
   )
 
   # Write increments
-  incTableName <- ifelse(long, "parameters_increments", "parameters_increments_wide")
+  incTableName <- ifelse(spinup, "parameters_increments_wide", "parameters_increments")
 
   arrow_space_dataset_write_table(
     dataset_name = dataset_name,
@@ -117,25 +117,41 @@ cbm4_write_parameters <- function(
     table_name   = paste0("table-", incTableName),
     table_data   = incTable
   )
-
-  # Write parameters_ecological
-  arrow_space_dataset_write_table(
+  cbm4_write_parameter_table_metadata(
     dataset_name = dataset_name,
     dataset_path = dataset_path,
-    table_name   = "table-parameters_ecological",
-    table_data   = cbm4_format_parameters_ecological(cbm_defaults_db)
+    table_name   = incTableName
   )
 
-  # Write parameter_table_metadata
-  paramTables <- data.table::data.table(table_name = c("parameters_ecological", incTableName))
-  paramTablesPath <- file.path(dataset_path, paste0(dataset_name, "-table-parameter_table_metadata"))
-  if (file.exists(paramTablesPath)){
-    paramTables <- unique(rbind(
-      dplyr::collect(arrow::open_dataset(paramTablesPath)),
-      paramTables
-    ))
+  # Write parameters_ecological
+  cbm4_write_parameters_decay(
+    dataset_name    = dataset_name,
+    dataset_path    = dataset_path,
+    cbm_defaults_db = cbm_defaults_db
+  )
+  cbm4_write_parameters_turnover(
+    dataset_name    = dataset_name,
+    dataset_path    = dataset_path,
+    cbm_defaults_db = cbm_defaults_db
+  )
+  cbm4_write_parameters_root(
+    dataset_name    = dataset_name,
+    dataset_path    = dataset_path,
+    cbm_defaults_db = cbm_defaults_db
+  )
+  if (spinup){
+    cbm4_write_parameters_spinup(
+      dataset_name    = dataset_name,
+      dataset_path    = dataset_path,
+      cbm_defaults_db = cbm_defaults_db
+    )
+  }else{
+    cbm4_write_parameters_mean_annual_temp(
+      dataset_name    = dataset_name,
+      dataset_path    = dataset_path,
+      cbm_defaults_db = cbm_defaults_db
+    )
   }
-  arrow::write_dataset(paramTables, paramTablesPath)
 
   return(invisible())
 }
@@ -260,97 +276,6 @@ cbm4_format_increments <- function(classifiers, gcMeta, gcIncr, long = TRUE, cbm
   }
 
   return(gcIncr)
-}
-
-
-# CBM4 format parameters ecological
-cbm4_format_parameters_ecological <- function(cbm_defaults_db){
-
-  # Read tables
-  paramTableNames <- c(
-    "spatial_unit", "spinup_parameter", "eco_boundary", "turnover_parameter", "root_parameter",
-    "decay_parameter", "dom_pool", "pool",
-    "slow_mixing_rate", "biomass_to_carbon_rate"
-  )
-  paramTables <- lapply(paramTableNames, cbmdbReadTable, cbm_defaults_db = cbm_defaults_db)
-  names(paramTables) <- paramTableNames
-
-  # Transform tables
-  data.table::setnames(paramTables$spatial_unit, "id", "inventory.spatial_unit")
-
-  turnoverRemap <- list(
-    id                                     = "id",
-    turnover.sw_merch                      = "stem_turnover", # TODO: check
-    turnover.sw_foliage                    = "sw_foliage",
-    turnover.sw_other                      = "sw_branch", # TODO: check
-    turnover.sw_stem_snag                  = "sw_stem_snag",
-    turnover.sw_branch_snag                = "sw_branch_snag",
-    turnover.sw_other_to_branch_snag_split = "branch_snag_split",  # TODO: check
-    turnover.sw_coarse_root                = "coarse_root",
-    turnover.sw_coarse_root_ag_split       = "coarse_ag_split",
-    turnover.sw_fine_root                  = "fine_root",
-    turnover.sw_fine_root_ag_split         = "fine_ag_split",
-    turnover.hw_merch                      = "stem_turnover", # TODO: check
-    turnover.hw_foliage                    = "hw_foliage",
-    turnover.hw_other                      = "hw_branch", # TODO: check
-    turnover.hw_stem_snag                  = "hw_stem_snag",
-    turnover.hw_branch_snag                = "hw_branch_snag",
-    turnover.hw_other_to_branch_snag_split = "branch_snag_split", # TODO: check
-    turnover.hw_coarse_root                = "coarse_root",
-    turnover.hw_coarse_root_ag_split       = "coarse_ag_split",
-    turnover.hw_fine_root                  = "fine_root",
-    turnover.hw_fine_root_ag_split         = "fine_ag_split"
-  )
-  paramTables$turnover_parameter <- data.table::as.data.table(
-    lapply(turnoverRemap, function(x) paramTables$turnover_parameter[[x]]))
-
-  rootRemap <- list(
-    id         = "id",
-    root.hw_a  = "hw_a",
-    root.sw_a  = "sw_a",
-    root.hw_b  = "hw_b",
-    root.frp_a = "frp_a",
-    root.frp_b = "frp_b",
-    root.frp_c = "frp_c"
-  )
-  data.table::setnames(paramTables$root_parameter, do.call(c, rootRemap), names(rootRemap))
-
-  decayRemap <- list(
-    dom_pool_id               = "dom_pool_id",
-    decay.POOL_NAME.base_rate = "base_decay_rate",
-    decay.POOL_NAME.tref      = "reference_temp",
-    decay.POOL_NAME.q10       = "q10",
-    decay.POOL_NAME.p_atm     = "prop_to_atmosphere",
-    decay.POOL_NAME.max_rate  = "max_rate"
-  )
-  domPools <- merge(paramTables$dom_pool, paramTables$pool, by.x = "pool_id", by.y = "id")
-  paramTables$decay_parameter <- data.table::cbindlist(
-    lapply(split(paramTables$decay_parameter, paramTables$decay_parameter$dom_pool_id), function(r){
-      pool_name <- domPools[id == r$dom_pool_id]$code
-      data.table::setnames(r, do.call(c, decayRemap), gsub("POOL_NAME", pool_name, names(decayRemap)))
-      r[, -c("dom_pool_id")]
-    })
-  )
-
-  # Merge tables
-  params <- paramTables$spatial_unit |>
-    merge(paramTables$spinup_parameter,   by.x = "spinup_parameter_id",   by.y = "id") |>
-    merge(paramTables$eco_boundary,       by.x = "eco_boundary_id",       by.y = "id") |>
-    merge(paramTables$turnover_parameter, by.x = "turnover_parameter_id", by.y = "id") |>
-    merge(paramTables$root_parameter,     by.x = "root_parameter_id",     by.y = "id")
-
-  params <- cbind(params, paramTables$decay_parameter)
-
-  params[, turnover.slow_mixing_rate   := paramTables$slow_mixing_rate$rate]
-  params[, root.biomass_to_carbon_rate := paramTables$biomass_to_carbon_rate$rate]
-
-  # Set enabled
-  params[, enabled := 1]
-
-  # Format and return
-  data.table::setkey(params, inventory.spatial_unit)
-  data.table::setcolorder(params)
-  params
 }
 
 
