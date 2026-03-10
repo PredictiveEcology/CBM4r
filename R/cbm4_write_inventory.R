@@ -28,8 +28,8 @@ cbm4_write_inventory <- function(
 
   if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
   if (!all(classifiers %in% names(inventoryDT))) stop("inventoryDT requires all classifiers")
-  if (!all((sapply(inventoryDT, is.character) | sapply(inventoryDT, is.integer))[classifiers])) stop(
-    "classifiers must be character or integer")
+  if (!all(sapply(inventoryDT, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
+    "classifiers must be integer, character, or factor")
 
   # Initiate dataset
   cbm4_write_geo(

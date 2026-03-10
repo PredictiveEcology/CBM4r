@@ -184,8 +184,8 @@ cbm4_format_increments <- function(classifiers, gcMeta, gcIncr, long = TRUE, cbm
   check_table_columns_all("gcIncr", gcIncr, c("gcID", "age", "merch_inc", "foliage_inc", "other_inc"))
 
   if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
-  if (!all((sapply(gcMeta, is.character) | sapply(gcMeta, is.integer))[classifiers])) stop(
-    "classifiers must be character or integer")
+  if (!all(sapply(gcMeta, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
+    "classifiers must be integer, character, or factor")
 
   # Check for data gaps
   if (any(do.call(c, lapply(split(gcIncr$age, gcIncr[["gcID"]]), diff)) > 1)) stop(
