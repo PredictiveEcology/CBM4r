@@ -104,7 +104,7 @@ cbm4_format_disturbance <- function(
     def_disturbed_transition_id   = 0L
 ){
 
-  if (!is.null(classifiers)) stop("Disturbances do not yet support classifiers.")
+  if (length(classifiers) > 0) stop("Disturbances do not yet support classifiers.")
 
   # Rename columns
   dataMeta <- data.table::as.data.table(distMeta)
