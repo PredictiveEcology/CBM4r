@@ -13,7 +13,13 @@ arrow_space_dataset_write_table <- function(
     is.null(table_name) || table_name == "", "", paste0("-", table_name))))
 
   if (nrow(table_data) > 0){
+
+    # Convert factor columns to string
+    factCols <- names(table_data)[sapply(table_data, is.factor)]
+    if (length(factCols) > 0) table_data[, (factCols) := lapply(.SD, as.character), .SDcols = factCols]
+
     arrow::write_dataset(table_data, table_path, existing_data_behavior = existing_data_behavior, ...)
+
   }else{
     dir.create(table_path, recursive = TRUE)
   }
