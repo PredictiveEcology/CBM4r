@@ -21,7 +21,7 @@ cbm4_write_inventory <- function(
     grid_chunks   = 1,
     template_name = NULL,
     template_path = file.path(cbm4_data, template_name),
-    dataset_name = "inventory",
+    dataset_name  = "inventory",
     dataset_path  = file.path(cbm4_data, dataset_name),
     ...
 ){
@@ -87,6 +87,7 @@ cbm4_write_inventory <- function(
 #' @param inventoryDT data.table. Cohort inventory.
 #' @param pixelDT TODO
 #' @template cbm_defaults_db
+#' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
 #' @param def_land_class character. Land class code.
 #' Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.
 #' @param def_afforestation_pre_type character. Land use before forestation.
@@ -106,6 +107,7 @@ cbm4_format_inventory <- function(
     inventoryDT,
     pixelDT,
     cbm_defaults_db = NULL,
+    area_unit_conversion           = 0.0001,
     def_land_class                 = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
     def_afforestation_pre_type     = "None",
     def_historic_disturbance_type  = "Wildfire",
@@ -142,7 +144,9 @@ cbm4_format_inventory <- function(
   dataFull[, index := .GRP - 1, by = setdiff(names(dataFull), c("raster_index", "area"))]
 
   # Set area
-  dataFull[, area := as.numeric(sum(area)), by = index]
+  ## Ensure that area is numeric, not integer
+  dataFull[, area := as.numeric(area)]
+  dataFull[, area := sum(area) * area_unit_conversion, by = index]
 
   # Split by raster key and unique groups
   dataIndex <- dataFull[, .(index, raster_index, cohort_index, chunk_index)]
@@ -151,9 +155,6 @@ cbm4_format_inventory <- function(
   dataFull <- unique(dataFull[, .SD, .SDcols = setdiff(names(dataFull), "raster_index")])
   data.table::setkeyv(dataFull, setdiff(names(dataIndex), "raster_index"))
   data.table::setcolorder(dataFull)
-
-  # Ensure that area is numeric, not integer
-  dataFull[, area := as.numeric(area)]
 
   # Set defaults
   for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){

@@ -8,6 +8,7 @@ cbm4_format_inventory(
   inventoryDT,
   pixelDT,
   cbm_defaults_db = NULL,
+  area_unit_conversion = 1e-04,
   def_land_class = "UNFCCC_FL_R_FL",
   def_afforestation_pre_type = "None",
   def_historic_disturbance_type = "Wildfire",
@@ -23,6 +24,8 @@ cbm4_format_inventory(
 
 \item{cbm_defaults_db}{character.
 Path to CBM defaults SQLite database.}
+
+\item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
 
 \item{def_land_class}{character. Land class code.
 Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.}
