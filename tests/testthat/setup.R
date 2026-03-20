@@ -2,7 +2,8 @@
 # Set virtual environment
 if (as.logical(Sys.getenv("CI", "false"))){
 
-  withr::local_envvar(list(RETICULATE_PYTHON_ENV = "r-CBM4"), .local_envir = testthat::teardown_env())
+  withr::local_envvar(list(RETICULATE_PYTHON_ENV = "r-CBM4-test"), .local_envir = testthat::teardown_env())
+  withr::defer(reticulate::virtualenv_remove("r-CBM4-test"), envir = testthat::teardown_env(), priority = "last")
 
 }else{
 
