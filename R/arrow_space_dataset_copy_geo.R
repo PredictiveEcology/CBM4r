@@ -11,6 +11,7 @@
 #' @param copy_raster_index_data logical. TODO
 #' @param partitions character. TODO
 #' @param tags character. TODO
+#' @param ... unused
 arrow_space_dataset_copy_geo <- function(
     dataset_dir = NULL,
     dataset_name,
@@ -19,7 +20,8 @@ arrow_space_dataset_copy_geo <- function(
     partitions = NULL,
     tags       = NULL,
     dataset_path  = file.path(dataset_dir, dataset_name),
-    template_path = file.path(dataset_dir, template_name)
+    template_path = file.path(dataset_dir, template_name),
+    ...
 ){
 
   if (length(dataset_path) == 0)   stop("dataset_path is invalid")

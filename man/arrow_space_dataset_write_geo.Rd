@@ -11,7 +11,8 @@ arrow_space_dataset_write_geo(
   geo_metadata,
   partitions = NULL,
   tags = NULL,
-  dataset_path = file.path(dataset_dir, dataset_name)
+  dataset_path = file.path(dataset_dir, dataset_name),
+  ...
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ arrow_space_dataset_write_geo(
 
 \item{dataset_path}{character. Path to \code{arrow_space} dataset.
 Defaults to \code{file.path(dataset_dir, dataset_name)}}
+
+\item{...}{unused}
 }
 \description{
 arrow_space_dataset_write_geo

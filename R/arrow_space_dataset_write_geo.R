@@ -9,6 +9,7 @@
 #' @param geo_metadata data.table.
 #' @param partitions character. TODO
 #' @param tags character. TODO
+#' @param ... unused
 arrow_space_dataset_write_geo <- function(
     dataset_dir  = NULL,
     dataset_name,
@@ -16,7 +17,8 @@ arrow_space_dataset_write_geo <- function(
     geo_metadata,
     partitions   = NULL,
     tags         = NULL,
-    dataset_path = file.path(dataset_dir, dataset_name)
+    dataset_path = file.path(dataset_dir, dataset_name),
+    ...
 ){
 
   if (length(dataset_path) == 0) stop("dataset_path is invalid")

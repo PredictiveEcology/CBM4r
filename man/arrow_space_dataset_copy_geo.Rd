@@ -12,7 +12,8 @@ arrow_space_dataset_copy_geo(
   partitions = NULL,
   tags = NULL,
   dataset_path = file.path(dataset_dir, dataset_name),
-  template_path = file.path(dataset_dir, template_name)
+  template_path = file.path(dataset_dir, template_name),
+  ...
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ Defaults to \code{file.path(dataset_dir, dataset_name)}}
 
 \item{template_path}{character. Path to \code{arrow_space} dataset to copy table from.
 Defaults to \code{file.path(dataset_dir, template_name)}}
+
+\item{...}{unused}
 }
 \description{
 arrow_space_dataset_copy_geo
