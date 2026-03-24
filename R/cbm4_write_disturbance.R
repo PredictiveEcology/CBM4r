@@ -4,52 +4,45 @@
 #' Write disturbances to a CBM4 spatial parquet dataset.
 #'
 #' @template cbm4_data
-#' @param ... arguments to \code{\link{cbm4_format_disturbance}}
-#' @inheritParams cbm4_format_disturbance
 #' @inheritParams cbm4_write_geo
+#' @inheritParams cbm4_format_disturbance
+#' @param ... arguments to \code{\link{cbm4_write_geo}} or \code{\link{cbm4_format_disturbance}}
 #'
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_disturbance <- function(
     cbm4_data = NULL,
-    cbm_defaults_db = NULL,
-    distMeta        = NULL,
-    distEvents      = NULL,
-    classifiers     = NULL,
-    grid_rast       = NULL,
-    grid_chunks     = 1,
-    template_name   = NULL,
-    template_path   = file.path(cbm4_data, template_name),
-    dataset_name    = "disturbance",
-    dataset_path    = file.path(cbm4_data, dataset_name),
+    distMeta     = NULL,
+    distEvents   = NULL,
+    classifiers  = NULL,
+    dataset_name = "disturbance",
+    dataset_path = file.path(cbm4_data, dataset_name),
     ...
 ){
 
   # Initiate dataset
   if (!file.exists(dataset_path)) cbm4_write_geo(
+    cbm4_data,
     dataset_name  = dataset_name,
     dataset_path  = dataset_path,
-    grid_rast     = grid_rast,
-    grid_chunks   = grid_chunks,
-    template_name = template_name,
-    template_path = template_path,
-    partitions    = list("disturbance_order" = "int64", "timestep" = "int64", "chunk_index" = "int64")
-  )
+    partitions    = list("disturbance_order" = "int64", "timestep" = "int64", "chunk_index" = "int64"),
+    tags          = if (length(classifiers) > 0) list(classifier = paste0("classifiers.", classifiers)),
+    ...)
 
   # Write disturbances
   if (!is.null(distEvents) && nrow(distEvents) > 0){
 
     # Format disturbances
     dist <- cbm4_format_disturbance(
-      cbm_defaults_db = cbm_defaults_db,
-      pixelDT = arrow_space_dataset_read_table(
-        dataset_name = dataset_name,
-        dataset_path = dataset_path,
-        table_name   = "table-pixels"
-      ),
       distMeta,
       distEvents,
       classifiers,
+      pixelDT = arrow_space_dataset_read_table(
+        dataset_name = dataset_name,
+        dataset_path = dataset_path,
+        table_name   = "table-pixels",
+        col_select   = c("pixel_index", "chunk_index", "raster_index")
+      ),
       ...)
 
     # Write disturbances
@@ -78,7 +71,7 @@ cbm4_write_disturbance <- function(
 #' @param distMeta data.table. Disturbance metadata.
 #' @param distEvents data.table. Disturbance events.
 #' @template classifiers
-#' @param pixelDT TODO
+#' @template pixelDT
 #' @template cbm_defaults_db
 #' @param def_proportion integer. TODO
 #' @param def_enable_merge integer. TODO
@@ -86,6 +79,7 @@ cbm4_write_disturbance <- function(
 #' @param def_filter_id integer. TODO
 #' @param def_undisturbed_transition_id integer. Set to 0 to indicate no transitions.
 #' @param def_disturbed_transition_id integer. Set to 0 to indicate no transitions.
+#' @param ... unused
 #'
 #' @return list with items:
 #' **index**: `arrow_space` raster indexed `data.table`;
@@ -93,83 +87,36 @@ cbm4_write_disturbance <- function(
 cbm4_format_disturbance <- function(
     distMeta,
     distEvents,
-    classifiers = NULL,
     pixelDT,
+    classifiers = NULL,
     cbm_defaults_db = NULL,
     def_proportion                = 1L,
     def_enable_merge              = 0L,
     def_sort_id                   = 0L,
     def_filter_id                 = 0L,
     def_undisturbed_transition_id = 0L,
-    def_disturbed_transition_id   = 0L
+    def_disturbed_transition_id   = 0L,
+    ...
 ){
 
   if (length(classifiers) > 0) stop("Disturbances do not yet support classifiers.")
 
-  # Rename columns
-  dataMeta <- data.table::as.data.table(distMeta)
-  data.table::setnames(dataMeta, "eventID", "disturbance_id", skip_absent = TRUE)
-  data.table::setnames(dataMeta, "disturbance_type_name", "disturbance_type", skip_absent = TRUE)
-
-  dataFull <- data.table::as.data.table(distEvents)
-  data.table::setnames(dataFull, "eventID", "disturbance_id", skip_absent = TRUE)
-  data.table::setnames(dataFull, "pixelIndex", "pixel_index", skip_absent = TRUE)
-
   # Check table columns
-  check_table_columns_all("distMeta",   dataMeta, c("disturbance_id"))
-  check_table_columns_any("distMeta",   dataMeta, c("disturbance_type", "disturbance_type_id"))
-  check_table_columns_all("distEvents", dataFull, c("pixel_index", "disturbance_id", "timestep"))
+  check_table_columns_all("distMeta", distMeta, c("disturbance_id"))
+  check_table_columns_any("distMeta", distMeta, c("disturbance_type", "disturbance_type_id"))
 
-  # Choose disturbance events by priority
-  multiEvents <- dataFull[, .(N = .N, disturbance_id = list(disturbance_id)), by = c("pixel_index", "timestep")][N > 1,]
-  if (nrow(multiEvents) > 0){
+  check_table_columns_all("distEvents", distEvents, c("pixel_index", "disturbance_id", "timestep"))
 
-    if (!"priority" %in% names(distMeta)) stop(
-      "Multiple disturbance events found in one or more pixels. ",
-      "Use the distMeta \"priority\" column to set event precendence.")
+  pixelCols <- c("pixel_index", "chunk_index", "raster_index")
+  check_table_columns_all("pixelDT",  pixelDT,  pixelCols)
 
-    multiEvents <- multiEvents[, .(disturbance_id = unlist(disturbance_id)), by = c("pixel_index", "timestep")]
-    multiEvents <- merge(multiEvents, dataMeta, by = "disturbance_id", all.x = TRUE)
-
-    multiEvents[, pri_highest := priority %in% min(priority), by = c("pixel_index", "timestep")]
-    multiEvents <- multiEvents[pri_highest == TRUE, .(N = .N, disturbance_id = first(disturbance_id)), by = c("pixel_index", "timestep")]
-
-    if (any(multiEvents$N > 1)) stop(
-      "Multiple disturbance events found in one or more pixels ",
-      "and distMeta \"priority\" indicates events have the same priority.")
-
-    dataFull <- rbind(
-      dataFull[!multiEvents, on = c("pixel_index", "timestep")],
-      dataFull[multiEvents,  on = c("pixel_index", "timestep", "disturbance_id")][, .SD, .SDcols = names(dataFull)]
-    )
-  }
-
-  # Join with metadata
-  dataFull <- merge(dataFull, dataMeta, by = "disturbance_id", all.x = TRUE)
+  # Cast to data.table
+  if (!data.table::is.data.table(distEvents)) distEvents <- data.table::as.data.table(distEvents)
+  if (!data.table::is.data.table(pixelDT))    pixelDT    <- data.table::as.data.table(pixelDT)
 
   # Join with pixel table
-  dataFull <- merge(dataFull, pixelDT[, .(pixel_index, chunk_index, raster_index)],
-                    by = "pixel_index", all.x = TRUE)
+  dataFull <- merge(distEvents, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
-
-  # Set disturbance_type
-  if (!"disturbance_type" %in% names(dataFull)){
-
-    disturbance_type_tr <- cbmdbReadTable(cbm_defaults_db, "disturbance_type_tr")
-
-    dataFull[, disturbance_type := factor(
-      disturbance_type_tr$name[match(disturbance_type_id, disturbance_type_tr$disturbance_type_id)],
-      levels = disturbance_type_tr$name)]
-  }
-
-  # Set disturbance_type_id
-  if (!"disturbance_type_id" %in% names(dataFull)){
-
-    disturbance_type_tr <- cbmdbReadTable(cbm_defaults_db, "disturbance_type_tr")
-
-    dataFull[, disturbance_type_id := disturbance_type_tr$disturbance_type_id[
-      match(disturbance_type, disturbance_type_tr$name)]]
-  }
 
   # Set disturbance_order
   ## This sets no order to the disturbances
@@ -183,21 +130,43 @@ cbm4_format_disturbance <- function(
   data.table::setkeyv(dataIndex, names(dataIndex))
 
   dataFull <- unique(dataFull[, .SD, .SDcols = setdiff(names(dataFull), "raster_index")])
+  dataFull <- merge(dataFull, distMeta, by = "disturbance_id", all.x = TRUE)
   data.table::setkeyv(dataFull, setdiff(names(dataIndex), "raster_index"))
   data.table::setcolorder(dataFull)
 
-  # Set defaults
-  for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
-    defCol <- sub("^def\\_", "", defArg)
-    if (!defCol %in% names(dataFull)){
-      dataFull[, eval(defCol) := get(defArg)]
-    }else{
-      data.table::setnafill(dataFull, cols = defCol, fill = get(defArg))
-    }
+  # Set disturbance_type_id
+  if (!"disturbance_type_id" %in% names(dataFull)){
+
+    disturbance_type_tr <- cbmdbReadTable(cbm_defaults_db, "disturbance_type_tr")
+
+    dataFull[, disturbance_type_id := disturbance_type_tr$disturbance_type_id[
+      match(disturbance_type, disturbance_type_tr$name)]]
+  }
+
+  # Set disturbance_type
+  if (!"disturbance_type" %in% names(dataFull)){
+
+    disturbance_type_tr <- cbmdbReadTable(cbm_defaults_db, "disturbance_type_tr")
+
+    dataFull[, disturbance_type := factor(
+      disturbance_type_tr$name[match(disturbance_type_id, disturbance_type_tr$disturbance_type_id)],
+      levels = disturbance_type_tr$name)]
   }
 
   # Rename disturbance_type_id column
   data.table::setnames(dataFull, "disturbance_type_id", "default_disturbance_type_id")
+
+  # Set defaults
+  for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
+    defCol <- sub("^def\\_", "", defArg)
+    if (!is.null(get(defArg))){
+      if (!defCol %in% names(dataFull)){
+        dataFull[, eval(defCol) := get(defArg)]
+      }else{
+        dataFull[is.na(eval(defCol)), eval(defCol) := get(defArg)]
+      }
+    }
+  }
 
   # Return
   list(

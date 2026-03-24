@@ -6,13 +6,9 @@
 \usage{
 cbm4_write_simulation_inventory(
   cbm4_data = NULL,
-  cbm_defaults_db = NULL,
-  inventoryDT,
+  cohortDT,
+  classifiers,
   timestep,
-  grid_rast = NULL,
-  grid_chunks = 1,
-  template_name = NULL,
-  template_path = file.path(cbm4_data, template_name),
   dataset_name = "simulation",
   dataset_path = file.path(cbm4_data, dataset_name),
   ...
@@ -23,24 +19,12 @@ cbm4_write_simulation_inventory(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
 
-\item{cbm_defaults_db}{character.
-Path to CBM defaults SQLite database.}
+\item{cohortDT}{data.table. Cohort inventory.}
 
-\item{inventoryDT}{data.table. Cohort inventory.}
+\item{classifiers}{character.
+Column names of inventory identifiers.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
-
-\item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
-
-\item{grid_chunks}{integer.
-The number of chunks to partition the grid into for parallel processing.}
-
-\item{template_name}{character.
-Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}
-
-\item{template_path}{character.
-Path to CBM4 spatial parquet dataset to use as a template for the new dataset.
-Defaults to \code{file.path(cbm4_data, template_name)}}
 
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}
@@ -49,8 +33,7 @@ Name of the CBM4 spatial parquet dataset.}
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
 
-\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}}
-or \code{\link{arrow_space_dataset_copy_geo}}}
+\item{...}{arguments to \code{\link{cbm4_write_geo}} or \code{\link{cbm4_format_simulation_inventory}}}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.

@@ -23,28 +23,40 @@ cbm4_read_simulation_inventory <- function(
     flat   = file.path(dataset_path, dataset_name)
   )
 
-  inventoryDT <- arrow::open_dataset(paths$pixels) |>
-    dplyr::select(pixel_index, chunk_index, raster_index, area) |>
-    dplyr::collect() |> data.table::as.data.table() |>
-    merge(
-      arrow::open_dataset(paths$index) |>
-        dplyr::filter(timestep == !!timestep) |>
-        dplyr::select(-timestep) |>
-        dplyr::collect() |> data.table::as.data.table(),
-      by = c("chunk_index", "raster_index")) |>
+  cohortDT <- merge(
+    arrow::open_dataset(paths$pixels) |>
+      dplyr::select(pixel_index, chunk_index, raster_index) |>
+      dplyr::collect() |> data.table::as.data.table(),
+    arrow::open_dataset(paths$index) |>
+      dplyr::filter(timestep == !!timestep) |>
+      dplyr::select(-timestep) |>
+      dplyr::collect() |> data.table::as.data.table(),
+    by = c("chunk_index", "raster_index"))[, .(index, pixel_index)] |>
     merge(
       arrow::open_dataset(paths$flat) |>
         dplyr::filter(timestep == !!timestep) |>
         dplyr::select(-timestep) |>
         dplyr::collect() |> data.table::as.data.table(),
-      by = c("index", "cohort_index", "chunk_index"))
+      by = "index")
 
-  inventoryDT[, inventory.area := NULL]
-  data.table::setnames(inventoryDT, "area", "inventory.area")
+  cohortDT[, c("index", "cohort_index", "chunk_index") := NULL]
 
-  data.table::setkey(inventoryDT, index, cohort_index, chunk_index, raster_index)
-  data.table::setcolorder(inventoryDT, c(data.table::key(inventoryDT), "pixel_index", "inventory.area"))
+  data.table::setcolorder(cohortDT, unique(c(
+    names(cohortDT)[!grepl("^(classifiers|inventory|state|pools)\\.", names(cohortDT))],
+    names(cohortDT)[grepl("^classifiers\\.", names(cohortDT))],
+    names(cohortDT)[grepl("^inventory\\.", names(cohortDT))],
+    names(cohortDT)[grepl("^state\\.", names(cohortDT))],
+    names(cohortDT)[grepl("^pools\\.", names(cohortDT))]
+  )))
 
-  inventoryDT
+  cohortDT[, names(cohortDT)[grepl("^inventory\\.", names(cohortDT))] := NULL]
+
+  classifierCols <- names(cohortDT)[grepl("^classifiers\\.", names(cohortDT))]
+  data.table::setnames(cohortDT, classifierCols, gsub("^classifiers\\.", "", classifierCols))
+
+  stateCols <- names(cohortDT)[grepl("^state\\.", names(cohortDT))]
+  data.table::setnames(cohortDT, stateCols, gsub("^state\\.", "", stateCols))
+
+  cohortDT
 }
 

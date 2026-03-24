@@ -5,44 +5,32 @@
 \title{CBM4 format inventory}
 \usage{
 cbm4_format_inventory(
-  inventoryDT,
+  cohortDT,
   pixelDT,
-  cbm_defaults_db = NULL,
-  area_unit_conversion = 1e-04,
-  def_land_class = "UNFCCC_FL_R_FL",
-  def_afforestation_pre_type = "None",
-  def_historic_disturbance_type = "Wildfire",
-  def_last_pass_disturbance_type = "Wildfire",
   def_delay = 0L,
-  def_cohort_proportion = 1L
+  def_land_class = "UNFCCC_FL_R_FL",
+  def_cohort_proportion = 1L,
+  area_unit_conversion = 1e-04,
+  ...
 )
 }
 \arguments{
-\item{inventoryDT}{data.table. Cohort inventory.}
+\item{cohortDT}{data.table. Cohort inventory.}
 
-\item{pixelDT}{TODO}
+\item{pixelDT}{character.
+Table of pixel attributes.}
 
-\item{cbm_defaults_db}{character.
-Path to CBM defaults SQLite database.}
-
-\item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
+\item{def_delay}{integer. Regeneration delay.}
 
 \item{def_land_class}{character. Land class code.
 Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.}
 
-\item{def_afforestation_pre_type}{character. Land use before forestation.
-Defined in CBM defaults database tables 'afforestation_pre_type'}
-
-\item{def_historic_disturbance_type}{character. Historic disturbance type.
-Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
-
-\item{def_last_pass_disturbance_type}{character. Last pass disturbance.
-Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
-
-\item{def_delay}{integer. Regeneration delay.}
-
 \item{def_cohort_proportion}{integer. A value between 0-1.
 Percentage of the pixel's area that is attributed to the cohort.}
+
+\item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
+
+\item{...}{unused}
 }
 \value{
 list with items:

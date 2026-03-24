@@ -9,31 +9,107 @@
 #'
 #' @template cbm4_data
 #' @template dataset_name
-#' @inheritParams arrow_space_dataset_chunks
+#' @template dataset_path
 #' @template template_name
 #' @template template_path
-#' @template dataset_path
+#' @param write_pixels logical. Write pixel table to file.
+#' @inheritParams arrow_space_dataset_chunks
+#' @param grid_meta data.table. Grid metadata. TODO
+#' @template cbm_defaults_db
+#' @param def_afforestation_pre_type character. Land use before forestation.
+#' Defined in CBM defaults database tables 'afforestation_pre_type'
+#' @param def_historic_disturbance_type character. Historic disturbance type.
+#' Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.
+#' @param def_last_pass_disturbance_type character. Last pass disturbance.
+#' Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.
 #' @param ... arguments to \code{\link{arrow_space_dataset_write_geo}}
 #' or \code{\link{arrow_space_dataset_copy_geo}}
-#' @param write_pixels logical. Write pixel table to file.
 #'
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_geo <- function(
     cbm4_data = NULL,
     dataset_name,
+    write_pixels  = TRUE,
     template_name = NULL,
     grid_rast     = NULL,
     grid_chunks   = 1,
-    write_pixels  = TRUE,
+    grid_meta     = NULL,
+    cbm_defaults_db = NULL,
     dataset_path  = file.path(cbm4_data, dataset_name),
     template_path = file.path(cbm4_data, template_name),
+    def_afforestation_pre_type     = "None",
+    def_historic_disturbance_type  = "Wildfire",
+    def_last_pass_disturbance_type = "Wildfire",
     ...
 ){
 
+  # Format grid metadata
+  if (!is.null(grid_meta)){
+
+    check_table_columns_all("grid_meta", grid_meta, "pixel_index")
+    check_table_columns_any("grid_meta", grid_meta, c("admin_boundary_id", "admin_boundary"))
+    check_table_columns_any("grid_meta", grid_meta, c("eco_boundary_id",   "eco_boundary"))
+
+    if (any(!c("admin_boundary", "eco_boundary", "spatial_unit") %in% names(grid_meta))){
+
+      admin_boundary_tr <- cbmdbReadTable(cbm_defaults_db, "admin_boundary_tr")
+      eco_boundary_tr   <- cbmdbReadTable(cbm_defaults_db, "eco_boundary_tr")
+
+      if (!"admin_boundary_id" %in% names(grid_meta)){
+        grid_meta[, admin_boundary_id := admin_boundary_tr$admin_boundary_id[
+          match(admin_boundary, admin_boundary_tr$name)]]
+      }
+      if (!"admin_boundary" %in% names(grid_meta)){
+        grid_meta[, admin_boundary := factor(
+          admin_boundary_tr$name[match(admin_boundary_id, admin_boundary_tr$id)],
+          levels = admin_boundary_tr$name)]
+      }
+
+      if (!"eco_boundary_id" %in% names(grid_meta)){
+        grid_meta[, eco_boundary_id := admin_boundary_tr$eco_boundary_id[
+          match(eco_boundary, eco_boundary_tr$name)]]
+      }
+      if (!"eco_boundary" %in% names(grid_meta)){
+        grid_meta[, eco_boundary := factor(
+          eco_boundary_tr$name[match(eco_boundary_id, eco_boundary_tr$id)],
+          levels = eco_boundary_tr$name)]
+      }
+
+      if (!"spatial_unit" %in% names(grid_meta)){
+
+        spatial_unit <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")[
+          , .(spatial_unit = id, admin_boundary_id, eco_boundary_id)]
+
+        grid_meta <- merge(
+          grid_meta, spatial_unit,
+          by = c("admin_boundary_id", "eco_boundary_id"), all.x = TRUE)
+
+        # Check spatial unit IDs
+        if (any(is.na(grid_meta$spatial_unit_id))){
+          noMatch <- unique(grid_meta[is.na(spatial_unit_id), .(admin_boundary, eco_boundary_id)])
+          data.table::setkey(noMatch, admin_boundary, eco_boundary_id)
+          if (nrow(noMatch) > 0) stop(
+            "spatial_unit_id not found for: ",
+            paste(paste(noMatch$admin_boundary, "ecozone", noMatch$eco_boundary_id), collapse = "; "))
+        }
+      }
+    }
+
+    # Set defaults
+    for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
+      defCol <- sub("^def\\_", "", defArg)
+      if (!defCol %in% names(grid_meta)){
+        grid_meta[, eval(defCol) := get(defArg)]
+      }else{
+        grid_meta[is.na(eval(defCol)), eval(defCol) := get(defArg)]
+      }
+    }
+  }
+
   if (is.null(template_name)){
 
-    # Set metadata from inputs
+    # Set geo metadata from inputs
     chunks <- arrow_space_dataset_chunks(grid_rast, grid_chunks)
     chunks$geo_metadata <- arrow_space_dataset_geo_metadata(grid_rast)
 
@@ -49,12 +125,26 @@ cbm4_write_geo <- function(
     # Write pixel table
     if (write_pixels){
 
+      if (is.null(grid_meta)) stop("grid_meta required")
+
       pixelDT <- data.table::as.data.table(terra::values(chunks$rast))
       pixelDT[, pixel_index := 1:terra::ncell(chunks$rast)]
-      data.table::setcolorder(pixelDT, c("pixel_index", "chunk_index", "raster_index"))
-      pixelDT[, x    := terra::xFromCell(chunks$rast, pixelDT$pixel_index)]
-      pixelDT[, y    := terra::yFromCell(chunks$rast, pixelDT$pixel_index)]
-      pixelDT[, area := prod(terra::res(chunks$rast) * terra::linearUnits(chunks$rast))]
+      pixelDT[, x := terra::xFromCell(chunks$rast, pixelDT$pixel_index)]
+      pixelDT[, y := terra::yFromCell(chunks$rast, pixelDT$pixel_index)]
+
+      pixelDT <- merge(pixelDT, grid_meta, by = "pixel_index", all.x = TRUE)
+
+      if (!"area" %in% names(pixelDT)){
+        pixelDT[, area := prod(terra::res(chunks$rast) * terra::linearUnits(chunks$rast))]
+      }
+
+      data.table::setkey(pixelDT, "pixel_index")
+      data.table::setcolorder(pixelDT, intersect(c(
+        "pixel_index", "chunk_index", "raster_index",
+        "x", "y", "area",
+        "spatial_unit", "admin_boundary_id", "admin_boundary", "eco_boundary_id", "eco_boundary",
+        "land_class", "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+      ), names(pixelDT)))
 
       arrow_space_dataset_write_table(
         dataset_name  = dataset_name,

@@ -7,15 +7,16 @@
 cbm4_format_disturbance(
   distMeta,
   distEvents,
-  classifiers = NULL,
   pixelDT,
+  classifiers = NULL,
   cbm_defaults_db = NULL,
   def_proportion = 1L,
   def_enable_merge = 0L,
   def_sort_id = 0L,
   def_filter_id = 0L,
   def_undisturbed_transition_id = 0L,
-  def_disturbed_transition_id = 0L
+  def_disturbed_transition_id = 0L,
+  ...
 )
 }
 \arguments{
@@ -23,10 +24,11 @@ cbm4_format_disturbance(
 
 \item{distEvents}{data.table. Disturbance events.}
 
+\item{pixelDT}{character.
+Table of pixel attributes.}
+
 \item{classifiers}{character.
 Column names of inventory identifiers.}
-
-\item{pixelDT}{TODO}
 
 \item{cbm_defaults_db}{character.
 Path to CBM defaults SQLite database.}
@@ -42,6 +44,8 @@ Path to CBM defaults SQLite database.}
 \item{def_undisturbed_transition_id}{integer. Set to 0 to indicate no transitions.}
 
 \item{def_disturbed_transition_id}{integer. Set to 0 to indicate no transitions.}
+
+\item{...}{unused}
 }
 \value{
 list with items:

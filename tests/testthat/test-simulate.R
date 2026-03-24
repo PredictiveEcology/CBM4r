@@ -4,8 +4,15 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 ## SET UP ----
 
 cbm4_data <- file.path(testDirs$temp$outputs, "simulate")
+unlink(cbm4_data, recursive = TRUE)
 
-grid_rast <- terra::rast(ncol = 2, nrow = 2, xmin = 0, ymin = 0, crs = "local")
+grid_rast <- terra::rast(ncol = 2, nrow = 2, xmin = 0, xmax = 2, ymin = 0, ymax = 2, crs = "local")
+grid_meta <- data.table::data.table(
+  pixel_index = 1:4,
+  area = 1,
+  admin_boundary = "Saskatchewan",
+  eco_boundary_id = 6
+)
 
 classifiers <- c("species", "prodClass")
 
@@ -43,7 +50,7 @@ gcIncr <- rbind(
   )
 )
 
-inventoryDT <- rbind(
+cohortDT <- rbind(
   data.table::data.table(
     pixel_index = 1,
     species = "Something",
@@ -63,29 +70,26 @@ inventoryDT <- rbind(
     age = 100
   )
 )
-inventoryDT[, area := 1]
-inventoryDT[, admin_boundary  := "Saskatchewan"]
-inventoryDT[, eco_boundary_id := 6]
 
 distMeta <- rbind(
   data.table::data.table(
-    eventID = 1,
+    disturbance_id = 1,
     disturbance_type = "Wildfire"
   ),
   data.table::data.table(
-    eventID = 2,
+    disturbance_id = 2,
     disturbance_type = "Clearcut harvest without salvage"
   )
 )
 distEvents <- rbind(
   data.table::data.table(
     pixel_index = 3,
-    eventID = 1,
+    disturbance_id = 1,
     timestep = 1
   ),
   data.table::data.table(
     pixel_index = 4,
-    eventID = 2,
+    disturbance_id = 2,
     timestep = 2
   )
 )
@@ -98,9 +102,10 @@ test_that("cbm4_write_inventory", {
   cbm4_write_inventory(
     cbm4_data,
     cbm_defaults_db = cbm_defaults_db,
-    inventoryDT = inventoryDT,
+    cohortDT = cohortDT,
     classifiers = classifiers,
-    grid_rast   = grid_rast
+    grid_rast = grid_rast,
+    grid_meta = grid_meta
   )
 
   expect_true(file.exists(file.path(cbm4_data, "inventory")))

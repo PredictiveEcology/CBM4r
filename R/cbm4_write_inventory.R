@@ -6,52 +6,45 @@
 #' @template cbm4_data
 #' @template cbm_defaults_db
 #' @template classifiers
-#' @param ... arguments to \code{\link{cbm4_format_inventory}}
-#' @inheritParams cbm4_format_inventory
 #' @inheritParams cbm4_write_geo
+#' @inheritParams cbm4_format_inventory
+#' @param ... arguments to \code{\link{cbm4_write_geo}} or \code{\link{cbm4_format_inventory}}
 #'
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_inventory <- function(
     cbm4_data = NULL,
     cbm_defaults_db,
+    cohortDT,
     classifiers,
-    inventoryDT,
-    grid_rast     = NULL,
-    grid_chunks   = 1,
-    template_name = NULL,
-    template_path = file.path(cbm4_data, template_name),
-    dataset_name  = "inventory",
-    dataset_path  = file.path(cbm4_data, dataset_name),
+    dataset_name = "inventory",
+    dataset_path = file.path(cbm4_data, dataset_name),
     ...
 ){
 
   if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
-  if (!all(classifiers %in% names(inventoryDT))) stop("inventoryDT requires all classifiers")
-  if (!all(sapply(inventoryDT, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
+  if (!all(classifiers %in% names(cohortDT))) stop("cohortDT requires all classifiers")
+  if (!all(sapply(cohortDT, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
     "classifiers must be integer, character, or factor")
 
   # Initiate dataset
-  cbm4_write_geo(
-    dataset_name  = dataset_name,
-    dataset_path  = dataset_path,
-    grid_rast     = grid_rast,
-    grid_chunks   = grid_chunks,
-    template_name = template_name,
-    template_path = template_path,
-    partitions    = list("cohort_index" = "int64", "chunk_index" = "int64"),
-    tags          = list(classifier = classifiers)
-  )
+  if (!file.exists(dataset_path)) cbm4_write_geo(
+    cbm4_data,
+    dataset_name    = dataset_name,
+    dataset_path    = dataset_path,
+    cbm_defaults_db = cbm_defaults_db,
+    partitions      = list("cohort_index" = "int64", "chunk_index" = "int64"),
+    tags            = list(classifier = classifiers),
+    ...)
 
   # Format inventory
   inv <- cbm4_format_inventory(
-    cbm_defaults_db = cbm_defaults_db,
-    pixelDT = arrow_space_dataset_read_table(
+    cohortDT = cohortDT,
+    pixelDT  = arrow_space_dataset_read_table(
       dataset_name = dataset_name,
       dataset_path = dataset_path,
       table_name   = "table-pixels"
     ),
-    inventoryDT,
     ...)
 
   # Write inventory
@@ -84,61 +77,48 @@ cbm4_write_inventory <- function(
 
 #' CBM4 format inventory
 #'
-#' @param inventoryDT data.table. Cohort inventory.
-#' @param pixelDT TODO
-#' @template cbm_defaults_db
-#' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
+#' @param cohortDT data.table. Cohort inventory.
+#' @template pixelDT
+#' @param def_delay integer. Regeneration delay.
 #' @param def_land_class character. Land class code.
 #' Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.
-#' @param def_afforestation_pre_type character. Land use before forestation.
-#' Defined in CBM defaults database tables 'afforestation_pre_type'
-#' @param def_historic_disturbance_type character. Historic disturbance type.
-#' Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.
-#' @param def_last_pass_disturbance_type character. Last pass disturbance.
-#' Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.
-#' @param def_delay integer. Regeneration delay.
 #' @param def_cohort_proportion integer. A value between 0-1.
 #' Percentage of the pixel's area that is attributed to the cohort.
+#' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
+#' @param ... unused
 #'
 #' @return list with items:
 #' **index**: `arrow_space` raster indexed `data.table`;
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_inventory <- function(
-    inventoryDT,
+    cohortDT,
     pixelDT,
-    cbm_defaults_db = NULL,
-    area_unit_conversion           = 0.0001,
-    def_land_class                 = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
-    def_afforestation_pre_type     = "None",
-    def_historic_disturbance_type  = "Wildfire",
-    def_last_pass_disturbance_type = "Wildfire",
-    def_delay                      = 0L,
-    def_cohort_proportion          = 1L
+    def_delay             = 0L,
+    def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
+    def_cohort_proportion = 1L,
+    area_unit_conversion  = 0.0001,
+    ...
 ){
 
-  # Rename columns
-  dataFull <- data.table::as.data.table(inventoryDT)
-  data.table::setnames(dataFull, "pixelIndex", "pixel_index",       skip_absent = TRUE)
-  data.table::setnames(dataFull, "admin_id",   "admin_boundary_id", skip_absent = TRUE)
-  data.table::setnames(dataFull, "admin_name", "admin_boundary",    skip_absent = TRUE)
-  data.table::setnames(dataFull, "eco_id",     "eco_boundary_id",   skip_absent = TRUE)
-  data.table::setnames(dataFull, "eco_name",   "eco_boundary",      skip_absent = TRUE)
-  data.table::setnames(dataFull, "spatial_unit_id", "spatial_unit", skip_absent = TRUE)
-
   # Check table columns
-  check_table_columns_all("inventoryDT", dataFull, c(
-    "pixel_index", "area", "admin_boundary", "age"
-  ))
-  check_table_columns_any("inventoryDT", dataFull, c("eco_boundary_id", "eco_boundary"))
+  check_table_columns_all("cohortDT", cohortDT, c("pixel_index", "age"))
+
+  pixelCols <- c("pixel_index", "chunk_index", "raster_index", setdiff(c(
+    "area", "admin_boundary", "eco_boundary", "spatial_unit",
+    "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+  ), names(cohortDT)))
+  check_table_columns_all("pixelDT", pixelDT, pixelCols)
+
+  # Cast to data.table
+  if (!data.table::is.data.table(cohortDT)) cohortDT <- data.table::as.data.table(cohortDT)
+  if (!data.table::is.data.table(pixelDT))  pixelDT  <- data.table::as.data.table(pixelDT)
 
   # Join with pixel table
-  dataFull <- merge(dataFull, pixelDT[, .(pixel_index, chunk_index, raster_index)],
-                    by = "pixel_index", all.x = TRUE)
+  dataFull <- merge(cohortDT, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
 
   # Set cohort index
-  ## Setting this to chunk_index for all cohorts until otherwise needed
-  dataFull[, cohort_index := chunk_index]
+  if (!"cohort_index" %in% names(dataFull)) dataFull[, cohort_index := 0]
 
   # Set index
   dataFull[, index := .GRP - 1, by = setdiff(names(dataFull), c("raster_index", "area"))]
@@ -159,45 +139,12 @@ cbm4_format_inventory <- function(
   # Set defaults
   for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
     defCol <- sub("^def\\_", "", defArg)
-    if (!defCol %in% names(dataFull)){
-      dataFull[, eval(defCol) := get(defArg)]
-    }else{
-      data.table::setnafill(dataFull, cols = defCol, fill = get(defArg))
-    }
-  }
-
-  # Set eco_boundary
-  if (!"eco_boundary" %in% names(dataFull)){
-
-    eco_boundary_tr <- cbmdbReadTable(cbm_defaults_db, "eco_boundary_tr")
-
-    dataFull[, eco_boundary := factor(
-      eco_boundary_tr$name[match(eco_boundary_id, eco_boundary_tr$id)],
-      levels = eco_boundary_tr$name)]
-  }
-
-  # Set spatial_unit
-  if (!"spatial_unit" %in% names(dataFull)){
-
-    spatial_unit <- merge(
-      cbmdbReadTable(cbm_defaults_db, "spatial_unit"),
-      cbmdbReadTable(cbm_defaults_db, "admin_boundary_tr"),
-      by.x = "admin_boundary_id", by.y = "id")[, .(
-        admin_boundary = name, eco_boundary_id, spatial_unit = id)]
-
-    dataFull <- merge(
-      dataFull, spatial_unit,
-      by = c("admin_boundary", "eco_boundary_id"), all.x = TRUE)
-    data.table::setkeyv(dataFull, setdiff(names(dataIndex), "raster_index"))
-    data.table::setcolorder(dataFull)
-
-    # Check spatial unit IDs
-    if (any(is.na(dataFull$spatial_unit_id))){
-      noMatch <- unique(dataFull[is.na(spatial_unit_id), .(admin_boundary, eco_boundary_id)])
-      data.table::setkey(noMatch, admin_boundary, eco_boundary_id)
-      if (nrow(noMatch) > 0) stop(
-        "spatial_unit_id not found for: ",
-        paste(paste(noMatch$admin_boundary, "ecozone", noMatch$eco_boundary_id), collapse = "; "))
+    if (!is.null(get(defArg))){
+      if (!defCol %in% names(dataFull)){
+        dataFull[, eval(defCol) := get(defArg)]
+      }else{
+        dataFull[is.na(eval(defCol)), eval(defCol) := get(defArg)]
+      }
     }
   }
 

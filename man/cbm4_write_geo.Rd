@@ -7,12 +7,17 @@
 cbm4_write_geo(
   cbm4_data = NULL,
   dataset_name,
+  write_pixels = TRUE,
   template_name = NULL,
   grid_rast = NULL,
   grid_chunks = 1,
-  write_pixels = TRUE,
+  grid_meta = NULL,
+  cbm_defaults_db = NULL,
   dataset_path = file.path(cbm4_data, dataset_name),
   template_path = file.path(cbm4_data, template_name),
+  def_afforestation_pre_type = "None",
+  def_historic_disturbance_type = "Wildfire",
+  def_last_pass_disturbance_type = "Wildfire",
   ...
 )
 }
@@ -24,6 +29,8 @@ May be omitted if full paths to datasets are provided.}
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}
 
+\item{write_pixels}{logical. Write pixel table to file.}
+
 \item{template_name}{character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}
 
@@ -32,7 +39,10 @@ Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.
 \item{grid_chunks}{integer.
 The number of chunks to partition the grid into for parallel processing.}
 
-\item{write_pixels}{logical. Write pixel table to file.}
+\item{grid_meta}{data.table. Grid metadata. TODO}
+
+\item{cbm_defaults_db}{character.
+Path to CBM defaults SQLite database.}
 
 \item{dataset_path}{character.
 Path to the CBM4 spatial parquet dataset.
@@ -41,6 +51,15 @@ Defaults to \code{file.path(cbm4_data, dataset_name)}}
 \item{template_path}{character.
 Path to CBM4 spatial parquet dataset to use as a template for the new dataset.
 Defaults to \code{file.path(cbm4_data, template_name)}}
+
+\item{def_afforestation_pre_type}{character. Land use before forestation.
+Defined in CBM defaults database tables 'afforestation_pre_type'}
+
+\item{def_historic_disturbance_type}{character. Historic disturbance type.
+Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
+
+\item{def_last_pass_disturbance_type}{character. Last pass disturbance.
+Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
 
 \item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}}
 or \code{\link{arrow_space_dataset_copy_geo}}}
