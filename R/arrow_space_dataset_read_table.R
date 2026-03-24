@@ -10,7 +10,7 @@ arrow_space_dataset_read_table <- function(
   table_path <- file.path(dataset_path, paste0(dataset_name, if (!is.null(table_name)) paste0("-", table_name)))
 
   data.table::as.data.table(
-    dplyr::collect(arrow::open_dataset(table_path))
+    dplyr::collect(arrow::open_dataset(table_path), ...)
   )
 }
 
