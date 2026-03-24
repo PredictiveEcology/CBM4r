@@ -128,14 +128,6 @@ cbm4_write_geo <- function(
         pixelDT[, area := prod(terra::res(chunks$rast) * terra::linearUnits(chunks$rast))]
       }
 
-      data.table::setkey(pixelDT, "pixel_index")
-      data.table::setcolorder(pixelDT, intersect(c(
-        "pixel_index", "chunk_index", "raster_index",
-        "x", "y", "area",
-        "spatial_unit", "admin_boundary_id", "admin_boundary", "eco_boundary_id", "eco_boundary",
-        "land_class", "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
-      ), names(pixelDT)))
-
       # Set defaults
       for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
         defCol <- sub("^def\\_", "", defArg)
@@ -145,6 +137,14 @@ cbm4_write_geo <- function(
           pixelDT[is.na(eval(defCol)), eval(defCol) := get(defArg)]
         }
       }
+
+      data.table::setkey(pixelDT, "pixel_index")
+      data.table::setcolorder(pixelDT, intersect(c(
+        "pixel_index", "chunk_index", "raster_index",
+        "x", "y", "area",
+        "spatial_unit", "admin_boundary_id", "admin_boundary", "eco_boundary_id", "eco_boundary",
+        "land_class", "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+      ), names(pixelDT)))
 
       arrow_space_dataset_write_table(
         dataset_name  = dataset_name,
