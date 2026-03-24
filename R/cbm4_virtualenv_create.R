@@ -43,11 +43,11 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
       if (is.null(gdalVers) |
           utils::compareVersion(gdalVers, vers$gdal[["min"]]) == -1 |
           utils::compareVersion(gdalVers, vers$gdal[["max"]]) == 1
-      ) stop("gdal[numpy] >=", vers$gdal[["min"]], ",<=", vers$gdal[["max"]], " not found")
+      ) stop("gdal >=", vers$gdal[["min"]], ",<=", vers$gdal[["max"]], " not found")
 
       reticulate::virtualenv_install(
         virtualenv,
-        packages = paste0("gdal==", gdalVers),
+        packages = paste0("gdal[numpy]==", gdalVers),
         pip_options = c("--no-cache-dir", "--no-build-isolation", "--upgrade"[upgrade], "-q"[quiet])
       )
     }
