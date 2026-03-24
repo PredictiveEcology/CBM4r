@@ -116,6 +116,7 @@ cbm4_format_inventory <- function(
   if (!data.table::is.data.table(pixelDT))  pixelDT  <- data.table::as.data.table(pixelDT)
 
   # Join with pixel table
+  pixelDT[, pixel_index := as.integer(pixel_index)]
   dataFull <- merge(cohortDT, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
 
