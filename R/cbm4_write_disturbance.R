@@ -123,7 +123,7 @@ cbm4_format_disturbance <- function(
   if (!"disturbance_order" %in% names(dataFull)) dataFull[, disturbance_order := 0]
 
   # Set index
-  dataFull[, index := .GRP - 1, by = c("disturbance_order", "timestep", "chunk_index", "disturbance_id")]
+  dataFull[, index := as.integer(.GRP - 1L), by = c("disturbance_order", "timestep", "chunk_index", "disturbance_id")]
 
   # Split by raster key and unique groups
   dataIndex <- dataFull[, .(index, raster_index, disturbance_order, timestep, chunk_index)]
