@@ -18,16 +18,42 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
   if (!requireNamespace("gert", quietly = TRUE)) stop(
     "The package \"gert\" is required to create the CBM4 Python virtual environment")
 
+  # Get version requirements
+  vers <- cbm4_versions(version)
+
+  # Initiate virtual environment with GDAL
   if (!reticulate::virtualenv_exists(virtualenv)){
-    reticulate::virtualenv_create(
-      virtualenv,
-      version  = ">=3.12,<3.13",
-      packages = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.7.4/gdal-3.11.1-cp312-cp312-win_amd64.whl",
-      pip_options = c("--upgrade"[upgrade], "-q"[quiet]),
-      ...
-    )
+
+    reticulate::virtualenv_create(virtualenv, version = vers$python, ...)
+
+    if (identical(.Platform$OS.type, "windows")){
+
+      reticulate::virtualenv_install(
+        virtualenv,
+        packages = vers$gdal_win,
+        pip_options = c("--upgrade"[upgrade], "-q"[quiet])
+      )
+
+    }else{
+
+      gdalVers <- tryCatch(
+        system("gdal-config --version", intern = TRUE),
+        error = function(e) NULL)
+
+      if (is.null(gdalVers) |
+          utils::compareVersion(gdalVers, vers$gdal[["min"]]) == -1 |
+          utils::compareVersion(gdalVers, vers$gdal[["max"]]) == 1
+      ) stop("gdal[numpy] >=", vers$gdal[["min"]], ",<=", vers$gdal[["max"]], " not found")
+
+      reticulate::virtualenv_install(
+        virtualenv,
+        packages = paste0("gdal==", gdalVers),
+        pip_options = c("--no-cache-dir", "--no-build-isolation", "--upgrade"[upgrade], "-q"[quiet])
+      )
+    }
   }
 
+  # Install CBM4 packages
   packages <- c(
     "arrow_space"  = "https://github.com/cat-cfs/arrow_space.git",
     "cbm4"         = "https://github.com/cat-cfs/cbm4.git",
@@ -47,8 +73,9 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
 
     refID <- gert::git_commit_info(repo = pkg_path)$id
 
-    if (package == "cbm4" & !is.null(version)){
-      gert::git_reset_hard(version, repo = pkg_path)
+    if (package %in% names(vers)){
+      gert::git_pull(repo = pkg_path, verbose = FALSE)
+      gert::git_reset_hard(vers[[package]], repo = pkg_path)
     }else{
       gert::git_reset_hard(repo = pkg_path)
       gert::git_pull(repo = pkg_path, verbose = FALSE)
@@ -65,6 +92,26 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
       )
     }
   }
+}
+
+
+# CBM4 version requirements
+cbm4_versions <- function(version = NULL){
+
+  vers <- list(
+    "2.17.9" = list(
+      cbm4     = "2.17.9",
+      python   = ">=3.12,<3.13",
+      gdal_win = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.7.4/gdal-3.11.1-cp312-cp312-win_amd64.whl",
+      gdal     = c(min = "0", max = "3.11.3")
+    )
+  )
+
+  if (!is.null(version) && !version %in% names(vers)) stop(
+    "CBM4 v", version, " requirements not set. Use version = NULL or choose from versions: ",
+    paste(names(vers), collapse = "; "))
+
+  vers[[if (!is.null(version)) version else 1]]
 }
 
 
