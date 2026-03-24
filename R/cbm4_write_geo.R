@@ -95,16 +95,6 @@ cbm4_write_geo <- function(
         }
       }
     }
-
-    # Set defaults
-    for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
-      defCol <- sub("^def\\_", "", defArg)
-      if (!defCol %in% names(grid_meta)){
-        grid_meta[, eval(defCol) := get(defArg)]
-      }else{
-        grid_meta[is.na(eval(defCol)), eval(defCol) := get(defArg)]
-      }
-    }
   }
 
   if (is.null(template_name)){
@@ -145,6 +135,16 @@ cbm4_write_geo <- function(
         "spatial_unit", "admin_boundary_id", "admin_boundary", "eco_boundary_id", "eco_boundary",
         "land_class", "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
       ), names(pixelDT)))
+
+      # Set defaults
+      for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
+        defCol <- sub("^def\\_", "", defArg)
+        if (!defCol %in% names(grid_meta)){
+          pixelDT[, eval(defCol) := get(defArg)]
+        }else{
+          pixelDT[is.na(eval(defCol)), eval(defCol) := get(defArg)]
+        }
+      }
 
       arrow_space_dataset_write_table(
         dataset_name  = dataset_name,
