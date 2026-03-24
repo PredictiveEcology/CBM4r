@@ -6,6 +6,13 @@
 \usage{
 cbm4_results_query(cbm4_data, query)
 }
+\arguments{
+\item{cbm4_data}{character.
+Path to CBM4 spatial parquet datasets directory.
+May be omitted if full paths to datasets are provided.}
+
+\item{query}{character. SQL query}
+}
 \description{
-CBM4 results query
+Query CBM4 results with SQL.
 }

@@ -1,5 +1,11 @@
 
 #' CBM4 results query
+#'
+#' Query CBM4 results with SQL.
+#'
+#' @template cbm4_data
+#' @param query character. SQL query
+#'
 #' @export
 cbm4_results_query <- function(cbm4_data, query){
 
