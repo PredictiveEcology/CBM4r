@@ -11,6 +11,7 @@ cbm4_format_inventory(
   def_land_class = "UNFCCC_FL_R_FL",
   def_cohort_proportion = 1L,
   area_unit_conversion = 1e-04,
+  col_ignore = NULL,
   ...
 )
 }
@@ -29,6 +30,8 @@ Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.}
 Percentage of the pixel's area that is attributed to the cohort.}
 
 \item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
+
+\item{col_ignore}{character. Names of \code{cohortDT} columns to exclude}
 
 \item{...}{unused}
 }

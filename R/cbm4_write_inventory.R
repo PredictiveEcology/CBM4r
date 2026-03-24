@@ -85,6 +85,7 @@ cbm4_write_inventory <- function(
 #' @param def_cohort_proportion integer. A value between 0-1.
 #' Percentage of the pixel's area that is attributed to the cohort.
 #' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
+#' @param col_ignore character. Names of `cohortDT` columns to exclude
 #' @param ... unused
 #'
 #' @return list with items:
@@ -97,6 +98,7 @@ cbm4_format_inventory <- function(
     def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
     def_cohort_proportion = 1L,
     area_unit_conversion  = 0.0001,
+    col_ignore            = NULL,
     ...
 ){
 
@@ -116,6 +118,10 @@ cbm4_format_inventory <- function(
   # Join with pixel table
   dataFull <- merge(cohortDT, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
+
+  # Drop columns
+  col_ignore <- intersect(col_ignore, names(cohortDT))
+  if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
   # Set cohort index
   if (!"cohort_index" %in% names(dataFull)) dataFull[, cohort_index := 0]
