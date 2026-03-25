@@ -1,5 +1,5 @@
 
--- Total annual process flux by timestep (MgC/year)
+-- Total flux by timestep (MgC/year)
 
 SELECT
   timestep,
@@ -26,4 +26,3 @@ FROM annual_process_flux
 -- WHERE
 GROUP BY timestep
 ORDER BY timestep
-

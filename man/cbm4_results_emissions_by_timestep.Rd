@@ -4,14 +4,14 @@
 \alias{cbm4_results_emissions_by_timestep}
 \title{CBM4 results: Emissions by timestep}
 \usage{
-cbm4_results_emissions_by_timestep(cbm4_data, timestep = NULL)
+cbm4_results_emissions_by_timestep(cbm4_results, timesteps = NULL)
 }
 \arguments{
-\item{cbm4_data}{character.
-Path to CBM4 spatial parquet datasets directory.
-May be omitted if full paths to datasets are provided.}
+\item{cbm4_results}{character or \code{SQLResultsProcessor}.
+Path to CBM4 spatial datasets directory
+or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
 
-\item{timestep}{integer. Simulation timestep with 1 representing the first year.}
+\item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
 }
 \value{
 \code{data.table}

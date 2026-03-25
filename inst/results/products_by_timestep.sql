@@ -6,5 +6,6 @@ SELECT
   SUM("pools.Products" * ("inventory.area" * cohort_proportion)) AS Products
 FROM simulation
 -- WHERE
-GROUP BY timestep ORDER BY timestep
+GROUP BY timestep
+ORDER BY timestep
 

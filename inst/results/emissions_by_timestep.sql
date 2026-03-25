@@ -26,8 +26,9 @@ SELECT
   SUM(COALESCE(d.DisturbanceBioCOEmission  * (d.area * d.cohort_proportion), 0)) AS DisturbanceBioCOEmission,
   SUM(COALESCE(d.DisturbanceDOMCO2Emission * (d.area * d.cohort_proportion), 0)) AS DisturbanceDOMCO2Emission,
   SUM(COALESCE(d.DisturbanceDOMCH4Emission * (d.area * d.cohort_proportion), 0)) AS DisturbanceDOMCH4Emission,
-  SUM(COALESCE(d.DisturbanceDOMCOEmission  * (d.area * d.cohort_proportion), 0)) AS DisturbanceDOMCOEmission,
+  SUM(COALESCE(d.DisturbanceDOMCOEmission  * (d.area * d.cohort_proportion), 0)) AS DisturbanceDOMCOEmission
 FROM annual_process_flux a LEFT JOIN disturbance_flux d ON a.timestep = d.timestep AND a.index = d.index
 -- WHERE
-GROUP BY a.timestep ORDER BY a.timestep
+GROUP BY a.timestep
+ORDER BY a.timestep
 

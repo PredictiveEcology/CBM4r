@@ -16,8 +16,9 @@ SELECT
   0 AS DisturbanceBioCOEmission,
   0 AS DisturbanceDOMCO2Emission,
   0 AS DisturbanceDOMCH4Emission,
-  0 AS DisturbanceDOMCOEmission,
+  0 AS DisturbanceDOMCOEmission
 FROM annual_process_flux a
 -- WHERE
-GROUP BY a.timestep ORDER BY a.timestep
+GROUP BY a.timestep
+ORDER BY a.timestep
 

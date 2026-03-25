@@ -38,5 +38,6 @@ SELECT
   SUM(DisturbanceHWBranchSnagToAir * (area * cohort_proportion)) AS DisturbanceHWBranchSnagToAir
 FROM disturbance_flux
 -- WHERE
-GROUP BY timestep ORDER BY timestep
+GROUP BY timestep
+ORDER BY timestep
 

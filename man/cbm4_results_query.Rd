@@ -4,14 +4,17 @@
 \alias{cbm4_results_query}
 \title{CBM4 results query}
 \usage{
-cbm4_results_query(cbm4_data, query)
+cbm4_results_query(cbm4_results, query = NULL)
 }
 \arguments{
-\item{cbm4_data}{character.
-Path to CBM4 spatial parquet datasets directory.
-May be omitted if full paths to datasets are provided.}
+\item{cbm4_results}{character or \code{SQLResultsProcessor}.
+Path to CBM4 spatial datasets directory
+or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
 
 \item{query}{character. SQL query}
+}
+\value{
+\code{data.table}
 }
 \description{
 Query CBM4 results with SQL.

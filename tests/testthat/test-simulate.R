@@ -170,21 +170,112 @@ test_that("cbm4_step", {
 })
 
 
-## READ RESULTS ----
+## READ RESULTS: BY TIMESTEP ----
 
-test_that("cbm4_results_emissions_by_timestep", {
+cbm4_results <- tryCatch(cbm4_results_processor(cbm4_data), error = function(e) NULL)
 
-  cbm4_summary <- cbm4_results_emissions_by_timestep(cbm4_data)
+test_that("cbm4_results_processor", {
 
-  expect_s3_class(cbm4_summary, "data.table")
+  expect_s3_class(cbm4_results, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")
+
+})
+
+test_that("cbm4_results_flux_by_timestep", {
+
+  cbm4Summary <- cbm4_results_flux_by_timestep(cbm4_data)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "timestep")
+  expect_equal(cbm4Summary$timestep, 1)
+
+  expect_equal(cbm4Summary, cbm4_results_flux_by_timestep(cbm4_results), ignore_attr = TRUE)
+
+  cbm4Summary <- cbm4_results_flux_by_timestep(cbm4_data, timesteps = 2)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "timestep")
+  expect_equal(cbm4Summary$timestep, integer(0))
+
+})
+
+test_that("cbm4_results_pools_by_timestep", {
+
+  cbm4Summary <- cbm4_results_pools_by_timestep(cbm4_data)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "timestep")
+  expect_equal(cbm4Summary$timestep, 0:1)
+
+  expect_equal(cbm4Summary, cbm4_results_pools_by_timestep(cbm4_results), ignore_attr = TRUE)
+
+  cbm4Summary <- cbm4_results_pools_by_timestep(cbm4_results, timesteps = 1)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "timestep")
+  expect_equal(cbm4Summary$timestep, 1)
 
 })
 
 test_that("cbm4_results_products_by_timestep", {
 
-  cbm4_summary <- cbm4_results_products_by_timestep(cbm4_data)
+  cbm4Summary <- cbm4_results_products_by_timestep(cbm4_data)
 
-  expect_s3_class(cbm4_summary, "data.table")
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "timestep")
+  expect_equal(cbm4Summary$timestep, 0:1)
+
+  expect_equal(cbm4Summary, cbm4_results_products_by_timestep(cbm4_results), ignore_attr = TRUE)
+
+  cbm4Summary <- cbm4_results_products_by_timestep(cbm4_results, timesteps = 1)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "timestep")
+  expect_equal(cbm4Summary$timestep, 1)
+
+})
+
+test_that("cbm4_results_emissions_by_timestep", {
+
+  cbm4Summary <- cbm4_results_emissions_by_timestep(cbm4_data)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "timestep")
+  expect_equal(cbm4Summary$timestep, 1)
+
+  expect_equal(cbm4Summary, cbm4_results_emissions_by_timestep(cbm4_results), ignore_attr = TRUE)
+
+  cbm4Summary <- cbm4_results_emissions_by_timestep(cbm4_results, timesteps = 2)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "timestep")
+  expect_equal(cbm4Summary$timestep, integer(0))
+
+})
+
+
+## READ RESULTS: BY PIXEL ----
+
+test_that("cbm4_results_flux_by_pixel", {
+
+  cbm4Summary <- cbm4_results_flux_by_pixel(cbm4_data, timestep = 1)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "pixel_index")
+  expect_equal(cbm4Summary$pixel_index, c(1, 3, 4))
+
+  expect_equal(cbm4Summary, cbm4_results_flux_by_pixel(cbm4_results, timestep = 1), ignore_attr = TRUE)
+
+})
+
+test_that("cbm4_results_pools_by_pixel", {
+
+  cbm4Summary <- cbm4_results_pools_by_pixel(cbm4_data, timestep = 1)
+
+  expect_s3_class(cbm4Summary, "data.table")
+  expect_equal(data.table::key(cbm4Summary), "pixel_index")
+  expect_equal(cbm4Summary$pixel_index, c(1, 3, 4))
+
+  expect_equal(cbm4Summary, cbm4_results_pools_by_pixel(cbm4_results, timestep = 1), ignore_attr = TRUE)
 
 })
 
