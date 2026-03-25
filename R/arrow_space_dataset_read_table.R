@@ -11,7 +11,7 @@ arrow_space_dataset_read_table <- function(
   table_path <- file.path(dataset_path, paste0(dataset_name, if (!is.null(table_name)) paste0("-", table_name)))
 
   table_dataset <- arrow::open_dataset(table_path, ...)
-  if (!is.null(col_select)) table_dataset <- dplyr::select(table_dataset, col_select)
+  if (!is.null(col_select)) table_dataset <- dplyr::select(table_dataset, dplyr::all_of(col_select))
   data.table::as.data.table(dplyr::collect(table_dataset))
 }
 
