@@ -19,7 +19,13 @@ cbm4_results_query <- function(cbm4_data, query){
 }
 
 
-# Query results from preset CBM4r SQL file
+#' CBM4 results query preset
+#'
+#' Query results from CBM4r preset SQL query file.
+#'
+#' @template cbm4_data
+#' @param queryName character. Preset SQL query file name
+#' @keywords internal
 cbm4_results_query_preset <- function(cbm4_data, queryName, where = NULL){
 
   queryPath <- file.path("results", paste0(queryName, ".sql"))
