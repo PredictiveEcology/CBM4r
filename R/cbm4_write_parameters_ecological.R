@@ -60,26 +60,26 @@ cbm4_write_parameters_turnover <- function(
       by = "id")[, .(inventory.spatial_unit, id = turnover_parameter_id)],
     cbmdbReadTable(cbm_defaults_db, "turnover_parameter")[, .(
       id,
-      turnover.sw_merch                      = stem_turnover, # TODO: check
+      turnover.sw_merch                      = stem_turnover,     # merch = stem; same for SW or HW
       turnover.sw_foliage                    = sw_foliage,
-      turnover.sw_other                      = sw_branch, # TODO: check
+      turnover.sw_other                      = sw_branch,         # other = branch + bark
       turnover.sw_stem_snag                  = sw_stem_snag,
       turnover.sw_branch_snag                = sw_branch_snag,
-      turnover.sw_other_to_branch_snag_split = branch_snag_split,  # TODO: check
-      turnover.sw_coarse_root                = coarse_root,
-      turnover.sw_coarse_root_ag_split       = coarse_ag_split,
-      turnover.sw_fine_root                  = fine_root,
-      turnover.sw_fine_root_ag_split         = fine_ag_split,
-      turnover.hw_merch                      = stem_turnover, # TODO: check
+      turnover.sw_other_to_branch_snag_split = branch_snag_split, # same for SW or HW
+      turnover.sw_coarse_root                = coarse_root,       # same for SW or HW
+      turnover.sw_coarse_root_ag_split       = coarse_ag_split,   # same for SW or HW
+      turnover.sw_fine_root                  = fine_root,         # same for SW or HW
+      turnover.sw_fine_root_ag_split         = fine_ag_split,     # same for SW or HW
+      turnover.hw_merch                      = stem_turnover,     # merch = stem; same for SW or HW
       turnover.hw_foliage                    = hw_foliage,
-      turnover.hw_other                      = hw_branch, # TODO: check
+      turnover.hw_other                      = hw_branch,         # other = branch + bark
       turnover.hw_stem_snag                  = hw_stem_snag,
       turnover.hw_branch_snag                = hw_branch_snag,
-      turnover.hw_other_to_branch_snag_split = branch_snag_split, # TODO: check
-      turnover.hw_coarse_root                = coarse_root,
-      turnover.hw_coarse_root_ag_split       = coarse_ag_split,
-      turnover.hw_fine_root                  = fine_root,
-      turnover.hw_fine_root_ag_split         = fine_ag_split
+      turnover.hw_other_to_branch_snag_split = branch_snag_split, # same for SW or HW
+      turnover.hw_coarse_root                = coarse_root,       # same for SW or HW
+      turnover.hw_coarse_root_ag_split       = coarse_ag_split,   # same for SW or HW
+      turnover.hw_fine_root                  = fine_root,         # same for SW or HW
+      turnover.hw_fine_root_ag_split         = fine_ag_split      # same for SW or HW
     )],
     by = "id")
 
