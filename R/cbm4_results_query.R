@@ -30,7 +30,7 @@ cbm4_results_query <- function(cbm4_results, query = NULL){
 #' @param where character. SQL WHERE clause
 #' @inherit cbm4_results_query params return
 #' @keywords internal
-cbm4_results_query_preset <- function(cbm4_results, queryName, where = NULL){
+.cbm4_results_query_preset <- function(cbm4_results, queryName, where = NULL){
 
   queryPath <- file.path("SQL", paste0(queryName, ".sql"))
   queryPathFull <- system.file(queryPath, package = "CBM4r")

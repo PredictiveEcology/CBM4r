@@ -1,24 +1,24 @@
 
 #' CBM4 results: pools by pixel
-#' @inherit cbm4_results_by_pixel params return
+#' @inherit .cbm4_results_by_pixel params return
 #' @export
 cbm4_results_pools_by_pixel <- function(cbm4_results, timestep){
-  cbm4_results_by_pixel(cbm4_results, "pools_by_pixel", timestep = timestep)
+  .cbm4_results_by_pixel(cbm4_results, "pools_by_pixel", timestep = timestep)
 }
 
 #' CBM4 results: flux by pixel
-#' @inherit cbm4_results_by_pixel params return
+#' @inherit .cbm4_results_by_pixel params return
 #' @export
 cbm4_results_flux_by_pixel <- function(cbm4_results, timestep){
-  cbm4_results_by_pixel(cbm4_results, "flux_by_pixel", timestep = timestep)
+  .cbm4_results_by_pixel(cbm4_results, "flux_by_pixel", timestep = timestep)
 }
 
 
 #' CBM4 results: by pixel
 #' @template timestep
-#' @inherit cbm4_results_query_preset params return
+#' @inherit .cbm4_results_query_preset params return
 #' @keywords internal
-cbm4_results_by_pixel <- function(
+.cbm4_results_by_pixel <- function(
     cbm4_results,
     queryName,
     timestep = NULL
@@ -26,7 +26,7 @@ cbm4_results_by_pixel <- function(
 
   cbm4_results <- cbm4_results_processor(cbm4_results)
 
-  cbm4Summary <- cbm4_results_query_preset(
+  cbm4Summary <- .cbm4_results_query_preset(
     cbm4_results, queryName,
     where = if (!is.null(timestep)) paste(
       "a.timestep IN (", paste(timestep, collapse = ", "), ")", "AND",
