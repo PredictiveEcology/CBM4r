@@ -32,7 +32,7 @@ cbm4_results_query <- function(cbm4_results, query = NULL){
 #' @keywords internal
 cbm4_results_query_preset <- function(cbm4_results, queryName, where = NULL){
 
-  queryPath <- file.path("results", paste0(queryName, ".sql"))
+  queryPath <- file.path("SQL", paste0(queryName, ".sql"))
   queryPathFull <- system.file(queryPath, package = "CBM4r")
   if (queryPathFull == "") stop("Query file not found: ", queryPath)
 
