@@ -30,8 +30,9 @@ testDirs <- list(
     outputs = file.path(tempdir(), "testthat-CBM4r", "outputs")
   )
 )
-dir.create(testDirs$temp$inputs,  recursive = TRUE)
-dir.create(testDirs$temp$outputs, recursive = TRUE)
+dir.create(testDirs$temp$root)
+dir.create(testDirs$temp$inputs,  showWarnings = FALSE)
+dir.create(testDirs$temp$outputs, showWarnings = FALSE)
 
 if (testthat::is_testing()) withr::defer({
   unlink(testDirs$temp$root, recursive = TRUE)

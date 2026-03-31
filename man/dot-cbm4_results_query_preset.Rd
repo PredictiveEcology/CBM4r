@@ -4,7 +4,14 @@
 \alias{.cbm4_results_query_preset}
 \title{CBM4 results query preset}
 \usage{
-.cbm4_results_query_preset(cbm4_results, queryName, where = NULL)
+.cbm4_results_query_preset(
+  cbm4_results,
+  queryName = NULL,
+  where = NULL,
+  type = NULL,
+  units = NULL,
+  by = NULL
+)
 }
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
@@ -14,6 +21,12 @@ or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_pro
 \item{queryName}{character. Preset SQL query file name}
 
 \item{where}{character. SQL WHERE clause}
+
+\item{type}{character. Results query type. e.g. 'pools'}
+
+\item{units}{character. Results units. 't/ha', 't', or 'Mt'.}
+
+\item{by}{character. Results query grouping entity. 'timestep' or 'pixel'}
 }
 \value{
 \code{data.table}

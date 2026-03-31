@@ -27,10 +27,17 @@ cbm4_results_query <- function(cbm4_results, query = NULL){
 #' Query results from CBM4r preset SQL query file.
 #'
 #' @param queryName character. Preset SQL query file name
+#' @param type character. Results query type. e.g. 'pools'
+#' @param units character. Results units. 't/ha', 't', or 'Mt'.
+#' @param by character. Results query grouping entity. 'timestep' or 'pixel'
 #' @param where character. SQL WHERE clause
 #' @inherit cbm4_results_query params return
 #' @keywords internal
-.cbm4_results_query_preset <- function(cbm4_results, queryName, where = NULL){
+.cbm4_results_query_preset <- function(cbm4_results, queryName = NULL, where = NULL,
+                                       type = NULL, units = NULL, by = NULL){
+
+  if (is.null(queryName)) queryName <- paste(
+    c(type, sub("/", "-", units, fixed = TRUE), "by", by), collapse = "_")
 
   queryPath <- file.path("SQL", paste0(queryName, ".sql"))
   queryPathFull <- system.file(queryPath, package = "CBM4r")

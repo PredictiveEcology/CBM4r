@@ -4,14 +4,16 @@
 \alias{.cbm4_results_by_pixel}
 \title{CBM4 results: by pixel}
 \usage{
-.cbm4_results_by_pixel(cbm4_results, queryName, timestep = NULL)
+.cbm4_results_by_pixel(cbm4_results, type, units, timestep = NULL)
 }
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
 Path to CBM4 spatial datasets directory
 or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
 
-\item{queryName}{character. Preset SQL query file name}
+\item{type}{character. Results query type. e.g. 'pools'}
+
+\item{units}{character. "t/ha", "t", or "Mt".}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 }

@@ -1,5 +1,6 @@
 
--- Total disturbance flux by timestep (MgC/year)
+-- Disturbance flux for each timestep
+-- Units: tonnes (t)
 
 SELECT
   timestep,
@@ -40,4 +41,3 @@ FROM disturbance_flux
 -- WHERE
 GROUP BY timestep
 ORDER BY timestep
-

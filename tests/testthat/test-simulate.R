@@ -3,157 +3,91 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 
 ## SET UP ----
 
-cbm4_data <- file.path(testDirs$temp$outputs, "simulate")
-unlink(cbm4_data, recursive = TRUE)
-
-grid_rast <- terra::rast(ncol = 2, nrow = 2, xmin = 0, xmax = 2, ymin = 0, ymax = 2, crs = "local")
-grid_meta <- data.table::data.table(
-  pixel_index = 1:4,
-  area = 1,
-  admin_boundary = "Saskatchewan",
-  eco_boundary_id = 6
+projects <- list(
+  `SK with disturbances` = testInputs_SK()
 )
+projects$`SK without disturbances` <- projects$`SK`
+projects$`SK without disturbances`[c("distMeta", "distEvents")] <- NULL
 
-classifiers <- c("species", "prodClass")
-
-gcMeta <- rbind(
-  data.table::data.table(
-    gcID = 1,
-    species = "Something",
-    prodClass = "P",
-    sw = TRUE
-  ),
-  data.table::data.table(
-    gcID = 2,
-    species = "Something else",
-    prodClass = "M",
-    sw = FALSE
-  )
-)
-gcMeta[, admin_boundary  := "Saskatchewan"]
-gcMeta[, eco_boundary_id := 6]
-
-gcIncr <- rbind(
-  data.table::data.table(
-    gcID        = 1,
-    age         = 0:150,
-    merch_inc   = seq(0, 1, length.out = 151),
-    foliage_inc = seq(0, 1, length.out = 151),
-    other_inc   = seq(0, 1, length.out = 151)
-  ),
-  data.table::data.table(
-    gcID        = 2,
-    age         = 0:150,
-    merch_inc   = seq(0, 1, length.out = 151),
-    foliage_inc = seq(0, 1, length.out = 151),
-    other_inc   = seq(0, 1, length.out = 151)
-  )
-)
-
-cohortDT <- rbind(
-  data.table::data.table(
-    pixel_index = 1,
-    species = "Something",
-    prodClass = "P",
-    age = 100
-  ),
-  data.table::data.table(
-    pixel_index = 3,
-    species = "Something",
-    prodClass = "P",
-    age = 50
-  ),
-  data.table::data.table(
-    pixel_index = 4,
-    species = "Something else",
-    prodClass = "M",
-    age = 100
-  )
-)
-
-distMeta <- rbind(
-  data.table::data.table(
-    disturbance_id = 1,
-    disturbance_type = "Wildfire"
-  ),
-  data.table::data.table(
-    disturbance_id = 2,
-    disturbance_type = "Clearcut harvest without salvage"
-  )
-)
-distEvents <- rbind(
-  data.table::data.table(
-    pixel_index = 3,
-    disturbance_id = 1,
-    timestep = 1
-  ),
-  data.table::data.table(
-    pixel_index = 4,
-    disturbance_id = 2,
-    timestep = 2
-  )
-)
+for (test in names(projects)){
+  projects[[test]]$test      <- test
+  projects[[test]]$cbm4_data <- file.path(testDirs$temp$outputs, test)
+  unlink(projects[[test]]$cbm4_data, recursive = TRUE)
+}
 
 
 ## SIMULATE ----
 
-test_that("cbm4_write_inventory", {
+for (project in projects) test_that(paste("cbm4_write_inventory:", project$test), {
+
+  cbm4_data <- project$cbm4_data
 
   cbm4_write_inventory(
     cbm4_data,
     cbm_defaults_db = cbm_defaults_db,
-    cohortDT = cohortDT,
-    classifiers = classifiers,
-    grid_rast = grid_rast,
-    grid_meta = grid_meta
+    cohortDT        = project$cohortDT,
+    classifiers     = project$classifiers,
+    grid_rast       = project$grid_rast,
+    grid_meta       = project$grid_meta
   )
 
   expect_true(file.exists(file.path(cbm4_data, "inventory")))
 
 })
 
-test_that("cbm4_write_disturbance", {
+for (project in projects) test_that(paste("cbm4_write_disturbance", project$test), {
+
+  cbm4_data <- project$cbm4_data
 
   cbm4_write_disturbance(
-    cbm4_data, template_name = "inventory",
+    cbm4_data,
     cbm_defaults_db = cbm_defaults_db,
-    distMeta   = distMeta,
-    distEvents = distEvents
+    template_name   = "inventory",
+    distMeta        = project$distMeta,
+    distEvents      = project$distEvents
   )
 
   expect_true(file.exists(file.path(cbm4_data, "disturbance")))
 
 })
 
-test_that("cbm4_write_spinup_parameters", {
+for (project in projects) test_that(paste("cbm4_write_spinup_parameters", project$test), {
+
+  cbm4_data <- project$cbm4_data
 
   cbm4_write_spinup_parameters(
-    cbm4_data, template_name = "inventory",
+    cbm4_data,
     cbm_defaults_db = cbm_defaults_db,
-    classifiers = classifiers,
-    gcMeta = gcMeta,
-    gcIncr = gcIncr
+    template_name   = "inventory",
+    classifiers     = project$classifiers,
+    gcMeta          = project$gcMeta,
+    gcIncr          = project$gcIncr
   )
 
   expect_true(file.exists(file.path(cbm4_data, "spinup_parameters")))
 
 })
 
-test_that("cbm4_write_step_parameters", {
+for (project in projects) test_that(paste("cbm4_write_step_parameters", project$test), {
+
+  cbm4_data <- project$cbm4_data
 
   cbm4_write_step_parameters(
-    cbm4_data, template_name = "inventory",
+    cbm4_data,
     cbm_defaults_db = cbm_defaults_db,
-    classifiers = classifiers,
-    gcMeta = gcMeta,
-    gcIncr = gcIncr
+    template_name   = "inventory",
+    classifiers     = project$classifiers,
+    gcMeta          = project$gcMeta,
+    gcIncr          = project$gcIncr
   )
 
   expect_true(file.exists(file.path(cbm4_data, "step_parameters")))
 
 })
 
-test_that("cbm4_spinup", {
+for (project in projects) test_that(paste("cbm4_spinup", project$test), {
+
+  cbm4_data <- project$cbm4_data
 
   cbm4_spinup(cbm4_data, cbm_defaults_db = cbm_defaults_db)
 
@@ -161,7 +95,9 @@ test_that("cbm4_spinup", {
 
 })
 
-test_that("cbm4_step", {
+for (project in projects) test_that(paste("cbm4_step", project$test), {
+
+  cbm4_data <- project$cbm4_data
 
   cbm4_step(cbm4_data, cbm_defaults_db = cbm_defaults_db, timestep = 1)
 
@@ -170,112 +106,190 @@ test_that("cbm4_step", {
 })
 
 
-## READ RESULTS: BY TIMESTEP ----
-
-cbm4_results <- tryCatch(cbm4_results_processor(cbm4_data), error = function(e) NULL)
+## READ RESULTS ----
 
 test_that("cbm4_results_processor", {
 
-  expect_s3_class(cbm4_results, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")
+  cbm4_data <- project$cbm4_data
+
+  results_processor <- cbm4_results_processor(cbm4_data)
+
+  expect_s3_class(results_processor, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")
 
 })
 
-test_that("cbm4_results_flux_by_timestep", {
+for (test in names(projects)){
+  projects[[test]]$cbm4_results <- cbm4_results_processor(projects[[test]]$cbm4_data)
+  projects[[test]]$grid_area    <- terra::cellSize(projects[[test]]$grid_rast, unit = "ha")[1, 1][[1]]
+}
 
-  cbm4Summary <- cbm4_results_flux_by_timestep(cbm4_data)
+for (project in projects) test_that(paste("cbm4_results_pools_by_timestep", project$test), {
 
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "timestep")
-  expect_equal(cbm4Summary$timestep, 1)
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  grid_area    <- project$grid_area
 
-  expect_equal(cbm4Summary, cbm4_results_flux_by_timestep(cbm4_results), ignore_attr = TRUE)
+  cbm4Summary <- list()
+  for (unit in c("t", "Mt")){
 
-  cbm4Summary <- cbm4_results_flux_by_timestep(cbm4_data, timesteps = 2)
+    cbm4Summary[[unit]] <- cbm4_results_pools_by_timestep(cbm4_data, unit)
 
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "timestep")
-  expect_equal(cbm4Summary$timestep, integer(0))
+    expect_s3_class(cbm4Summary[[unit]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
+    expect_equal(cbm4Summary[[unit]]$timestep, 0:1)
+
+    cbm4SumSubset <- cbm4_results_pools_by_timestep(cbm4_results, unit, timesteps = 1)
+
+    expect_s3_class(cbm4SumSubset, "data.table")
+    expect_equal(data.table::key(cbm4SumSubset), "timestep")
+    expect_equal(cbm4SumSubset$timestep, 1)
+  }
+
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
+
+  expect_equal(
+    cbm4Summary[["t"]],
+    cbm4_results_pools_by_timestep(cbm4_results, "t"),
+    ignore_attr = TRUE)
+})
+
+for (project in projects) test_that(paste("cbm4_results_flux_by_timestep", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  grid_area    <- project$grid_area
+
+  cbm4Summary <- list()
+  for (unit in c("t", "Mt")){
+
+    cbm4Summary[[unit]] <- cbm4_results_flux_by_timestep(cbm4_data, unit)
+
+    expect_s3_class(cbm4Summary[[unit]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
+    expect_equal(cbm4Summary[[unit]]$timestep, 1)
+
+    cbm4SumSubset <- cbm4_results_flux_by_timestep(cbm4_results, unit, timesteps = 2)
+
+    expect_s3_class(cbm4SumSubset, "data.table")
+    expect_equal(data.table::key(cbm4SumSubset), "timestep")
+    expect_equal(cbm4SumSubset$timestep, integer(0))
+  }
+
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
+
+  expect_equal(
+    cbm4Summary[["t"]],
+    cbm4_results_flux_by_timestep(cbm4_results, "t"),
+    ignore_attr = TRUE)
+})
+
+for (project in projects) test_that(paste("cbm4_results_emissions_by_timestep", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  grid_area    <- project$grid_area
+
+  cbm4Summary <- list()
+  for (unit in c("t", "Mt")){
+
+    cbm4Summary[[unit]] <- cbm4_results_emissions_by_timestep(cbm4_data, unit)
+
+    expect_s3_class(cbm4Summary[[unit]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
+    expect_equal(cbm4Summary[[unit]]$timestep, 1)
+
+    cbm4SumSubset <- cbm4_results_emissions_by_timestep(cbm4_results, unit, timesteps = 2)
+
+    expect_s3_class(cbm4SumSubset, "data.table")
+    expect_equal(data.table::key(cbm4SumSubset), "timestep")
+    expect_equal(cbm4SumSubset$timestep, integer(0))
+  }
+
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
+
+  expect_equal(
+    cbm4Summary[["t"]],
+    cbm4_results_emissions_by_timestep(cbm4_results, "t"),
+    ignore_attr = TRUE)
+})
+
+for (project in projects) test_that(paste("cbm4_results_pools_by_pixel", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  grid_area    <- project$grid_area
+
+  cbm4Summary <- list()
+  for (unit in c("t/ha", "t", "Mt")){
+
+    cbm4Summary[[unit]] <- cbm4_results_pools_by_pixel(cbm4_results, unit, timestep = 1)
+
+    expect_s3_class(cbm4Summary[[unit]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[unit]]), "pixel_index")
+    expect_equal(cbm4Summary[[unit]]$pixel_index, c(1, 3, 4))
+  }
+
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["t/ha"]][, -1] * grid_area, ignore_attr = TRUE)
+
+  expect_equal(
+    cbm4Summary[["t"]],
+    cbm4_results_pools_by_pixel(cbm4_results, "t", timestep = 1),
+    ignore_attr = TRUE)
+})
+
+for (project in projects) test_that(paste("cbm4_results_flux_by_pixel", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  grid_area    <- project$grid_area
+
+  cbm4Summary <- list()
+  for (unit in c("t/ha", "t", "Mt")){
+
+    cbm4Summary[[unit]] <- cbm4_results_flux_by_pixel(cbm4_results, unit, timestep = 1)
+
+    expect_s3_class(cbm4Summary[[unit]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[unit]]), "pixel_index")
+    expect_equal(cbm4Summary[[unit]]$pixel_index, c(1, 3, 4))
+  }
+
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["t/ha"]][, -1] * grid_area, ignore_attr = TRUE)
+
+  expect_equal(
+    cbm4Summary[["t"]],
+    cbm4_results_flux_by_pixel(cbm4_results, "t", timestep = 1),
+    ignore_attr = TRUE)
 
 })
 
-test_that("cbm4_results_pools_by_timestep", {
+for (project in projects) test_that(paste("cbm4_results_emissions_by_pixel", project$test), {
 
-  cbm4Summary <- cbm4_results_pools_by_timestep(cbm4_data)
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  grid_area    <- project$grid_area
 
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "timestep")
-  expect_equal(cbm4Summary$timestep, 0:1)
+  cbm4Summary <- list()
+  for (unit in c("t/ha", "t", "Mt")){
 
-  expect_equal(cbm4Summary, cbm4_results_pools_by_timestep(cbm4_results), ignore_attr = TRUE)
+    cbm4Summary[[unit]] <- cbm4_results_emissions_by_pixel(cbm4_results, unit, timestep = 1)
 
-  cbm4Summary <- cbm4_results_pools_by_timestep(cbm4_results, timesteps = 1)
+    expect_s3_class(cbm4Summary[[unit]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[unit]]), "pixel_index")
+    expect_equal(cbm4Summary[[unit]]$pixel_index, c(1, 3, 4))
+  }
 
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "timestep")
-  expect_equal(cbm4Summary$timestep, 1)
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
+  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["t/ha"]][, -1] * grid_area, ignore_attr = TRUE)
 
-})
-
-test_that("cbm4_results_products_by_timestep", {
-
-  cbm4Summary <- cbm4_results_products_by_timestep(cbm4_data)
-
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "timestep")
-  expect_equal(cbm4Summary$timestep, 0:1)
-
-  expect_equal(cbm4Summary, cbm4_results_products_by_timestep(cbm4_results), ignore_attr = TRUE)
-
-  cbm4Summary <- cbm4_results_products_by_timestep(cbm4_results, timesteps = 1)
-
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "timestep")
-  expect_equal(cbm4Summary$timestep, 1)
-
-})
-
-test_that("cbm4_results_emissions_by_timestep", {
-
-  cbm4Summary <- cbm4_results_emissions_by_timestep(cbm4_data)
-
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "timestep")
-  expect_equal(cbm4Summary$timestep, 1)
-
-  expect_equal(cbm4Summary, cbm4_results_emissions_by_timestep(cbm4_results), ignore_attr = TRUE)
-
-  cbm4Summary <- cbm4_results_emissions_by_timestep(cbm4_results, timesteps = 2)
-
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "timestep")
-  expect_equal(cbm4Summary$timestep, integer(0))
+  expect_equal(
+    cbm4Summary[["t"]],
+    cbm4_results_emissions_by_pixel(cbm4_results, "t", timestep = 1),
+    ignore_attr = TRUE)
 
 })
 
 
-## READ RESULTS: BY PIXEL ----
 
-test_that("cbm4_results_flux_by_pixel", {
-
-  cbm4Summary <- cbm4_results_flux_by_pixel(cbm4_data, timestep = 1)
-
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "pixel_index")
-  expect_equal(cbm4Summary$pixel_index, c(1, 3, 4))
-
-  expect_equal(cbm4Summary, cbm4_results_flux_by_pixel(cbm4_results, timestep = 1), ignore_attr = TRUE)
-
-})
-
-test_that("cbm4_results_pools_by_pixel", {
-
-  cbm4Summary <- cbm4_results_pools_by_pixel(cbm4_data, timestep = 1)
-
-  expect_s3_class(cbm4Summary, "data.table")
-  expect_equal(data.table::key(cbm4Summary), "pixel_index")
-  expect_equal(cbm4Summary$pixel_index, c(1, 3, 4))
-
-  expect_equal(cbm4Summary, cbm4_results_pools_by_pixel(cbm4_results, timestep = 1), ignore_attr = TRUE)
-
-})
 

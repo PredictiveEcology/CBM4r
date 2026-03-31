@@ -6,7 +6,8 @@
 \usage{
 .cbm4_results_by_timestep(
   cbm4_results,
-  queryName,
+  type,
+  units,
   timesteps = NULL,
   alias = NULL
 )
@@ -16,7 +17,9 @@
 Path to CBM4 spatial datasets directory
 or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
 
-\item{queryName}{character. Preset SQL query file name}
+\item{type}{character. Results query type. e.g. 'pools'}
+
+\item{units}{character. "t/ha", "t", or "Mt".}
 
 \item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
 }

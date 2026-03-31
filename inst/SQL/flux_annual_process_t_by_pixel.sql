@@ -1,5 +1,6 @@
 
--- Total flux by pixel (MgC/year)
+-- Annual process flux for each pixel
+-- Units: tonnes (t)
 
 SELECT
   a.timestep,

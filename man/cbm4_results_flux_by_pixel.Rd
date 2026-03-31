@@ -4,12 +4,14 @@
 \alias{cbm4_results_flux_by_pixel}
 \title{CBM4 results: flux by pixel}
 \usage{
-cbm4_results_flux_by_pixel(cbm4_results, timestep)
+cbm4_results_flux_by_pixel(cbm4_results, units, timestep)
 }
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
 Path to CBM4 spatial datasets directory
 or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
+
+\item{units}{character. "t/ha", "t", or "Mt".}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 }

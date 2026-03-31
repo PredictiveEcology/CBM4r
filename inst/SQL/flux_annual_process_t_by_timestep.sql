@@ -1,5 +1,6 @@
 
--- Total annual process flux by timestep (MgC/year)
+-- Annual process flux for each timestep
+-- Units: tonnes (t)
 
 SELECT
   timestep,
@@ -26,4 +27,3 @@ FROM annual_process_flux
 -- WHERE
 GROUP BY timestep
 ORDER BY timestep
-
