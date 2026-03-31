@@ -123,6 +123,16 @@ for (test in names(projects)){
   projects[[test]]$grid_area    <- terra::cellSize(projects[[test]]$grid_rast, unit = "ha")[1, 1][[1]]
 }
 
+for (project in projects) test_that(paste("cbm4_read_geo", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+
+  expect_true(terra::compareGeom(project$grid_rast, cbm4_read_geo(cbm4_data)))
+  expect_true(terra::compareGeom(project$grid_rast, cbm4_read_geo(cbm4_results)))
+
+})
+
 for (project in projects) test_that(paste("cbm4_results_pools_by_timestep", project$test), {
 
   cbm4_data    <- project$cbm4_data

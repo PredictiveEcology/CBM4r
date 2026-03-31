@@ -67,13 +67,13 @@ cbm4_results_pools_by_pixel <- function(cbm4_results, units, timestep){
   if (length(timestep) == 1) cbm4Summary[, timestep := NULL]
 
   # Merge with pixels table
-  results_simulation_dataset <- reticulate::py_get_attr(cbm4_results, "_results_dataset")$simulation_dataset
-  if ("pixels" %in% results_simulation_dataset$list_tables()){
+  results_dataset <- reticulate::py_get_attr(cbm4_results, "_results_dataset")$simulation_dataset
+  if ("pixels" %in% results_dataset$list_tables()){
 
     cbm4Summary <- merge(
       cbm4Summary,
       dplyr::collect(
-        results_simulation_dataset$read_table_pyarrow(
+        results_dataset$read_table_pyarrow(
           "pixels", read_cols = c("pixel_index", "raster_index", "chunk_index"))
       ),
       by = c("raster_index", "chunk_index"))
