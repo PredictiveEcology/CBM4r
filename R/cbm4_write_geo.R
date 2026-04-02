@@ -189,6 +189,10 @@ cbm4_write_geo <- function(
 arrow_space_dataset_chunks <- function(grid_rast, grid_chunks = 1){
 
   if (is.null(grid_rast)) stop("grid_rast is NULL")
+  if (!is(grid_rast, "SpatRaster")) grid_rast <- tryCatch(
+    terra::rast(grid_rast), error = function(e) stop(
+      "failed to read grid_rast as SpatRaster: ", e$message))
+
   if (grid_chunks != 1) stop(">1 chunks not yet supported")
 
   if (grid_chunks == 1){
@@ -214,6 +218,9 @@ arrow_space_dataset_chunks <- function(grid_rast, grid_chunks = 1){
 arrow_space_dataset_geo_metadata <- function(grid_rast){
 
   if (is.null(grid_rast)) stop("grid_rast is NULL")
+  if (!is(grid_rast, "SpatRaster")) grid_rast <- tryCatch(
+    terra::rast(grid_rast), error = function(e) stop(
+      "failed to read grid_rast as SpatRaster: ", e$message))
 
   list(
     nrows           = terra::nrow(grid_rast),
