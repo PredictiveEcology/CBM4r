@@ -6,6 +6,7 @@ arrow_space_dataset_write_table <- function(
     table_name = NULL,
     dataset_path = file.path(dataset_dir, dataset_name),
     existing_data_behavior = "delete_matching",
+    no_factors = TRUE,
     ...
 ){
 
@@ -15,8 +16,10 @@ arrow_space_dataset_write_table <- function(
   if (nrow(table_data) > 0){
 
     # Convert factor columns to string
-    factCols <- names(table_data)[sapply(table_data, is.factor)]
-    if (length(factCols) > 0) table_data[, (factCols) := lapply(.SD, as.character), .SDcols = factCols]
+    if (no_factors){
+      factCols <- names(table_data)[sapply(table_data, is.factor)]
+      if (length(factCols) > 0) table_data[, (factCols) := lapply(.SD, as.character), .SDcols = factCols]
+    }
 
     arrow::write_dataset(table_data, table_path, existing_data_behavior = existing_data_behavior, ...)
 
