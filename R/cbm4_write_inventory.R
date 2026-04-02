@@ -43,7 +43,13 @@ cbm4_write_inventory <- function(
     pixelDT  = arrow_space_dataset_read_table(
       dataset_name = dataset_name,
       dataset_path = dataset_path,
-      table_name   = "table-pixels"
+      table_name   = "table-pixels",
+      col_select   = c(
+        "pixel_index", "chunk_index", "raster_index",
+        "area",
+        "admin_boundary", "eco_boundary", "spatial_unit",
+        "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+      )
     ),
     ...)
 
@@ -116,7 +122,6 @@ cbm4_format_inventory <- function(
   if (!data.table::is.data.table(pixelDT))  pixelDT  <- data.table::as.data.table(pixelDT)
 
   # Join with pixel table
-  pixelDT[, pixel_index := as.integer(pixel_index)]
   dataFull <- merge(cohortDT, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
 

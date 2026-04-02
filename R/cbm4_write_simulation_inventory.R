@@ -40,7 +40,13 @@ cbm4_write_simulation_inventory <- function(
     pixelDT     = arrow_space_dataset_read_table(
       dataset_name = dataset_name,
       dataset_path = dataset_path,
-      table_name   = "table-pixels"
+      table_name   = "table-pixels",
+      col_select   = c(
+        "pixel_index", "chunk_index", "raster_index",
+        "area",
+        "admin_boundary", "eco_boundary", "spatial_unit",
+        "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+      )
     ),
     ...)
 

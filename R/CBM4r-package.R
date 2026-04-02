@@ -48,7 +48,7 @@ utils::globalVariables(c(
 
 # CBM4 dataset 'pixels' table columns
 utils::globalVariables(c(
-  "pixel_index", "x", "y", "area"
+  "pixel_index", "area"
 ))
 
 

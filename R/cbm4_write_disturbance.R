@@ -115,8 +115,7 @@ cbm4_format_disturbance <- function(
   if (!data.table::is.data.table(pixelDT))    pixelDT    <- data.table::as.data.table(pixelDT)
 
   # Join with pixel table
-  pixelDT[, pixel_index := as.integer(pixel_index)]
-  dataFull <- merge(distEvents, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index", all.x = TRUE)
+  dataFull <- merge(distEvents, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index")
   dataFull[, pixel_index := NULL]
 
   # Set disturbance_order
