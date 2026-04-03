@@ -141,6 +141,10 @@ cbm4_format_disturbance <- function(
 
     dataFull[, disturbance_type_id := disturbance_type_tr$disturbance_type_id[
       match(disturbance_type, disturbance_type_tr$name)]]
+
+    if (any(is.na(dataFull$disturbance_type_id))) stop(
+      "disturbance_type_id not found for: ",
+      paste(shQuote(unique(dataFull[is.na(disturbance_type_id),]$disturbance_type)), collapse = ", "))
   }
 
   # Set disturbance_type

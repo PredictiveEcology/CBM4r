@@ -75,7 +75,7 @@ testInputs_SK <- function(){
       ),
       data.table::data.table(
         disturbance_id = 2,
-        disturbance_type = "Clearcut harvest without salvage"
+        disturbance_type = "Clearcut harvesting without salvage"
       )
     ),
     distEvents = rbind(
