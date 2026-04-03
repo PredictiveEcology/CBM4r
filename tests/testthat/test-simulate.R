@@ -105,6 +105,21 @@ for (project in projects) test_that(paste("cbm4_step", project$test), {
 
 })
 
+for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_write_simulation_inventory", project$test), {
+
+  cbm4_data <- project$cbm4_data
+
+  cbm4_write_simulation_inventory(
+    cbm4_data,
+    cohortDT = cbm4_read_simulation_inventory(cbm4_data, timestep = 1),
+    timestep = 1)
+
+  cbm4_step(cbm4_data, cbm_defaults_db = cbm_defaults_db, timestep = 2)
+
+  expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=2")))
+
+})
+
 
 ## READ RESULTS ----
 
@@ -146,7 +161,7 @@ for (project in projects) test_that(paste("cbm4_results_pools_by_timestep", proj
 
     expect_s3_class(cbm4Summary[[unit]], "data.table")
     expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
-    expect_equal(cbm4Summary[[unit]]$timestep, 0:1)
+    expect_equal(cbm4Summary[[unit]]$timestep, 0:2)
 
     cbm4SumSubset <- cbm4_results_pools_by_timestep(cbm4_results, unit, timesteps = 1)
 
@@ -176,13 +191,13 @@ for (project in projects) test_that(paste("cbm4_results_flux_by_timestep", proje
 
     expect_s3_class(cbm4Summary[[unit]], "data.table")
     expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
-    expect_equal(cbm4Summary[[unit]]$timestep, 1)
+    expect_equal(cbm4Summary[[unit]]$timestep, 1:2)
 
-    cbm4SumSubset <- cbm4_results_flux_by_timestep(cbm4_results, unit, timesteps = 2)
+    cbm4SumSubset <- cbm4_results_flux_by_timestep(cbm4_results, unit, timesteps = 1)
 
     expect_s3_class(cbm4SumSubset, "data.table")
     expect_equal(data.table::key(cbm4SumSubset), "timestep")
-    expect_equal(cbm4SumSubset$timestep, integer(0))
+    expect_equal(cbm4SumSubset$timestep, 1L)
   }
 
   expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
@@ -206,13 +221,13 @@ for (project in projects) test_that(paste("cbm4_results_emissions_by_timestep", 
 
     expect_s3_class(cbm4Summary[[unit]], "data.table")
     expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
-    expect_equal(cbm4Summary[[unit]]$timestep, 1)
+    expect_equal(cbm4Summary[[unit]]$timestep, 1:2)
 
-    cbm4SumSubset <- cbm4_results_emissions_by_timestep(cbm4_results, unit, timesteps = 2)
+    cbm4SumSubset <- cbm4_results_emissions_by_timestep(cbm4_results, unit, timesteps = 1)
 
     expect_s3_class(cbm4SumSubset, "data.table")
     expect_equal(data.table::key(cbm4SumSubset), "timestep")
-    expect_equal(cbm4SumSubset$timestep, integer(0))
+    expect_equal(cbm4SumSubset$timestep, 1L)
   }
 
   expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
@@ -271,7 +286,6 @@ for (project in projects) test_that(paste("cbm4_results_flux_by_pixel", project$
     cbm4Summary[["t"]],
     cbm4_results_flux_by_pixel(cbm4_results, "t", timestep = 1),
     ignore_attr = TRUE)
-
 })
 
 for (project in projects) test_that(paste("cbm4_results_emissions_by_pixel", project$test), {
@@ -297,7 +311,6 @@ for (project in projects) test_that(paste("cbm4_results_emissions_by_pixel", pro
     cbm4Summary[["t"]],
     cbm4_results_emissions_by_pixel(cbm4_results, "t", timestep = 1),
     ignore_attr = TRUE)
-
 })
 
 
