@@ -46,8 +46,7 @@ cbm4_write_inventory <- function(
       table_name   = "table-pixels",
       col_select   = c(
         "pixel_index", "chunk_index", "raster_index",
-        "area",
-        "admin_boundary", "eco_boundary", "spatial_unit",
+        "area", "admin_boundary", "eco_boundary", "spatial_unit",
         "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
       )
     ),
@@ -112,8 +111,7 @@ cbm4_format_inventory <- function(
   check_table_columns_all("cohortDT", cohortDT, c("pixel_index", "age"))
 
   pixelCols <- c("pixel_index", "chunk_index", "raster_index", setdiff(c(
-    "area", "admin_boundary", "eco_boundary", "spatial_unit",
-    "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+    "area", "admin_boundary", "eco_boundary", "spatial_unit"
   ), names(cohortDT)))
   check_table_columns_all("pixelDT", pixelDT, pixelCols)
 
@@ -122,7 +120,7 @@ cbm4_format_inventory <- function(
   if (!data.table::is.data.table(pixelDT))  pixelDT  <- data.table::as.data.table(pixelDT)
 
   # Join with pixel table
-  dataFull <- merge(cohortDT, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index", all.x = TRUE)
+  dataFull <- merge(cohortDT, pixelDT, by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
 
   # Drop columns

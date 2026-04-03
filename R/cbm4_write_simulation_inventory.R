@@ -39,9 +39,7 @@ cbm4_write_simulation_inventory <- function(
       table_name   = "table-pixels",
       col_select   = c(
         "pixel_index", "chunk_index", "raster_index",
-        "area",
-        "admin_boundary", "eco_boundary", "spatial_unit",
-        "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+        "area", "admin_boundary", "eco_boundary", "spatial_unit"
       )
     ),
     ...)
@@ -98,8 +96,7 @@ cbm4_format_simulation_inventory <- function(
   colTypes <- list(
     classifiers = classifiers,
     inventory = c(
-      "area", "admin_boundary", "eco_boundary", "spatial_unit",
-      "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+      "area", "admin_boundary", "eco_boundary", "spatial_unit"
     ),
     state = c(
       "age", "last_disturbance_type", "last_disturbance_event", "time_since_last_disturbance", "time_since_land_class_change",
