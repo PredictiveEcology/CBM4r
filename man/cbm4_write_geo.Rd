@@ -72,5 +72,7 @@ Initiate a CBM4 spatial parquet dataset with study area geographic metadata.
 This can be done by providing a raster grid or the name of a dataset to use as a template.
 The dataset will contain an additional "pixels" table
 mapping grid pixel locations to their parallel processing partition chunks.
-This table has columns \code{pixel_index}, \code{chunk_index}, \code{raster_index}, \code{x}, \code{y}, \code{area}.
+This table has columns \code{pixel_index}, \code{chunk_index}, \code{raster_index}, \code{area},
+\code{admin_boundary}, \code{eco_boundary}, \code{spatial_unit},
+\code{afforestation_pre_type}, \code{historic_disturbance_type}, \code{last_pass_disturbance_type}.
 }
