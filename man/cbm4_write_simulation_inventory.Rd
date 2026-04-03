@@ -7,8 +7,8 @@
 cbm4_write_simulation_inventory(
   cbm4_data = NULL,
   cohortDT,
-  classifiers,
   timestep,
+  classifiers = NULL,
   dataset_name = "simulation",
   dataset_path = file.path(cbm4_data, dataset_name),
   ...
@@ -21,10 +21,10 @@ May be omitted if full paths to datasets are provided.}
 
 \item{cohortDT}{data.table. Cohort inventory.}
 
+\item{timestep}{integer. Simulation timestep with 1 representing the first year.}
+
 \item{classifiers}{character.
 Column names of inventory identifiers.}
-
-\item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}

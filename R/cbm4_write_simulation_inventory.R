@@ -3,11 +3,7 @@
 #'
 #' Write inventory to a simulation CBM4 spatial parquet dataset.
 #'
-#' @template cbm4_data
-#' @template classifiers
-#' @param cohortDT data.table. Cohort inventory.
-#' @template timestep
-#' @inheritParams cbm4_format_inventory
+#' @inheritParams cbm4_format_simulation_inventory
 #' @inheritParams cbm4_write_geo
 #' @param ... arguments to \code{\link{cbm4_write_geo}} or \code{\link{cbm4_format_simulation_inventory}}
 #'
@@ -16,8 +12,8 @@
 cbm4_write_simulation_inventory <- function(
     cbm4_data = NULL,
     cohortDT,
-    classifiers,
     timestep,
+    classifiers = NULL,
     dataset_name = "simulation",
     dataset_path  = file.path(cbm4_data, dataset_name),
     ...
@@ -73,8 +69,9 @@ cbm4_write_simulation_inventory <- function(
 
 #' CBM4 format simulation inventory
 #'
-#' @template classifiers
+#' @param cohortDT data.table. Cohort inventory.
 #' @template timestep
+#' @template classifiers
 #' @inheritParams cbm4_format_inventory
 #' @param ... arguments to \code{\link{cbm4_format_inventory}}
 #'
@@ -83,9 +80,9 @@ cbm4_write_simulation_inventory <- function(
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_simulation_inventory <- function(
     cohortDT,
-    classifiers,
-    timestep,
     pixelDT,
+    timestep,
+    classifiers = NULL,
     ...
 ){
 
@@ -120,9 +117,17 @@ cbm4_format_simulation_inventory <- function(
     )
   )
 
-  for (colType in names(colTypes)){
+  for (colType in names(colTypes)[!sapply(colTypes, is.null)]){
     data.table::setnames(inv$flat, colTypes[[colType]], paste0(colType, ".", colTypes[[colType]]), skip_absent = TRUE)
     check_table_columns_all("cohortDT", inv$flat, paste0(colType, ".", colTypes[[colType]]))
+  }
+
+  if (is.null(classifiers)){
+    classifiers <- setdiff(names(inv$flat), c(
+      "index", "cohort_index", "chunk_index", "cohort_proportion", "timestep",
+      do.call(c, lapply(names(colTypes), function(colType) paste0(colType, ".", colTypes[[colType]])))
+    ))
+    data.table::setnames(inv$flat, classifiers, paste0("classifiers.", classifiers), skip_absent = TRUE)
   }
 
   data.table::setcolorder(inv$flat, unique(c(

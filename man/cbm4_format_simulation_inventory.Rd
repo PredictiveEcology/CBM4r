@@ -4,18 +4,24 @@
 \alias{cbm4_format_simulation_inventory}
 \title{CBM4 format simulation inventory}
 \usage{
-cbm4_format_simulation_inventory(cohortDT, classifiers, timestep, pixelDT, ...)
+cbm4_format_simulation_inventory(
+  cohortDT,
+  pixelDT,
+  timestep,
+  classifiers = NULL,
+  ...
+)
 }
 \arguments{
 \item{cohortDT}{data.table. Cohort inventory.}
 
-\item{classifiers}{character.
-Column names of inventory identifiers.}
+\item{pixelDT}{character.
+Table of pixel attributes.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 
-\item{pixelDT}{character.
-Table of pixel attributes.}
+\item{classifiers}{character.
+Column names of inventory identifiers.}
 
 \item{...}{arguments to \code{\link{cbm4_format_inventory}}}
 }
