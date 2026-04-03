@@ -1,7 +1,7 @@
 
 check_table_columns_all <- function(tableName, table, colNames){
 
-  if (is.null(table)) stop(tableName, " object is NULL")
+  if (!is.data.frame(table)) stop(tableName, " object is not a data.frame")
 
   if (!all(colNames %in% names(table))) stop(
     tableName, " missing column(s): ",
@@ -10,7 +10,7 @@ check_table_columns_all <- function(tableName, table, colNames){
 
 check_table_columns_any <- function(tableName, table, colNames){
 
-  if (is.null(table)) stop(tableName, " object is NULL")
+  if (!is.data.frame(table)) stop(tableName, " object is not a data.frame")
 
   if (!any(colNames %in% names(table))) stop(
     tableName, " requires any of column(s): ",
