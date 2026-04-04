@@ -5,8 +5,8 @@
 #' @param dataset_name character. name of `arrow_space` dataset directory.
 #' @param dataset_path character. Path to `arrow_space` dataset.
 #' Defaults to `file.path(dataset_dir, dataset_name)`
-#' @param template_name character. name of `arrow_space` dataset directory to copy table from.
-#' @param template_path character. Path to `arrow_space` dataset to copy table from.
+#' @param template_name character. name of `arrow_space` dataset directory to copy geo metadata from.
+#' @param template_path character. Path to `arrow_space` dataset to copy geo metadata from.
 #' Defaults to `file.path(dataset_dir, template_name)`
 #' @param copy_raster_index_data logical. TODO
 #' @param partitions character. TODO
@@ -26,7 +26,9 @@ arrow_space_dataset_copy_geo <- function(
 
   if (length(dataset_path) == 0)   stop("dataset_path is invalid")
   if (length(template_path) == 0)  stop("template_path is invalid")
-  if (!file.exists(template_path)) stop("template_path not found: ", template_path)
+  if (!file.exists(template_path)) stop(
+    "template_path not found: ", template_path,
+    "\nUse cbm4_write_geo to initiate a new dataset.")
 
   arrow_space <- reticulate::import("arrow_space")
   if (!is.null(tags)) pd <- reticulate::import("pandas")

@@ -3,109 +3,72 @@
 #'
 #' Write spinup parameters to a CBM4 spatial parquet dataset.
 #'
-#' @template cbm4_data
-#' @template cbm_defaults_db
-#' @param ... arguments to \code{\link{cbm4_format_increments}}
-#' @inheritParams cbm4_write_geo
-#'
-#' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
+#' @param ... arguments to \code{\link{cbm4_write_parameters}}
+#' @inherit cbm4_write_parameters return
 #' @export
-cbm4_write_spinup_parameters <- function(
-    cbm4_data = NULL,
-    cbm_defaults_db,
-    grid_rast     = NULL,
-    grid_chunks   = 1,
-    template_name = NULL,
-    template_path = file.path(cbm4_data, template_name),
-    dataset_name  = "spinup_parameters",
-    dataset_path  = file.path(cbm4_data, dataset_name),
-    ...
-){
-
+cbm4_write_spinup_parameters <- function(...){
   cbm4_write_parameters(
-    cbm4_data       = cbm4_data,
-    dataset_name    = dataset_name,
-    dataset_path    = dataset_path,
-    grid_rast       = grid_rast,
-    grid_chunks     = grid_chunks,
-    template_name   = template_name,
-    template_path   = template_path,
-    cbm_defaults_db = cbm_defaults_db,
-    spinup          = TRUE,
-    ...
-  )
+    dataset_name = "spinup_parameters",
+    spinup       = TRUE,
+    ...)
 }
-
 
 #' CBM4 write step parameters
 #'
 #' Write step parameters to a CBM4 spatial parquet dataset.
 #'
-#' @template cbm4_data
-#' @template cbm_defaults_db
-#' @param ... arguments to \code{\link{cbm4_format_increments}}
-#' @inheritParams cbm4_write_geo
-#'
-#' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
+#' @param ... arguments to \code{\link{cbm4_write_parameters}}
+#' @inherit cbm4_write_parameters return
 #' @export
-cbm4_write_step_parameters <- function(
-    cbm4_data = NULL,
-    cbm_defaults_db,
-    grid_rast     = NULL,
-    grid_chunks   = 1,
-    template_name = NULL,
-    template_path = file.path(cbm4_data, template_name),
-    dataset_name  = "step_parameters",
-    dataset_path  = file.path(cbm4_data, dataset_name),
-    ...
-){
-
+cbm4_write_step_parameters  <- function(...){
   cbm4_write_parameters(
-    cbm4_data       = cbm4_data,
-    dataset_name    = dataset_name,
-    dataset_path    = dataset_path,
-    grid_rast       = grid_rast,
-    grid_chunks     = grid_chunks,
-    template_name   = template_name,
-    template_path   = template_path,
-    cbm_defaults_db = cbm_defaults_db,
-    spinup          = FALSE,
-    ...
-  )
+    dataset_name = "step_parameters",
+    spinup       = FALSE,
+    ...)
 }
 
 
-# Helper function: write parameters
+#' cbm4_write_parameters
+#' @template cbm4_data
+#' @template cbm_defaults_db
+#' @param spinup logical. Spinup or step parameters.
+#' @inheritParams cbm4_format_increments
+#' @template dataset_name
+#' @template dataset_path
+#' @template template_name
+#' @template template_path
+#' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 cbm4_write_parameters <- function(
     cbm4_data = NULL,
-    dataset_name,
     cbm_defaults_db,
+    gcMeta,
+    gcIncr,
+    classifiers,
+    dataset_name,
     spinup,
-    grid_rast     = NULL,
-    grid_chunks   = 1,
-    template_name = NULL,
+    template_name = "inventory",
     template_path = file.path(cbm4_data, template_name),
-    dataset_path  = file.path(cbm4_data, dataset_name),
-    ...
+    dataset_path  = file.path(cbm4_data, dataset_name)
 ){
+
+  # Initiate dataset from template
+  if (!file.exists(dataset_path)){
+    arrow_space_dataset_copy_geo(
+      dataset_name  = dataset_name,
+      dataset_path  = dataset_path,
+      template_name = template_name,
+      template_path = template_path,
+      partitions    = list("chunk_index" = "int64")
+    )
+  }
 
   # Format increments
   incTable <- cbm4_format_increments(
     cbm_defaults_db = cbm_defaults_db,
-    long = !spinup,
-    ...
-  )
-
-  # Initiate dataset
-  cbm4_write_geo(
-    dataset_name  = dataset_name,
-    dataset_path  = dataset_path,
-    grid_rast     = grid_rast,
-    grid_chunks   = grid_chunks,
-    template_name = template_name,
-    template_path = template_path,
-    partitions    = list("chunk_index" = "int64"),
-    write_pixels  = FALSE
+    gcMeta          = gcMeta,
+    gcIncr          = gcIncr,
+    classifiers     = classifiers,
+    long            = !spinup
   )
 
   # Write increments
@@ -158,15 +121,16 @@ cbm4_write_parameters <- function(
 
 
 #' CBM4 format increments
-#'
-#' @template classifiers
 #' @param gcMeta data.table. Growth curve metadata
 #' @param gcIncr data.table. Growth curve carbon increments
+#'
+#' @template classifiers
 #' @param long logical. Format table long or wide.
 #' @template cbm_defaults_db
 #'
 #' @return data.table
-cbm4_format_increments <- function(classifiers, gcMeta, gcIncr, long = TRUE, cbm_defaults_db = NULL){
+#' @keywords internal
+cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm_defaults_db = NULL){
 
   # Read tables
   gcMeta <- data.table::as.data.table(gcMeta)

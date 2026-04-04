@@ -21,7 +21,7 @@ arrow_space_dataset_copy_geo(
 
 \item{dataset_name}{character. name of \code{arrow_space} dataset directory.}
 
-\item{template_name}{character. name of \code{arrow_space} dataset directory to copy table from.}
+\item{template_name}{character. name of \code{arrow_space} dataset directory to copy geo metadata from.}
 
 \item{copy_raster_index_data}{logical. TODO}
 
@@ -32,7 +32,7 @@ arrow_space_dataset_copy_geo(
 \item{dataset_path}{character. Path to \code{arrow_space} dataset.
 Defaults to \code{file.path(dataset_dir, dataset_name)}}
 
-\item{template_path}{character. Path to \code{arrow_space} dataset to copy table from.
+\item{template_path}{character. Path to \code{arrow_space} dataset to copy geo metadata from.
 Defaults to \code{file.path(dataset_dir, template_name)}}
 
 \item{...}{unused}

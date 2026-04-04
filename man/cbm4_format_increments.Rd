@@ -5,20 +5,20 @@
 \title{CBM4 format increments}
 \usage{
 cbm4_format_increments(
-  classifiers,
   gcMeta,
   gcIncr,
+  classifiers,
   long = TRUE,
   cbm_defaults_db = NULL
 )
 }
 \arguments{
-\item{classifiers}{character.
-Column names of inventory identifiers.}
-
 \item{gcMeta}{data.table. Growth curve metadata}
 
 \item{gcIncr}{data.table. Growth curve carbon increments}
+
+\item{classifiers}{character.
+Column names of inventory identifiers.}
 
 \item{long}{logical. Format table long or wide.}
 
@@ -31,3 +31,4 @@ data.table
 \description{
 CBM4 format increments
 }
+\keyword{internal}

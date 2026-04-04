@@ -43,7 +43,6 @@ for (project in projects) test_that(paste("cbm4_write_disturbance:", project$tes
   cbm4_write_disturbance(
     cbm4_data,
     cbm_defaults_db = cbm_defaults_db,
-    template_name   = "inventory",
     distMeta        = project$distMeta,
     distEvents      = project$distEvents
   )
@@ -60,7 +59,6 @@ for (project in projects) test_that(paste("cbm4_write_spinup_parameters:", proje
   cbm4_write_spinup_parameters(
     cbm4_data,
     cbm_defaults_db = cbm_defaults_db,
-    template_name   = "inventory",
     classifiers     = project$classifiers,
     gcMeta          = project$gcMeta,
     gcIncr          = project$gcIncr
@@ -78,7 +76,6 @@ for (project in projects) test_that(paste("cbm4_write_step_parameters:", project
   cbm4_write_step_parameters(
     cbm4_data,
     cbm_defaults_db = cbm_defaults_db,
-    template_name   = "inventory",
     classifiers     = project$classifiers,
     gcMeta          = project$gcMeta,
     gcIncr          = project$gcIncr
