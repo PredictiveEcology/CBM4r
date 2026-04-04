@@ -35,7 +35,7 @@ for (project in projects) test_that(paste("cbm4_write_inventory:", project$test)
 
 })
 
-for (project in projects) test_that(paste("cbm4_write_disturbance", project$test), {
+for (project in projects) test_that(paste("cbm4_write_disturbance:", project$test), {
 
   cbm4_data <- project$cbm4_data
 
@@ -51,7 +51,7 @@ for (project in projects) test_that(paste("cbm4_write_disturbance", project$test
 
 })
 
-for (project in projects) test_that(paste("cbm4_write_spinup_parameters", project$test), {
+for (project in projects) test_that(paste("cbm4_write_spinup_parameters:", project$test), {
 
   cbm4_data <- project$cbm4_data
 
@@ -68,7 +68,7 @@ for (project in projects) test_that(paste("cbm4_write_spinup_parameters", projec
 
 })
 
-for (project in projects) test_that(paste("cbm4_write_step_parameters", project$test), {
+for (project in projects) test_that(paste("cbm4_write_step_parameters:", project$test), {
 
   cbm4_data <- project$cbm4_data
 
@@ -85,7 +85,7 @@ for (project in projects) test_that(paste("cbm4_write_step_parameters", project$
 
 })
 
-for (project in projects) test_that(paste("cbm4_spinup", project$test), {
+for (project in projects) test_that(paste("cbm4_spinup:", project$test), {
 
   cbm4_data <- project$cbm4_data
 
@@ -95,7 +95,7 @@ for (project in projects) test_that(paste("cbm4_spinup", project$test), {
 
 })
 
-for (project in projects) test_that(paste("cbm4_step", project$test), {
+for (project in projects) test_that(paste("cbm4_step:", project$test), {
 
   cbm4_data <- project$cbm4_data
 
@@ -105,7 +105,7 @@ for (project in projects) test_that(paste("cbm4_step", project$test), {
 
 })
 
-for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_write_simulation_inventory", project$test), {
+for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_write_simulation_inventory:", project$test), {
 
   cbm4_data <- project$cbm4_data
 
@@ -138,7 +138,7 @@ for (test in names(projects)){
   projects[[test]]$grid_area    <- terra::cellSize(projects[[test]]$grid_rast, unit = "ha")[1, 1][[1]]
 }
 
-for (project in projects) test_that(paste("cbm4_read_geo", project$test), {
+for (project in projects) test_that(paste("cbm4_read_geo:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -148,7 +148,7 @@ for (project in projects) test_that(paste("cbm4_read_geo", project$test), {
 
 })
 
-for (project in projects) test_that(paste("cbm4_results_pools_by_timestep", project$test), {
+for (project in projects) test_that(paste("cbm4_results_pools_by_timestep:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -178,7 +178,7 @@ for (project in projects) test_that(paste("cbm4_results_pools_by_timestep", proj
     ignore_attr = TRUE)
 })
 
-for (project in projects) test_that(paste("cbm4_results_flux_by_timestep", project$test), {
+for (project in projects) test_that(paste("cbm4_results_flux_by_timestep:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -208,7 +208,7 @@ for (project in projects) test_that(paste("cbm4_results_flux_by_timestep", proje
     ignore_attr = TRUE)
 })
 
-for (project in projects) test_that(paste("cbm4_results_emissions_by_timestep", project$test), {
+for (project in projects) test_that(paste("cbm4_results_emissions_by_timestep:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -238,7 +238,7 @@ for (project in projects) test_that(paste("cbm4_results_emissions_by_timestep", 
     ignore_attr = TRUE)
 })
 
-for (project in projects) test_that(paste("cbm4_results_pools_by_pixel", project$test), {
+for (project in projects) test_that(paste("cbm4_results_pools_by_pixel:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -263,7 +263,7 @@ for (project in projects) test_that(paste("cbm4_results_pools_by_pixel", project
     ignore_attr = TRUE)
 })
 
-for (project in projects) test_that(paste("cbm4_results_flux_by_pixel", project$test), {
+for (project in projects) test_that(paste("cbm4_results_flux_by_pixel:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -288,7 +288,7 @@ for (project in projects) test_that(paste("cbm4_results_flux_by_pixel", project$
     ignore_attr = TRUE)
 })
 
-for (project in projects) test_that(paste("cbm4_results_emissions_by_pixel", project$test), {
+for (project in projects) test_that(paste("cbm4_results_emissions_by_pixel:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
