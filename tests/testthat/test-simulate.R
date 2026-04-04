@@ -112,9 +112,11 @@ for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_
   cbm4_data <- project$cbm4_data
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
 
+  cohortDT <- cbm4_read_simulation_inventory(cbm4_data, timestep = 1)
+
   cbm4_write_simulation_inventory(
     cbm4_data,
-    cohortDT = cbm4_read_simulation_inventory(cbm4_data, timestep = 1),
+    cohortDT = cohortDT,
     timestep = 1)
 
   cbm4_step(cbm4_data, cbm_defaults_db = cbm_defaults_db, timestep = 2)
