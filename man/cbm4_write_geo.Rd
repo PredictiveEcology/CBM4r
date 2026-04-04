@@ -7,15 +7,10 @@
 cbm4_write_geo(
   cbm4_data = NULL,
   dataset_name,
-  write_pixels = TRUE,
   grid_rast = NULL,
-  grid_chunks = 1,
   grid_meta = NULL,
-  cbm_defaults_db = NULL,
+  write_pixels = TRUE,
   dataset_path = file.path(cbm4_data, dataset_name),
-  def_afforestation_pre_type = "None",
-  def_historic_disturbance_type = "Wildfire",
-  def_last_pass_disturbance_type = "Wildfire",
   ...
 )
 }
@@ -27,32 +22,23 @@ May be omitted if full paths to datasets are provided.}
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}
 
-\item{write_pixels}{logical. Write pixel table to file.}
-
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
 
-\item{grid_chunks}{integer.
-The number of chunks to partition the grid into for parallel processing.}
+\item{grid_meta}{data.table. Grid metadata.
+Required columns: \code{pixel_index},
+\code{admin_boundary} or \code{admin_boundary_id}.
+\code{eco_boundary} or \code{eco_boundary_id},
+\code{spatial_unit}.
+Optional columns: \code{chunk_index}, \code{raster_index},
+\code{afforestation_pre_type}, \code{historic_disturbance_type}, \code{last_pass_disturbance_type}.}
 
-\item{grid_meta}{data.table. Grid metadata. TODO}
-
-\item{cbm_defaults_db}{character.
-Path to CBM defaults SQLite database.}
+\item{write_pixels}{logical. Write pixel table to file. If \code{TRUE}, grid_meta is required.}
 
 \item{dataset_path}{character.
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
 
-\item{def_afforestation_pre_type}{character. Land use before forestation.
-Defined in CBM defaults database tables 'afforestation_pre_type'}
-
-\item{def_historic_disturbance_type}{character. Historic disturbance type.
-Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
-
-\item{def_last_pass_disturbance_type}{character. Last pass disturbance.
-Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
-
-\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}}}
+\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}} or \code{\link{cbm4_format_grid_meta}}}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.
@@ -61,7 +47,4 @@ Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type
 Initiate a CBM4 spatial parquet dataset with study area geographic metadata.
 The dataset can contain an additional "pixels" metadata table with
 mapping grid pixel locations to their parallel processing partition chunks.
-This table has columns \code{pixel_index}, \code{chunk_index}, \code{raster_index}, \code{area},
-\code{admin_boundary}, \code{eco_boundary}, \code{spatial_unit},
-\code{afforestation_pre_type}, \code{historic_disturbance_type}, \code{last_pass_disturbance_type}.
 }
