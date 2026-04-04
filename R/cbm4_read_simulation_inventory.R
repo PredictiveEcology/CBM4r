@@ -24,24 +24,27 @@ cbm4_read_simulation_inventory <- function(
   )
 
   cohortDT <- merge(
-    arrow::open_dataset(paths$pixels) |>
-      dplyr::select(pixel_index, chunk_index, raster_index) |>
-      dplyr::collect() |> data.table::as.data.table(),
-    arrow::open_dataset(paths$index) |>
-      dplyr::filter(timestep == !!timestep) |>
-      dplyr::select(-timestep) |>
-      dplyr::collect() |> data.table::as.data.table(),
-    by = c("chunk_index", "raster_index"))[, .(index, pixel_index)] |>
     merge(
-      arrow::open_dataset(paths$flat) |>
+      arrow::open_dataset(paths$pixels) |>
+        dplyr::select(pixel_index, chunk_index, raster_index) |>
+        dplyr::collect() |> data.table::as.data.table(),
+      arrow::open_dataset(paths$index) |>
         dplyr::filter(timestep == !!timestep) |>
         dplyr::select(-timestep) |>
         dplyr::collect() |> data.table::as.data.table(),
-      by = "index")
+      by = c("chunk_index", "raster_index")
+    )[, .(pixel_index, index, chunk_index, cohort_index)],
+    arrow::open_dataset(paths$flat) |>
+      dplyr::filter(timestep == !!timestep) |>
+      dplyr::select(-timestep) |>
+      dplyr::collect() |> data.table::as.data.table(),
+    by = c("index", "chunk_index", "cohort_index")
+  )
+  cohortDT[, c("index", "chunk_index", "cohort_index") := NULL]
 
-  cohortDT[, c("index", "cohort_index", "chunk_index") := NULL]
-
+  data.table::setkey(cohortDT, pixel_index)
   data.table::setcolorder(cohortDT, unique(c(
+    "pixel_index",
     names(cohortDT)[!grepl("^(classifiers|inventory|state|pools)\\.", names(cohortDT))],
     names(cohortDT)[grepl("^classifiers\\.", names(cohortDT))],
     names(cohortDT)[grepl("^inventory\\.", names(cohortDT))],

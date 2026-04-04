@@ -39,7 +39,8 @@ SELECT
   SUM(DisturbanceSWBranchSnagToAir * (cohort_proportion)) AS DisturbanceSWBranchSnagToAir,
   SUM(DisturbanceHWStemSnagToAir   * (cohort_proportion)) AS DisturbanceHWStemSnagToAir,
   SUM(DisturbanceHWBranchSnagToAir * (cohort_proportion)) AS DisturbanceHWBranchSnagToAir
-FROM disturbance_flux a LEFT JOIN raster_index b ON a.index = b.index
+FROM disturbance_flux a
+LEFT JOIN raster_index b ON a.timestep = b.timestep AND a.chunk_index = b.chunk_index
 -- WHERE
 GROUP BY a.timestep, b.raster_index, b.chunk_index
 ORDER BY a.timestep, b.raster_index, b.chunk_index

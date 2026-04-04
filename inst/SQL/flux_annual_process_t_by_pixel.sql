@@ -25,7 +25,8 @@ SELECT
   SUM(DecaySWBranchSnagToAir      * ("inventory.area" * cohort_proportion)) AS DecaySWBranchSnagToAir,
   SUM(DecayHWStemSnagToAir        * ("inventory.area" * cohort_proportion)) AS DecayHWStemSnagToAir,
   SUM(DecayHWBranchSnagToAir      * ("inventory.area" * cohort_proportion)) AS DecayHWBranchSnagToAir
-FROM annual_process_flux a LEFT JOIN raster_index b ON a.index = b.index
+FROM annual_process_flux a
+LEFT JOIN raster_index b ON a.timestep = b.timestep AND a.cohort_index = b.cohort_index AND a.chunk_index = b.chunk_index
 -- WHERE
 GROUP BY a.timestep, b.raster_index, b.chunk_index
 ORDER BY a.timestep, b.raster_index, b.chunk_index

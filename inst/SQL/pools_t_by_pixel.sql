@@ -33,7 +33,8 @@ SELECT
   SUM("pools.CO"                      * ("inventory.area" * cohort_proportion)) AS CO,
   SUM("pools.NO2"                     * ("inventory.area" * cohort_proportion)) AS NO2,
   SUM("pools.Products"                * ("inventory.area" * cohort_proportion)) AS Products
-FROM simulation a LEFT JOIN raster_index b ON a.index = b.index
+FROM simulation a
+LEFT JOIN raster_index b ON a.index = b.index
 -- WHERE
 GROUP BY a.timestep, b.raster_index, b.chunk_index
 ORDER BY a.timestep, b.raster_index, b.chunk_index
