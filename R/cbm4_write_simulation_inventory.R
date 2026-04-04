@@ -3,9 +3,13 @@
 #'
 #' Write inventory to a simulation CBM4 spatial parquet dataset.
 #'
+#' @template cbm4_data
 #' @inheritParams cbm4_format_simulation_inventory
-#' @inheritParams cbm4_write_geo
-#' @param ... arguments to \code{\link{cbm4_write_geo}} or \code{\link{cbm4_format_simulation_inventory}}
+#' @param ... arguments to \code{\link{cbm4_format_simulation_inventory}}
+#' @template dataset_name
+#' @template dataset_path
+#' @template template_name
+#' @template template_path
 #'
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
@@ -14,19 +18,35 @@ cbm4_write_simulation_inventory <- function(
     cohortDT,
     timestep,
     classifiers = NULL,
-    dataset_name = "simulation",
+    template_name = "inventory",
+    template_path = file.path(cbm4_data, template_name),
+    dataset_name  = "simulation",
     dataset_path  = file.path(cbm4_data, dataset_name),
     ...
 ){
 
-  # Initiate dataset
-  if (!file.exists(dataset_path)) cbm4_write_geo(
-    cbm4_data,
-    dataset_name    = dataset_name,
-    dataset_path    = dataset_path,
-    partitions    = list("timestep" = "int32", "cohort_index" = "int64", "chunk_index" = "int64"),
-    tags          = list(classifier = paste0("classifiers.", classifiers)),
-    ...)
+  # Initiate dataset from template
+  if (!file.exists(dataset_path)){
+
+    arrow_space_dataset_copy_geo(
+      dataset_name  = dataset_name,
+      dataset_path  = dataset_path,
+      template_name = template_name,
+      template_path = template_path,
+      partitions    = list("timestep" = "int32", "cohort_index" = "int64", "chunk_index" = "int64"),
+      tags          = list(classifier = paste0("classifiers.", classifiers))
+    )
+
+    # Copy pixels table
+    arrow_space_dataset_copy_table(
+      dataset_name  = dataset_name,
+      dataset_path  = dataset_path,
+      template_name = template_name,
+      template_path = template_path,
+      table_name    = "table-pixels",
+      overwrite     = TRUE
+    )
+  }
 
   # Format inventory
   inv <- cbm4_format_simulation_inventory(
