@@ -2,19 +2,17 @@
 % Please edit documentation in R/cbm4_write_geo.R
 \name{cbm4_write_geo}
 \alias{cbm4_write_geo}
-\title{CBM write geo}
+\title{CBM4 write geo}
 \usage{
 cbm4_write_geo(
   cbm4_data = NULL,
   dataset_name,
   write_pixels = TRUE,
-  template_name = NULL,
   grid_rast = NULL,
   grid_chunks = 1,
   grid_meta = NULL,
   cbm_defaults_db = NULL,
   dataset_path = file.path(cbm4_data, dataset_name),
-  template_path = file.path(cbm4_data, template_name),
   def_afforestation_pre_type = "None",
   def_historic_disturbance_type = "Wildfire",
   def_last_pass_disturbance_type = "Wildfire",
@@ -31,9 +29,6 @@ Name of the CBM4 spatial parquet dataset.}
 
 \item{write_pixels}{logical. Write pixel table to file.}
 
-\item{template_name}{character.
-Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}
-
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
 
 \item{grid_chunks}{integer.
@@ -48,10 +43,6 @@ Path to CBM defaults SQLite database.}
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
 
-\item{template_path}{character.
-Path to CBM4 spatial parquet dataset to use as a template for the new dataset.
-Defaults to \code{file.path(cbm4_data, template_name)}}
-
 \item{def_afforestation_pre_type}{character. Land use before forestation.
 Defined in CBM defaults database tables 'afforestation_pre_type'}
 
@@ -61,16 +52,14 @@ Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type
 \item{def_last_pass_disturbance_type}{character. Last pass disturbance.
 Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
 
-\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}}
-or \code{\link{arrow_space_dataset_copy_geo}}}
+\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}}}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.
 }
 \description{
 Initiate a CBM4 spatial parquet dataset with study area geographic metadata.
-This can be done by providing a raster grid or the name of a dataset to use as a template.
-The dataset will contain an additional "pixels" table
+The dataset can contain an additional "pixels" metadata table with
 mapping grid pixel locations to their parallel processing partition chunks.
 This table has columns \code{pixel_index}, \code{chunk_index}, \code{raster_index}, \code{area},
 \code{admin_boundary}, \code{eco_boundary}, \code{spatial_unit},
