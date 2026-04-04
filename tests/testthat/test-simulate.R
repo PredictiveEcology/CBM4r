@@ -161,15 +161,15 @@ for (project in projects) test_that(paste("cbm4_results_pools_by_timestep:", pro
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
 
   cbm4Summary <- list()
-  for (unit in c("t", "Mt")){
+  for (units in c("t", "Mt")){
 
-    cbm4Summary[[unit]] <- cbm4_results_pools_by_timestep(cbm4_data, unit)
+    cbm4Summary[[units]] <- cbm4_results_pools_by_timestep(cbm4_data, units)
 
-    expect_s3_class(cbm4Summary[[unit]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
-    expect_equal(cbm4Summary[[unit]]$timestep, 0:2)
+    expect_s3_class(cbm4Summary[[units]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[units]]), "timestep")
+    expect_equal(cbm4Summary[[units]]$timestep, 0:2)
 
-    cbm4SumSubset <- cbm4_results_pools_by_timestep(cbm4_results, unit, timesteps = 1)
+    cbm4SumSubset <- cbm4_results_pools_by_timestep(cbm4_results, units, timesteps = 1)
 
     expect_s3_class(cbm4SumSubset, "data.table")
     expect_equal(data.table::key(cbm4SumSubset), "timestep")
@@ -192,15 +192,15 @@ for (project in projects) test_that(paste("cbm4_results_flux_by_timestep:", proj
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
 
   cbm4Summary <- list()
-  for (unit in c("t", "Mt")){
+  for (units in c("t", "Mt")){
 
-    cbm4Summary[[unit]] <- cbm4_results_flux_by_timestep(cbm4_data, unit)
+    cbm4Summary[[units]] <- cbm4_results_flux_by_timestep(cbm4_data, units)
 
-    expect_s3_class(cbm4Summary[[unit]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
-    expect_equal(cbm4Summary[[unit]]$timestep, 1:2)
+    expect_s3_class(cbm4Summary[[units]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[units]]), "timestep")
+    expect_equal(cbm4Summary[[units]]$timestep, 1:2)
 
-    cbm4SumSubset <- cbm4_results_flux_by_timestep(cbm4_results, unit, timesteps = 1)
+    cbm4SumSubset <- cbm4_results_flux_by_timestep(cbm4_results, units, timesteps = 1)
 
     expect_s3_class(cbm4SumSubset, "data.table")
     expect_equal(data.table::key(cbm4SumSubset), "timestep")
@@ -223,15 +223,15 @@ for (project in projects) test_that(paste("cbm4_results_emissions_by_timestep:",
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
 
   cbm4Summary <- list()
-  for (unit in c("t", "Mt")){
+  for (units in c("t", "Mt")){
 
-    cbm4Summary[[unit]] <- cbm4_results_emissions_by_timestep(cbm4_data, unit)
+    cbm4Summary[[units]] <- cbm4_results_emissions_by_timestep(cbm4_data, units)
 
-    expect_s3_class(cbm4Summary[[unit]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[unit]]), "timestep")
-    expect_equal(cbm4Summary[[unit]]$timestep, 1:2)
+    expect_s3_class(cbm4Summary[[units]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[units]]), "timestep")
+    expect_equal(cbm4Summary[[units]]$timestep, 1:2)
 
-    cbm4SumSubset <- cbm4_results_emissions_by_timestep(cbm4_results, unit, timesteps = 1)
+    cbm4SumSubset <- cbm4_results_emissions_by_timestep(cbm4_results, units, timesteps = 1)
 
     expect_s3_class(cbm4SumSubset, "data.table")
     expect_equal(data.table::key(cbm4SumSubset), "timestep")
@@ -254,13 +254,13 @@ for (project in projects) test_that(paste("cbm4_results_pools_by_pixel:", projec
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
 
   cbm4Summary <- list()
-  for (unit in c("t/ha", "t", "Mt")){
+  for (units in c("t/ha", "t", "Mt")){
 
-    cbm4Summary[[unit]] <- cbm4_results_pools_by_pixel(cbm4_results, unit, timestep = 1)
+    cbm4Summary[[units]] <- cbm4_results_pools_by_pixel(cbm4_results, units, timestep = 1)
 
-    expect_s3_class(cbm4Summary[[unit]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[unit]]), "pixel_index")
-    expect_equal(cbm4Summary[[unit]]$pixel_index, c(1, 3, 4))
+    expect_s3_class(cbm4Summary[[units]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[units]]), "pixel_index")
+    expect_equal(cbm4Summary[[units]]$pixel_index, c(1, 3, 4))
   }
 
   expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
@@ -280,13 +280,13 @@ for (project in projects) test_that(paste("cbm4_results_flux_by_pixel:", project
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
 
   cbm4Summary <- list()
-  for (unit in c("t/ha", "t", "Mt")){
+  for (units in c("t/ha", "t", "Mt")){
 
-    cbm4Summary[[unit]] <- cbm4_results_flux_by_pixel(cbm4_results, unit, timestep = 1)
+    cbm4Summary[[units]] <- cbm4_results_flux_by_pixel(cbm4_results, units, timestep = 1)
 
-    expect_s3_class(cbm4Summary[[unit]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[unit]]), "pixel_index")
-    expect_equal(cbm4Summary[[unit]]$pixel_index, c(1, 3, 4))
+    expect_s3_class(cbm4Summary[[units]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[units]]), "pixel_index")
+    expect_equal(cbm4Summary[[units]]$pixel_index, c(1, 3, 4))
   }
 
   expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
@@ -306,13 +306,13 @@ for (project in projects) test_that(paste("cbm4_results_emissions_by_pixel:", pr
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
 
   cbm4Summary <- list()
-  for (unit in c("t/ha", "t", "Mt")){
+  for (units in c("t/ha", "t", "Mt")){
 
-    cbm4Summary[[unit]] <- cbm4_results_emissions_by_pixel(cbm4_results, unit, timestep = 1)
+    cbm4Summary[[units]] <- cbm4_results_emissions_by_pixel(cbm4_results, units, timestep = 1)
 
-    expect_s3_class(cbm4Summary[[unit]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[unit]]), "pixel_index")
-    expect_equal(cbm4Summary[[unit]]$pixel_index, c(1, 3, 4))
+    expect_s3_class(cbm4Summary[[units]], "data.table")
+    expect_equal(data.table::key(cbm4Summary[[units]]), "pixel_index")
+    expect_equal(cbm4Summary[[units]]$pixel_index, c(1, 3, 4))
   }
 
   expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
