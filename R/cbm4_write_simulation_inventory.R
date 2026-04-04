@@ -65,6 +65,8 @@ cbm4_write_simulation_inventory <- function(
     ...)
 
   # Write inventory
+  unlink(file.path(dataset_path, "simulation", paste0("timestep=", timestep), recursive = TRUE))
+
   arrow_space_dataset_write_table(
     dataset_name = dataset_name,
     dataset_path = dataset_path,
