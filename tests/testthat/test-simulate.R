@@ -4,10 +4,10 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 ## SET UP ----
 
 projects <- list(
-  `SK with disturbances` = testInputs_SK()
+  `SK_w_disturbances` = testInputs_SK()
 )
-projects$`SK without disturbances` <- projects$`SK`
-projects$`SK without disturbances`[c("distMeta", "distEvents")] <- NULL
+projects$`SK_wo_disturbances` <- projects$`SK`
+projects$`SK_wo_disturbances`[c("distMeta", "distEvents")] <- NULL
 
 for (test in names(projects)){
   projects[[test]]$test      <- test
