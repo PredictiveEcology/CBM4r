@@ -6,27 +6,28 @@ SELECT
   a.timestep,
   b.raster_index,
   b.chunk_index,
-  SUM(DecayDOMCO2Emission         * ("inventory.area" * cohort_proportion)) AS DecayDOMCO2Emission,
-  SUM(DeltaBiomass_AG             * ("inventory.area" * cohort_proportion)) AS DeltaBiomass_AG,
-  SUM(DeltaBiomass_BG             * ("inventory.area" * cohort_proportion)) AS DeltaBiomass_BG,
-  SUM(TurnoverMerchLitterInput    * ("inventory.area" * cohort_proportion)) AS TurnoverMerchLitterInput,
-  SUM(TurnoverFolLitterInput      * ("inventory.area" * cohort_proportion)) AS TurnoverFolLitterInput,
-  SUM(TurnoverOthLitterInput      * ("inventory.area" * cohort_proportion)) AS TurnoverOthLitterInput,
-  SUM(TurnoverCoarseLitterInput   * ("inventory.area" * cohort_proportion)) AS TurnoverCoarseLitterInput,
-  SUM(TurnoverFineLitterInput     * ("inventory.area" * cohort_proportion)) AS TurnoverFineLitterInput,
-  SUM(DecayVFastAGToAir           * ("inventory.area" * cohort_proportion)) AS DecayVFastAGToAir,
-  SUM(DecayVFastBGToAir           * ("inventory.area" * cohort_proportion)) AS DecayVFastBGToAir,
-  SUM(DecayFastAGToAir            * ("inventory.area" * cohort_proportion)) AS DecayFastAGToAir,
-  SUM(DecayFastBGToAir            * ("inventory.area" * cohort_proportion)) AS DecayFastBGToAir,
-  SUM(DecayMediumToAir            * ("inventory.area" * cohort_proportion)) AS DecayMediumToAir,
-  SUM(DecaySlowAGToAir            * ("inventory.area" * cohort_proportion)) AS DecaySlowAGToAir,
-  SUM(DecaySlowBGToAir            * ("inventory.area" * cohort_proportion)) AS DecaySlowBGToAir,
-  SUM(DecaySWStemSnagToAir        * ("inventory.area" * cohort_proportion)) AS DecaySWStemSnagToAir,
-  SUM(DecaySWBranchSnagToAir      * ("inventory.area" * cohort_proportion)) AS DecaySWBranchSnagToAir,
-  SUM(DecayHWStemSnagToAir        * ("inventory.area" * cohort_proportion)) AS DecayHWStemSnagToAir,
-  SUM(DecayHWBranchSnagToAir      * ("inventory.area" * cohort_proportion)) AS DecayHWBranchSnagToAir
+  SUM(DecayDOMCO2Emission         * (c.area * a.cohort_proportion)) AS DecayDOMCO2Emission,
+  SUM(DeltaBiomass_AG             * (c.area * a.cohort_proportion)) AS DeltaBiomass_AG,
+  SUM(DeltaBiomass_BG             * (c.area * a.cohort_proportion)) AS DeltaBiomass_BG,
+  SUM(TurnoverMerchLitterInput    * (c.area * a.cohort_proportion)) AS TurnoverMerchLitterInput,
+  SUM(TurnoverFolLitterInput      * (c.area * a.cohort_proportion)) AS TurnoverFolLitterInput,
+  SUM(TurnoverOthLitterInput      * (c.area * a.cohort_proportion)) AS TurnoverOthLitterInput,
+  SUM(TurnoverCoarseLitterInput   * (c.area * a.cohort_proportion)) AS TurnoverCoarseLitterInput,
+  SUM(TurnoverFineLitterInput     * (c.area * a.cohort_proportion)) AS TurnoverFineLitterInput,
+  SUM(DecayVFastAGToAir           * (c.area * a.cohort_proportion)) AS DecayVFastAGToAir,
+  SUM(DecayVFastBGToAir           * (c.area * a.cohort_proportion)) AS DecayVFastBGToAir,
+  SUM(DecayFastAGToAir            * (c.area * a.cohort_proportion)) AS DecayFastAGToAir,
+  SUM(DecayFastBGToAir            * (c.area * a.cohort_proportion)) AS DecayFastBGToAir,
+  SUM(DecayMediumToAir            * (c.area * a.cohort_proportion)) AS DecayMediumToAir,
+  SUM(DecaySlowAGToAir            * (c.area * a.cohort_proportion)) AS DecaySlowAGToAir,
+  SUM(DecaySlowBGToAir            * (c.area * a.cohort_proportion)) AS DecaySlowBGToAir,
+  SUM(DecaySWStemSnagToAir        * (c.area * a.cohort_proportion)) AS DecaySWStemSnagToAir,
+  SUM(DecaySWBranchSnagToAir      * (c.area * a.cohort_proportion)) AS DecaySWBranchSnagToAir,
+  SUM(DecayHWStemSnagToAir        * (c.area * a.cohort_proportion)) AS DecayHWStemSnagToAir,
+  SUM(DecayHWBranchSnagToAir      * (c.area * a.cohort_proportion)) AS DecayHWBranchSnagToAir
 FROM annual_process_flux a
 LEFT JOIN raster_index b ON a.timestep = b.timestep AND a.cohort_index = b.cohort_index AND a.chunk_index = b.chunk_index
+LEFT JOIN area c ON b.raster_index = c.raster_index and b.chunk_index = c.chunk_index
 -- WHERE
 GROUP BY a.timestep, b.raster_index, b.chunk_index
 ORDER BY a.timestep, b.raster_index, b.chunk_index
