@@ -169,16 +169,7 @@ cbm4_format_disturbance <- function(
   data.table::setnames(dataFull, "disturbance_type_id", "default_disturbance_type_id")
 
   # Set defaults
-  for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
-    defCol <- sub("^def\\_", "", defArg)
-    if (!is.null(get(defArg))){
-      if (!defCol %in% names(dataFull)){
-        dataFull[, eval(defCol) := get(defArg)]
-      }else{
-        dataFull[is.na(eval(defCol)), eval(defCol) := get(defArg)]
-      }
-    }
-  }
+  set_table_defaults(dataFull)
 
   # Return
   list(

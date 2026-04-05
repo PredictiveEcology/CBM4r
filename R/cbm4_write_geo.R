@@ -145,14 +145,10 @@ cbm4_format_grid_meta <- function(
   }
 
   # Set defaults
-  for (defArg in names(environment())[grepl("^def\\_", names(environment()))]){
-    defCol <- sub("^def\\_", "", defArg)
-    if (!defCol %in% names(grid_meta)){
-      grid_meta[, eval(defCol) := factor(get(defArg))]
-    }else{
-      grid_meta[is.na(eval(defCol)), eval(defCol) := factor(get(defArg))]
-    }
-  }
+  set_table_defaults(grid_meta)
+
+  # Strings as factor
+  for (col in names(grid_meta)[sapply(grid_meta, is.character)]) grid_meta[[col]] <- factor(grid_meta[[col]])
 
   data.table::setkey(grid_meta, pixel_index)
   data.table::setcolorder(grid_meta, intersect(c(
@@ -161,9 +157,6 @@ cbm4_format_grid_meta <- function(
     "spatial_unit", "admin_boundary_id", "admin_boundary", "eco_boundary_id", "eco_boundary",
     "land_class", "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
   ), names(grid_meta)))
-
-  # Strings as factor
-  for (col in names(grid_meta)[sapply(grid_meta, is.character)]) grid_meta[[col]] <- factor(grid_meta[[col]])
 
   return(grid_meta)
 }
