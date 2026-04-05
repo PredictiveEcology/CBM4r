@@ -18,14 +18,12 @@ testInputs_SK <- function(){
     gcMeta = cbind(rbind(
       data.table::data.table(
         gcID = 1,
-        species = "Something",
-        prodClass = "P",
+        species = "species1", prodClass = "P",
         sw = TRUE
       ),
       data.table::data.table(
         gcID = 2,
-        species = "Something else",
-        prodClass = "M",
+        species = "species2", prodClass = "M",
         sw = FALSE
       )
     ), admin_boundary = admin_boundary, eco_boundary_id = eco_boundary_id),
@@ -50,21 +48,18 @@ testInputs_SK <- function(){
     cohortDT = rbind(
       data.table::data.table(
         pixel_index = 1,
-        species = "Something",
-        prodClass = "P",
+        species = "species1", prodClass = "P",
         age = 100
       ),
       data.table::data.table(
         pixel_index = 3,
-        species = "Something",
-        prodClass = "P",
-        age = 50
+        species = "species1", prodClass = "P",
+        age = 100
       ),
       data.table::data.table(
         pixel_index = 4,
-        species = "Something else",
-        prodClass = "M",
-        age = 100
+        species = "species2", prodClass = "M",
+        age = 50
       )
     ),
 
