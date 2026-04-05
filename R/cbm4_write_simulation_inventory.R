@@ -53,7 +53,7 @@ cbm4_write_simulation_inventory <- function(
     cohortDT    = cohortDT,
     classifiers = classifiers,
     timestep    = timestep,
-    pixelDT     = arrow_space_dataset_read_table(
+    grid_meta   = arrow_space_dataset_read_table(
       dataset_name = dataset_name,
       dataset_path = dataset_path,
       table_name   = "table-pixels",
@@ -100,7 +100,7 @@ cbm4_write_simulation_inventory <- function(
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_simulation_inventory <- function(
     cohortDT,
-    pixelDT,
+    grid_meta,
     timestep,
     classifiers = NULL,
     ...
@@ -108,7 +108,7 @@ cbm4_format_simulation_inventory <- function(
 
   inv <- cbm4_format_inventory(
     cohortDT  = cohortDT,
-    pixelDT   = pixelDT,
+    grid_meta = grid_meta,
     def_delay = NULL,
     ...)
 

@@ -17,6 +17,7 @@ cbm4_write_inventory <- function(
     cbm_defaults_db,
     cohortDT,
     classifiers,
+    grid_meta    = NULL,
     dataset_name = "inventory",
     dataset_path = file.path(cbm4_data, dataset_name),
     ...
@@ -32,15 +33,16 @@ cbm4_write_inventory <- function(
     cbm4_data,
     dataset_name    = dataset_name,
     dataset_path    = dataset_path,
-    cbm_defaults_db = cbm_defaults_db,
     partitions      = list("cohort_index" = "int64", "chunk_index" = "int64"),
     tags            = list(classifier = classifiers),
+    grid_meta       = grid_meta,
+    cbm_defaults_db = cbm_defaults_db,
     ...)
 
   # Format inventory
   inv <- cbm4_format_inventory(
-    cohortDT = cohortDT,
-    pixelDT  = arrow_space_dataset_read_table(
+    cohortDT  = cohortDT,
+    grid_meta = arrow_space_dataset_read_table(
       dataset_name = dataset_name,
       dataset_path = dataset_path,
       table_name   = "table-pixels",
@@ -83,7 +85,7 @@ cbm4_write_inventory <- function(
 #' CBM4 format inventory
 #'
 #' @param cohortDT data.table. Cohort inventory.
-#' @template pixelDT
+#' @template grid_meta
 #' @param def_delay integer. Regeneration delay.
 #' @param def_land_class character. Land class code.
 #' Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.
@@ -98,7 +100,7 @@ cbm4_write_inventory <- function(
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_inventory <- function(
     cohortDT,
-    pixelDT,
+    grid_meta,
     def_delay             = 0L,
     def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
     def_cohort_proportion = 1L,
@@ -110,17 +112,17 @@ cbm4_format_inventory <- function(
   # Check table columns
   check_table_columns_all("cohortDT", cohortDT, c("pixel_index", "age"))
 
-  pixelCols <- c("pixel_index", "chunk_index", "raster_index", setdiff(c(
+  gridCols <- c("pixel_index", "chunk_index", "raster_index", setdiff(c(
     "area", "admin_boundary", "eco_boundary", "spatial_unit"
   ), names(cohortDT)))
-  check_table_columns_all("pixelDT", pixelDT, pixelCols)
+  check_table_columns_all("grid_meta", grid_meta, gridCols)
 
   # Cast to data.table
-  if (!data.table::is.data.table(cohortDT)) cohortDT <- data.table::as.data.table(cohortDT)
-  if (!data.table::is.data.table(pixelDT))  pixelDT  <- data.table::as.data.table(pixelDT)
+  if (!data.table::is.data.table(cohortDT))  cohortDT  <- data.table::as.data.table(cohortDT)
+  if (!data.table::is.data.table(grid_meta)) grid_meta <- data.table::as.data.table(grid_meta)
 
   # Join with pixel table
-  dataFull <- merge(cohortDT, pixelDT, by = "pixel_index", all.x = TRUE)
+  dataFull <- merge(cohortDT, grid_meta, by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
 
   # Drop columns

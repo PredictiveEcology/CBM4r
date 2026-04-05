@@ -7,7 +7,7 @@
 cbm4_format_disturbance(
   distMeta,
   distEvents,
-  pixelDT,
+  grid_meta,
   classifiers = NULL,
   cbm_defaults_db = NULL,
   def_proportion = 1L,
@@ -24,8 +24,7 @@ cbm4_format_disturbance(
 
 \item{distEvents}{data.table. Disturbance events.}
 
-\item{pixelDT}{character.
-Table of pixel attributes.}
+\item{grid_meta}{data.table. Grid metadata.}
 
 \item{classifiers}{character.
 Column names of inventory identifiers.}

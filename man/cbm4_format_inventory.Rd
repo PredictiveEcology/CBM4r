@@ -6,7 +6,7 @@
 \usage{
 cbm4_format_inventory(
   cohortDT,
-  pixelDT,
+  grid_meta,
   def_delay = 0L,
   def_land_class = "UNFCCC_FL_R_FL",
   def_cohort_proportion = 1L,
@@ -18,8 +18,7 @@ cbm4_format_inventory(
 \arguments{
 \item{cohortDT}{data.table. Cohort inventory.}
 
-\item{pixelDT}{character.
-Table of pixel attributes.}
+\item{grid_meta}{data.table. Grid metadata.}
 
 \item{def_delay}{integer. Regeneration delay.}
 

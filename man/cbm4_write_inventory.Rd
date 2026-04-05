@@ -9,6 +9,7 @@ cbm4_write_inventory(
   cbm_defaults_db,
   cohortDT,
   classifiers,
+  grid_meta = NULL,
   dataset_name = "inventory",
   dataset_path = file.path(cbm4_data, dataset_name),
   ...
@@ -26,6 +27,14 @@ Path to CBM defaults SQLite database.}
 
 \item{classifiers}{character.
 Column names of inventory identifiers.}
+
+\item{grid_meta}{data.table. Grid metadata.
+Required columns: \code{pixel_index},
+\code{admin_boundary} or \code{admin_boundary_id}.
+\code{eco_boundary} or \code{eco_boundary_id},
+\code{spatial_unit}.
+Optional columns: \code{chunk_index}, \code{raster_index},
+\code{afforestation_pre_type}, \code{historic_disturbance_type}, \code{last_pass_disturbance_type}.}
 
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}

@@ -45,7 +45,7 @@ cbm4_write_disturbance <- function(
       distMeta,
       distEvents,
       classifiers,
-      pixelDT = arrow_space_dataset_read_table(
+      grid_meta = arrow_space_dataset_read_table(
         dataset_name = template_name,
         dataset_path = template_path,
         table_name   = "table-pixels",
@@ -79,7 +79,7 @@ cbm4_write_disturbance <- function(
 #' @param distMeta data.table. Disturbance metadata.
 #' @param distEvents data.table. Disturbance events.
 #' @template classifiers
-#' @template pixelDT
+#' @template grid_meta
 #' @template cbm_defaults_db
 #' @param def_proportion integer. TODO
 #' @param def_enable_merge integer. TODO
@@ -95,7 +95,7 @@ cbm4_write_disturbance <- function(
 cbm4_format_disturbance <- function(
     distMeta,
     distEvents,
-    pixelDT,
+    grid_meta,
     classifiers = NULL,
     cbm_defaults_db = NULL,
     def_proportion                = 1L,
@@ -115,15 +115,15 @@ cbm4_format_disturbance <- function(
 
   check_table_columns_all("distEvents", distEvents, c("pixel_index", "disturbance_id", "timestep"))
 
-  pixelCols <- c("pixel_index", "chunk_index", "raster_index")
-  check_table_columns_all("pixelDT",  pixelDT,  pixelCols)
+  gridCols <- c("pixel_index", "chunk_index", "raster_index")
+  check_table_columns_all("grid_meta",  grid_meta,  gridCols)
 
   # Cast to data.table
   if (!data.table::is.data.table(distEvents)) distEvents <- data.table::as.data.table(distEvents)
-  if (!data.table::is.data.table(pixelDT))    pixelDT    <- data.table::as.data.table(pixelDT)
+  if (!data.table::is.data.table(grid_meta))  grid_meta  <- data.table::as.data.table(grid_meta)
 
   # Join with pixel table
-  dataFull <- merge(distEvents, pixelDT[, .SD, .SDcols = pixelCols], by = "pixel_index")
+  dataFull <- merge(distEvents, grid_meta[, .SD, .SDcols = gridCols], by = "pixel_index")
   dataFull[, pixel_index := NULL]
 
   # Set disturbance_order

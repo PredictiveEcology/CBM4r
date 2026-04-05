@@ -6,7 +6,7 @@
 \usage{
 cbm4_format_simulation_inventory(
   cohortDT,
-  pixelDT,
+  grid_meta,
   timestep,
   classifiers = NULL,
   ...
@@ -15,8 +15,7 @@ cbm4_format_simulation_inventory(
 \arguments{
 \item{cohortDT}{data.table. Cohort inventory.}
 
-\item{pixelDT}{character.
-Table of pixel attributes.}
+\item{grid_meta}{data.table. Grid metadata.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 
