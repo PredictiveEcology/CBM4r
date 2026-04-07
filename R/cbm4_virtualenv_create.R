@@ -36,14 +36,12 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
 
     }else{
 
-      gdalVers <- tryCatch(
-        system("gdal-config --version", intern = TRUE),
-        error = function(e) NULL)
+      gdalVers <- system("gdal-config --version", intern = TRUE)
 
-      if (is.null(gdalVers) |
-          utils::compareVersion(gdalVers, vers$gdal[["min"]]) == -1 |
-          utils::compareVersion(gdalVers, vers$gdal[["max"]]) == 1
-      ) stop("gdal >=", vers$gdal[["min"]], ",<=", vers$gdal[["max"]], " not found")
+      if (!is.null(vers[["gdal"]]) && (
+        utils::compareVersion(gdalVers, vers[["gdal"]][["min"]]) == -1 |
+        utils::compareVersion(gdalVers, vers[["gdal"]][["max"]]) ==  1
+      )) stop("gdal >=", vers[["gdal"]][["min"]], ",<=", vers[["gdal"]][["max"]], " not found")
 
       reticulate::virtualenv_install(
         virtualenv,
@@ -99,6 +97,11 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
 cbm4_versions <- function(version = NULL){
 
   vers <- list(
+    "2.17.10" = list(
+      cbm4     = "2.17.10",
+      python   = ">=3.12",
+      gdal_win = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl"
+    ),
     "2.17.9" = list(
       cbm4     = "2.17.9",
       python   = ">=3.12,<3.13",
