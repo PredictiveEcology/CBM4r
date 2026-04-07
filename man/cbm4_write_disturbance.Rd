@@ -9,6 +9,7 @@ cbm4_write_disturbance(
   distMeta = NULL,
   distEvents = NULL,
   classifiers = NULL,
+  grid_meta = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "disturbance",
@@ -27,6 +28,8 @@ May be omitted if full paths to datasets are provided.}
 
 \item{classifiers}{character.
 Column names of inventory identifiers.}
+
+\item{grid_meta}{data.table. Grid metadata.}
 
 \item{template_name}{character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}

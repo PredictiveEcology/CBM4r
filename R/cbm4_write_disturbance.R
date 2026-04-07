@@ -18,6 +18,7 @@ cbm4_write_disturbance <- function(
     distMeta      = NULL,
     distEvents    = NULL,
     classifiers   = NULL,
+    grid_meta     = NULL,
     template_name = "inventory",
     template_path = file.path(cbm4_data, template_name),
     dataset_name  = "disturbance",
@@ -40,17 +41,20 @@ cbm4_write_disturbance <- function(
   # Write disturbances
   if (!is.null(distEvents) && nrow(distEvents) > 0){
 
+    # Read grid metadata
+    if (is.null(grid_meta)) grid_meta <- arrow_space_dataset_read_table(
+      dataset_name = template_name,
+      dataset_path = template_path,
+      table_name   = "table-pixels",
+      col_select   = c("pixel_index", "chunk_index", "raster_index")
+    )
+
     # Format disturbances
     dist <- cbm4_format_disturbance(
       distMeta,
       distEvents,
+      grid_meta,
       classifiers,
-      grid_meta = arrow_space_dataset_read_table(
-        dataset_name = template_name,
-        dataset_path = template_path,
-        table_name   = "table-pixels",
-        col_select   = c("pixel_index", "chunk_index", "raster_index")
-      ),
       ...)
 
     # Write disturbances
@@ -128,7 +132,7 @@ cbm4_format_disturbance <- function(
 
   # Set disturbance_order
   ## This sets no order to the disturbances
-  if (!"disturbance_order" %in% names(dataFull)) dataFull[, disturbance_order := 0]
+  if (!"disturbance_order" %in% names(dataFull)) dataFull[, disturbance_order := 0L]
 
   # Set index
   dataFull[, index := as.integer(.GRP - 1L), by = c("disturbance_order", "timestep", "chunk_index", "disturbance_id")]
