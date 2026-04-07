@@ -5,7 +5,7 @@
 #'
 #' @template cbm4_data
 #' @inheritParams cbm4_format_disturbance
-#' @param ... arguments to \code{\link{cbm4_format_disturbance}}
+#' @param ... arguments to \code{\link{cbm4_format_disturbance}} or \code{\link{set_grid_meta}}
 #' @template dataset_name
 #' @template dataset_path
 #' @template template_name
@@ -42,12 +42,17 @@ cbm4_write_disturbance <- function(
   if (!is.null(distEvents) && nrow(distEvents) > 0){
 
     # Read grid metadata
-    if (is.null(grid_meta)) grid_meta <- arrow_space_dataset_read_table(
-      dataset_name = template_name,
-      dataset_path = template_path,
-      table_name   = "table-pixels",
-      col_select   = c("pixel_index", "chunk_index", "raster_index")
-    )
+    if (!is.null(grid_meta)){
+      set_grid_meta(grid_meta, ...)
+
+    }else{
+      grid_meta <- arrow_space_dataset_read_table(
+        dataset_name = template_name,
+        dataset_path = template_path,
+        table_name   = "table-pixels",
+        col_select   = c("pixel_index", "chunk_index", "raster_index")
+      )
+    }
 
     # Format disturbances
     dist <- cbm4_format_disturbance(

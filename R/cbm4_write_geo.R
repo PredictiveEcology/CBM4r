@@ -9,9 +9,9 @@
 #' @template dataset_name
 #' @template dataset_path
 #' @param write_pixels logical. Write pixel table to file. If `TRUE`, grid_meta is required.
-#' @inheritParams cbm4_format_grid_meta
+#' @inheritParams set_grid_meta
 #' @inheritParams arrow_space_dataset_write_geo
-#' @param ... arguments to \code{\link{arrow_space_dataset_write_geo}} or \code{\link{cbm4_format_grid_meta}}
+#' @param ... arguments to \code{\link{arrow_space_dataset_write_geo}} or \code{\link{set_grid_meta}}
 #'
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
@@ -32,11 +32,11 @@ cbm4_write_geo <- function(
 
   if (write_pixels){
 
-    grid_meta <- cbm4_format_grid_meta(grid_meta, ...)
+    set_grid_meta(grid_meta, ...)
 
     if (!"area" %in% names(grid_meta)){
       grid_meta[, area := prod(terra::res(chunks$rast) * terra::linearUnits(chunks$rast))]
-      data.table::setcolorder(grid_meta, c("pixel_index", "chunk_index", "raster_index"))
+      data.table::setcolorder(grid_meta, c("pixel_index", "chunk_index", "raster_index", "area"))
     }
   }
 
@@ -64,7 +64,9 @@ cbm4_write_geo <- function(
 }
 
 
-#' cbm4_format_grid_meta
+#' set_grid_meta
+#'
+#' Format `grid_meta` table by reference.
 #'
 #' @param grid_meta data.table. Grid metadata.
 #' Required columns: `pixel_index`,
@@ -81,7 +83,8 @@ cbm4_write_geo <- function(
 #' @param def_last_pass_disturbance_type character. Last pass disturbance.
 #' Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.
 #' @param ... unused
-cbm4_format_grid_meta <- function(
+#' @keywords internal
+set_grid_meta <- function(
     grid_meta,
     cbm_defaults_db = NULL,
     def_afforestation_pre_type     = "None",
@@ -96,8 +99,8 @@ cbm4_format_grid_meta <- function(
   check_table_columns_any("grid_meta", grid_meta, c("admin_boundary_id", "admin_boundary"))
   check_table_columns_any("grid_meta", grid_meta, c("eco_boundary_id",   "eco_boundary"))
 
-  if (!"chunk_index"  %in% names(grid_meta)) grid_meta[, chunk_index  := 0]
-  if (!"raster_index" %in% names(grid_meta)) grid_meta[, raster_index := pixel_index - 1]
+  if (!"chunk_index"  %in% names(grid_meta)) data.table::set(grid_meta, j = "chunk_index",  value = 0L)
+  if (!"raster_index" %in% names(grid_meta)) data.table::set(grid_meta, j = "raster_index", value = grid_meta$pixel_index - 1)
 
   if (any(!c("admin_boundary", "eco_boundary", "spatial_unit") %in% names(grid_meta))){
 
@@ -105,37 +108,36 @@ cbm4_format_grid_meta <- function(
     eco_boundary_tr   <- cbmdbReadTable(cbm_defaults_db, "eco_boundary_tr")
 
     if (!"admin_boundary" %in% names(grid_meta)){
-      grid_meta[, admin_boundary := factor(
-        admin_boundary_tr$name[match(admin_boundary_id, admin_boundary_tr$id)],
-        levels = admin_boundary_tr$name)]
+      data.table::set(grid_meta, j = "admin_boundary", value = factor(
+        admin_boundary_tr$name[match(grid_meta$admin_boundary_id, admin_boundary_tr$id)],
+        levels = admin_boundary_tr$name) )
     }
     if (!"eco_boundary" %in% names(grid_meta)){
-      grid_meta[, eco_boundary := factor(
-        eco_boundary_tr$name[match(eco_boundary_id, eco_boundary_tr$id)],
-        levels = eco_boundary_tr$name)]
+      data.table::set(grid_meta, j = "eco_boundary", value = factor(
+        eco_boundary_tr$name[match(grid_meta$eco_boundary_id, eco_boundary_tr$id)],
+        levels = eco_boundary_tr$name))
     }
 
     if (!"spatial_unit" %in% names(grid_meta)){
 
       if (!"admin_boundary_id" %in% names(grid_meta)){
-        grid_meta[, admin_boundary_id := admin_boundary_tr$admin_boundary_id[
-          match(admin_boundary, admin_boundary_tr$name)]]
+        data.table::set(grid_meta, j = "admin_boundary_id", value = admin_boundary_tr$admin_boundary_id[
+          match(grid_meta$admin_boundary, admin_boundary_tr$name)])
       }
       if (!"eco_boundary_id" %in% names(grid_meta)){
-        grid_meta[, eco_boundary_id := admin_boundary_tr$eco_boundary_id[
-          match(eco_boundary, eco_boundary_tr$name)]]
+        data.table::set(grid_meta, j = "eco_boundary_id", value = admin_boundary_tr$eco_boundary_id[
+          match(grid_meta$eco_boundary, eco_boundary_tr$name)])
       }
 
-      spatial_unit <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")[
-        , .(spatial_unit = id, admin_boundary_id, eco_boundary_id)]
+      spatial_unit <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")
+      spatial_unit[, spu_join  := paste0(admin_boundary_id, "_", eco_boundary_id)]
 
-      grid_meta <- merge(
-        grid_meta, spatial_unit,
-        by = c("admin_boundary_id", "eco_boundary_id"), all.x = TRUE)
+      spu_join <- paste0(grid_meta$admin_boundary_id, "_", grid_meta$eco_boundary_id)
+      data.table::set(grid_meta, j = "spatial_unit", value = spatial_unit$id[match(spu_join, spatial_unit$spu_join)])
 
       # Check spatial unit IDs
-      if (any(is.na(grid_meta$spatial_unit_id))){
-        noMatch <- unique(grid_meta[is.na(spatial_unit_id), .(admin_boundary, eco_boundary_id)])
+      if (any(is.na(grid_meta$spatial_unit))){
+        noMatch <- unique(grid_meta[is.na(spatial_unit), .(admin_boundary, eco_boundary_id)])
         data.table::setkey(noMatch, admin_boundary, eco_boundary_id)
         if (nrow(noMatch) > 0) stop(
           "spatial_unit_id not found for: ",
@@ -147,8 +149,19 @@ cbm4_format_grid_meta <- function(
   # Set defaults
   set_table_defaults(grid_meta)
 
-  # Strings as factor
-  for (col in names(grid_meta)[sapply(grid_meta, is.character)]) grid_meta[[col]] <- factor(grid_meta[[col]])
+  # Set data types
+  colTypes <- list(
+    factor = c(
+      "admin_boundary", "eco_boundary",
+      "land_class", "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"),
+    integer = c(
+      "pixel_index", "chunk_index", "raster_index", "spatial_unit", "admin_boundary_id", "eco_boundary_id"),
+    numeric = "area"
+  )
+  colTypes <- lapply(colTypes, intersect, names(grid_meta))
+  for (col in colTypes$factor)  if (!is.factor(grid_meta[[col]]))  data.table::set(grid_meta, j = col, value = factor(grid_meta[[col]]))
+  for (col in colTypes$integer) if (!is.integer(grid_meta[[col]])) data.table::set(grid_meta, j = col, value = as.integer(grid_meta[[col]]))
+  for (col in colTypes$numeric) if (!is.integer(grid_meta[[col]])) data.table::set(grid_meta, j = col, value = as.numeric(grid_meta[[col]]))
 
   data.table::setkey(grid_meta, pixel_index)
   data.table::setcolorder(grid_meta, intersect(c(
@@ -158,7 +171,7 @@ cbm4_format_grid_meta <- function(
     "land_class", "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
   ), names(grid_meta)))
 
-  return(grid_meta)
+  return(invisible())
 }
 
 

@@ -4,10 +4,13 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 ## SET UP ----
 
 projects <- list(
-  `SK_w_disturbances` = testInputs_SK()
+  `SK_w_disturbances`  = testInputs_SK(),
+  `SK_wo_disturbances` = {
+    inputs <- testInputs_SK()
+    inputs[c("distMeta", "distEvents")] <- NULL
+    inputs
+  }
 )
-projects$`SK_wo_disturbances` <- projects$`SK`
-projects$`SK_wo_disturbances`[c("distMeta", "distEvents")] <- NULL
 
 for (test in names(projects)){
   projects[[test]]$test      <- test
@@ -28,7 +31,8 @@ for (project in projects) test_that(paste("cbm4_write_inventory:", project$test)
     cohortDT        = project$cohortDT,
     classifiers     = project$classifiers,
     grid_rast       = project$grid_rast,
-    grid_meta       = project$grid_meta
+    grid_meta       = project$grid_meta,
+    chunk_size      = 2
   )
 
   expect_true(file.exists(file.path(cbm4_data, "inventory")))

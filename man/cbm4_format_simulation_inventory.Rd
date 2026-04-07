@@ -9,6 +9,9 @@ cbm4_format_simulation_inventory(
   grid_meta,
   timestep,
   classifiers = NULL,
+  def_cohort_proportion = 1L,
+  area_unit_conversion = 1e-04,
+  col_ignore = NULL,
   ...
 )
 }
@@ -22,7 +25,14 @@ cbm4_format_simulation_inventory(
 \item{classifiers}{character.
 Column names of inventory identifiers.}
 
-\item{...}{arguments to \code{\link{cbm4_format_inventory}}}
+\item{def_cohort_proportion}{integer. A value between 0-1.
+Percentage of the pixel's area that is attributed to the cohort.}
+
+\item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
+
+\item{col_ignore}{character. Names of \code{cohortDT} columns to exclude}
+
+\item{...}{unused}
 }
 \value{
 list with items:

@@ -9,7 +9,8 @@ cbm4_write_inventory(
   cbm_defaults_db,
   cohortDT,
   classifiers,
-  grid_meta = NULL,
+  grid_rast,
+  grid_meta,
   dataset_name = "inventory",
   dataset_path = file.path(cbm4_data, dataset_name),
   ...
@@ -28,6 +29,8 @@ Path to CBM defaults SQLite database.}
 \item{classifiers}{character.
 Column names of inventory identifiers.}
 
+\item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
+
 \item{grid_meta}{data.table. Grid metadata.
 Required columns: \code{pixel_index},
 \code{admin_boundary} or \code{admin_boundary_id}.
@@ -43,7 +46,7 @@ Name of the CBM4 spatial parquet dataset.}
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
 
-\item{...}{arguments to \code{\link{cbm4_write_geo}} or \code{\link{cbm4_format_inventory}}}
+\item{...}{arguments to \code{\link{cbm4_format_inventory}} or \code{\link{set_grid_meta}}}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.

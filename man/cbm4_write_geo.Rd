@@ -38,7 +38,7 @@ Optional columns: \code{chunk_index}, \code{raster_index},
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
 
-\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}} or \code{\link{cbm4_format_grid_meta}}}
+\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}} or \code{\link{set_grid_meta}}}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.

@@ -57,9 +57,6 @@ cbm4_read_simulation_inventory <- function(
   classifierCols <- names(cohortDT)[grepl("^classifiers\\.", names(cohortDT))]
   data.table::setnames(cohortDT, classifierCols, gsub("^classifiers\\.", "", classifierCols))
 
-  stateCols <- names(cohortDT)[grepl("^state\\.", names(cohortDT))]
-  data.table::setnames(cohortDT, stateCols, gsub("^state\\.", "", stateCols))
-
   cohortDT
 }
 

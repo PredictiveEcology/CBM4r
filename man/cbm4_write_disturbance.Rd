@@ -45,7 +45,7 @@ Name of the CBM4 spatial parquet dataset.}
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
 
-\item{...}{arguments to \code{\link{cbm4_format_disturbance}}}
+\item{...}{arguments to \code{\link{cbm4_format_disturbance}} or \code{\link{set_grid_meta}}}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.
