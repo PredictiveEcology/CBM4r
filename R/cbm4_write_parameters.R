@@ -136,10 +136,6 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
   gcMeta <- data.table::as.data.table(gcMeta)
   gcIncr <- data.table::as.data.table(gcIncr)
 
-  # Rename columns
-  data.table::setnames(gcMeta, "admin_name", "admin_boundary",  skip_absent = TRUE)
-  data.table::setnames(gcMeta, "eco_id",     "eco_boundary_id", skip_absent = TRUE)
-
   # Set columns
   if (!"sw" %in% names(gcMeta) & "sw_hw" %in% names(gcMeta)) gcMeta[, sw := sw_hw == "sw"]
 
@@ -158,18 +154,25 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
   # Set spatial_unit
   if (!"spatial_unit" %in% names(gcMeta)){
 
-    check_table_columns_all("gcMeta", gcMeta, c("admin_boundary", "eco_boundary_id"))
+    if (!"admin_boundary_id" %in% names(gcMeta)){
+      check_table_columns_all("gcMeta", gcMeta, "admin_boundary")
+      admin_boundary_tr <- cbmdbReadTable(cbm_defaults_db, "admin_boundary_tr")
+      gcMeta[, admin_boundary_id := admin_boundary_tr$admin_boundary_id[
+        match(admin_boundary, admin_boundary_tr$name)]]
+    }
 
-    if (is.null(cbm_defaults_db)) stop("cbm_defaults_db required to set spatial_unit")
-    spatial_unit <- merge(
-      cbmdbReadTable(cbm_defaults_db, "spatial_unit"),
-      cbmdbReadTable(cbm_defaults_db, "admin_boundary_tr"),
-      by.x = "admin_boundary_id", by.y = "id", all.x = TRUE)
+    if (!"eco_boundary_id" %in% names(gcMeta)){
+      check_table_columns_all("gcMeta", gcMeta, "eco_boundary")
+      eco_boundary_tr <- cbmdbReadTable(cbm_defaults_db, "eco_boundary_tr")
+      gcMeta[, eco_boundary_id := admin_boundary_tr$eco_boundary_id[
+        match(eco_boundary, eco_boundary_tr$name)]]
+    }
 
-    gcMeta <- data.table::merge.data.table(
-      gcMeta,
-      data.table::as.data.table(spatial_unit)[, .(admin_boundary = name, eco_boundary_id, spatial_unit = id)],
-      by = c("admin_boundary", "eco_boundary_id"), all.x = TRUE, sort = FALSE)
+    spatial_unit <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")
+    spatial_unit[, spu_join := paste0(admin_boundary_id, "_", eco_boundary_id)]
+    gcMeta[, spu_join     := paste0(admin_boundary_id, "_", eco_boundary_id)]
+    gcMeta[, spatial_unit := spatial_unit$id[match(gcMeta$spu_join, spatial_unit$spu_join)]]
+    gcMeta[, spu_join     := NULL]
 
     # Check spatial unit IDs
     if (any(is.na(gcMeta$spatial_unit))){
