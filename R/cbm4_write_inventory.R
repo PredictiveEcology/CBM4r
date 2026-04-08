@@ -146,7 +146,7 @@ cbm4_format_inventory <- function(
   dataFull[, pixel_index := NULL]
 
   # Set area
-  dataFull[, area := as.numeric(area)] # Not integer
+  if (is.integer(dataFull$area)) dataFull[, area := as.numeric(area)]
   dataFull[, area := sum(area) * area_unit_conversion, by = index]
 
   # Split by raster key and unique groups

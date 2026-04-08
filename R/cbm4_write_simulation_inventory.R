@@ -183,7 +183,7 @@ cbm4_format_simulation_inventory <- function(
   if (!"cohort_index" %in% names(dataFull)) dataFull[, cohort_index := 0L]
 
   # Set area
-  dataFull[, inventory.area:= as.numeric(inventory.area)] # Not integer
+  if (is.integer(dataFull$inventory.area)) dataFull[, inventory.area := as.numeric(inventory.area)]
   dataFull[, inventory.area := sum(as.numeric(inventory.area)) * area_unit_conversion, by = index]
 
   # Split by raster key and unique groups
