@@ -169,10 +169,7 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
     }
 
     spatial_unit <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")
-    spatial_unit[, spu_join := paste0(admin_boundary_id, "_", eco_boundary_id)]
-    gcMeta[, spu_join     := paste0(admin_boundary_id, "_", eco_boundary_id)]
-    gcMeta[, spatial_unit := spatial_unit$id[match(gcMeta$spu_join, spatial_unit$spu_join)]]
-    gcMeta[, spu_join     := NULL]
+    gcMeta[spatial_unit, spatial_unit := id, on = .(admin_boundary_id, eco_boundary_id)]
 
     # Check spatial unit IDs
     if (any(is.na(gcMeta$spatial_unit))){

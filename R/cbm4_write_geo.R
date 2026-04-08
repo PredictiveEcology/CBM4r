@@ -130,10 +130,7 @@ set_grid_meta <- function(
       }
 
       spatial_unit <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")
-      spatial_unit[, spu_join  := paste0(admin_boundary_id, "_", eco_boundary_id)]
-
-      spu_join <- paste0(grid_meta$admin_boundary_id, "_", grid_meta$eco_boundary_id)
-      data.table::set(grid_meta, j = "spatial_unit", value = spatial_unit$id[match(spu_join, spatial_unit$spu_join)])
+      grid_meta[spatial_unit, spatial_unit := id, on = .(admin_boundary_id, eco_boundary_id)]
 
       # Check spatial unit IDs
       if (any(is.na(grid_meta$spatial_unit))){
