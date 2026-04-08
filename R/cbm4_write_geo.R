@@ -133,7 +133,7 @@ set_grid_meta <- function(
       grid_meta[spatial_unit, spatial_unit := id, on = .(admin_boundary_id, eco_boundary_id)]
 
       # Check spatial unit IDs
-      if (any(is.na(grid_meta$spatial_unit))){
+      if (anyNA(grid_meta$spatial_unit)){
         noMatch <- unique(grid_meta[is.na(spatial_unit), .(admin_boundary, eco_boundary_id)])
         data.table::setkey(noMatch, admin_boundary, eco_boundary_id)
         if (nrow(noMatch) > 0) stop(

@@ -172,7 +172,7 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
     gcMeta[spatial_unit, spatial_unit := id, on = .(admin_boundary_id, eco_boundary_id)]
 
     # Check spatial unit IDs
-    if (any(is.na(gcMeta$spatial_unit))){
+    if (anyNA(gcMeta$spatial_unit)){
       noMatch <- unique(gcMeta[is.na(spatial_unit), .(admin_boundary, eco_boundary_id)])
       data.table::setkey(noMatch, admin_boundary, eco_boundary_id)
       if (nrow(noMatch) > 0) stop(
