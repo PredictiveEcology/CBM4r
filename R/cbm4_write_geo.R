@@ -161,7 +161,7 @@ set_grid_meta <- function(
   colTypes <- lapply(colTypes, intersect, names(grid_meta))
   for (col in colTypes$factor)  if (!is.factor(grid_meta[[col]]))  data.table::set(grid_meta, j = col, value = factor(grid_meta[[col]]))
   for (col in colTypes$integer) if (!is.integer(grid_meta[[col]])) data.table::set(grid_meta, j = col, value = as.integer(grid_meta[[col]]))
-  for (col in colTypes$numeric) if (!is.integer(grid_meta[[col]])) data.table::set(grid_meta, j = col, value = as.numeric(grid_meta[[col]]))
+  for (col in colTypes$numeric) if (!is.numeric(grid_meta[[col]])) data.table::set(grid_meta, j = col, value = as.numeric(grid_meta[[col]]))
 
   data.table::setkey(grid_meta, pixel_index)
   data.table::setcolorder(grid_meta, intersect(c(
