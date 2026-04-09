@@ -103,7 +103,7 @@ for (project in projects) test_that(paste("cbm4_spinup:", project$test), {
 for (project in projects) test_that(paste("cbm4_step:", project$test), {
 
   cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=0")))
 
   cbm4_step(cbm4_data, cbm_defaults_db = cbm_defaults_db, timestep = 1)
 
@@ -114,7 +114,7 @@ for (project in projects) test_that(paste("cbm4_step:", project$test), {
 for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_write_simulation_inventory:", project$test), {
 
   cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=1")))
 
   cohortDT <- cbm4_read_simulation_inventory(cbm4_data, timestep = 1)
 
@@ -132,27 +132,28 @@ for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_
 
 ## READ RESULTS ----
 
-test_that("cbm4_results_processor", {
+for (test in names(projects)){
 
-  cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  cbm4_data <- projects[[test]]$cbm4_data
 
-  results_processor <- cbm4_results_processor(cbm4_data)
+  if (file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=2"))){
 
-  expect_s3_class(results_processor, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")
+    projects[[test]]$cbm4_results <- tryCatch(cbm4_results_processor(cbm4_data), error = function(e) NULL)
+    projects[[test]]$grid_area    <- terra::cellSize(projects[[test]]$grid_rast, unit = "ha")[1, 1][[1]]
+  }
+}
+
+for (project in projects) test_that(paste("cbm4_results_processor:", project$test), {
+
+  expect_s3_class(project$cbm4_results, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")
 
 })
-
-for (test in names(projects)) if (file.exists(file.path(projects[[test]]$cbm4_data, "simulation"))){
-  projects[[test]]$cbm4_results <- cbm4_results_processor(projects[[test]]$cbm4_data)
-  projects[[test]]$grid_area    <- terra::cellSize(projects[[test]]$grid_rast, unit = "ha")[1, 1][[1]]
-}
 
 for (project in projects) test_that(paste("cbm4_read_geo:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(is.null(cbm4_results))
 
   expect_true(terra::compareGeom(project$grid_rast, cbm4_read_geo(cbm4_data)))
   expect_true(terra::compareGeom(project$grid_rast, cbm4_read_geo(cbm4_results)))
@@ -164,7 +165,7 @@ for (project in projects) test_that(paste("cbm4_results_pools_by_timestep:", pro
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   grid_area    <- project$grid_area
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(is.null(cbm4_results))
 
   cbm4Summary <- list()
   for (units in c("t", "Mt")){
@@ -195,7 +196,7 @@ for (project in projects) test_that(paste("cbm4_results_flux_by_timestep:", proj
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   grid_area    <- project$grid_area
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(is.null(cbm4_results))
 
   cbm4Summary <- list()
   for (units in c("t", "Mt")){
@@ -226,7 +227,7 @@ for (project in projects) test_that(paste("cbm4_results_emissions_by_timestep:",
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   grid_area    <- project$grid_area
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(is.null(cbm4_results))
 
   cbm4Summary <- list()
   for (units in c("t", "Mt")){
@@ -257,7 +258,7 @@ for (project in projects) test_that(paste("cbm4_results_pools_by_pixel:", projec
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   grid_area    <- project$grid_area
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(is.null(cbm4_results))
 
   cbm4Summary <- list()
   for (units in c("t/ha", "t", "Mt")){
@@ -283,7 +284,7 @@ for (project in projects) test_that(paste("cbm4_results_flux_by_pixel:", project
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   grid_area    <- project$grid_area
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(is.null(cbm4_results))
 
   cbm4Summary <- list()
   for (units in c("t/ha", "t", "Mt")){
@@ -309,7 +310,7 @@ for (project in projects) test_that(paste("cbm4_results_emissions_by_pixel:", pr
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   grid_area    <- project$grid_area
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation")))
+  testthat::skip_if(is.null(cbm4_results))
 
   cbm4Summary <- list()
   for (units in c("t/ha", "t", "Mt")){

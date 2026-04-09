@@ -1,19 +1,21 @@
 
 # Set virtual environment
-if (as.logical(Sys.getenv("CI", "false"))){
+if (Sys.getenv("VIRTUAL_ENV") == ""){
 
-  withr::local_envvar(list(RETICULATE_PYTHON_ENV = "r-CBM4-test"), .local_envir = testthat::teardown_env())
-  withr::defer(reticulate::virtualenv_remove("r-CBM4-test"), envir = testthat::teardown_env(), priority = "last")
-
-}else{
-
-  # Use local CBM4 install
-  cbm4_virtualenv <- file.path(Sys.getenv("USERPROFILE"), "cbm4", ".venv")
+  cbm4_virtualenv <- Sys.getenv("RETICULATE_PYTHON_ENV", unset = "r-CBM4-2.17.10")
   if (!reticulate::virtualenv_exists(cbm4_virtualenv)) stop("CBM4 Python virtual environment not found: ", cbm4_virtualenv)
 
-  # Import pyarrow before loading package to prevent DLL loading issues
-  reticulate::use_virtualenv(cbm4_virtualenv)
-  reticulate::import("pyarrow")
+  if (testthat::is_testing()){
+    withr::local_envvar(list(RETICULATE_PYTHON_ENV = cbm4_virtualenv), .local_envir = testthat::teardown_env())
+
+  }else{
+
+    Sys.setenv(RETICULATE_PYTHON_ENV = cbm4_virtualenv)
+
+    # Import pyarrow before loading package to prevent DLL loading issues
+    reticulate::use_virtualenv(cbm4_virtualenv)
+    reticulate::import("pyarrow")
+  }
 }
 
 if (!testthat::is_testing()){
@@ -40,6 +42,12 @@ if (testthat::is_testing()) withr::defer({
     "Temporary test directory could not be removed: ",
     testDirs$temp$root, call. = FALSE)
 }, envir = testthat::teardown_env(), priority = "last")
+
+# Set temporary location for virtual environment
+if (as.logical(Sys.getenv("CI", "false"))){
+  withr::local_envvar(list(RETICULATE_VIRTUALENV_ROOT = file.path(testDirs$temp$root, ".virtualenvs")),
+                      .local_envir = testthat::teardown_env())
+}
 
 # Download CBM-CFS3 defaults database
 cbm_defaults_db <- file.path(testDirs$temp$inputs, "cbm_defaults.db")
