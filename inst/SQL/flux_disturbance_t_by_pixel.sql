@@ -12,8 +12,8 @@ SELECT
   SUM(DisturbanceBioCO2Emission    * (c.area * a.cohort_proportion)) AS DisturbanceBioCO2Emission,
   SUM(DisturbanceBioCH4Emission    * (c.area * a.cohort_proportion)) AS DisturbanceBioCH4Emission,
   SUM(DisturbanceBioCOEmission     * (c.area * a.cohort_proportion)) AS DisturbanceBioCOEmission,
-  SUM(DisturbanceSoftProduction    * (c.area * a.cohort_proportion)) AS DisturbanceSoftProduction,
-  SUM(DisturbanceHardProduction    * (c.area * a.cohort_proportion)) AS DisturbanceHardProduction,
+  SUM(DisturbanceSoftProduction    * (c.area * a.cohort_proportion)) +,
+  SUM(DisturbanceHardProduction    * (c.area * a.cohort_proportion)) AS DisturbanceProduction,
   SUM(DisturbanceDOMProduction     * (c.area * a.cohort_proportion)) AS DisturbanceDOMProduction,
   SUM(DisturbanceMerchToAir        * (c.area * a.cohort_proportion)) AS DisturbanceMerchToAir,
   SUM(DisturbanceFolToAir          * (c.area * a.cohort_proportion)) AS DisturbanceFolToAir,
@@ -35,10 +35,10 @@ SELECT
   SUM(DisturbanceMediumToAir       * (c.area * a.cohort_proportion)) AS DisturbanceMediumToAir,
   SUM(DisturbanceSlowAGToAir       * (c.area * a.cohort_proportion)) AS DisturbanceSlowAGToAir,
   SUM(DisturbanceSlowBGToAir       * (c.area * a.cohort_proportion)) AS DisturbanceSlowBGToAir,
-  SUM(DisturbanceSWStemSnagToAir   * (c.area * a.cohort_proportion)) AS DisturbanceSWStemSnagToAir,
-  SUM(DisturbanceSWBranchSnagToAir * (c.area * a.cohort_proportion)) AS DisturbanceSWBranchSnagToAir,
-  SUM(DisturbanceHWStemSnagToAir   * (c.area * a.cohort_proportion)) AS DisturbanceHWStemSnagToAir,
-  SUM(DisturbanceHWBranchSnagToAir * (c.area * a.cohort_proportion)) AS DisturbanceHWBranchSnagToAir
+  SUM(DisturbanceSWStemSnagToAir   * (c.area * a.cohort_proportion)) +
+  SUM(DisturbanceHWStemSnagToAir   * (c.area * a.cohort_proportion)) AS DisturbanceStemSnagToAir,
+  SUM(DisturbanceSWBranchSnagToAir * (c.area * a.cohort_proportion)) +
+  SUM(DisturbanceHWBranchSnagToAir * (c.area * a.cohort_proportion)) AS DisturbanceBranchSnagToAir
 FROM disturbance_flux a
 LEFT JOIN raster_index b ON a.timestep = b.timestep AND a.chunk_index = b.chunk_index
 LEFT JOIN area c ON b.raster_index = c.raster_index and b.chunk_index = c.chunk_index

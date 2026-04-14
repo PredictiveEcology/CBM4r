@@ -19,10 +19,10 @@ SELECT
   SUM(DecayMediumToAir          * ("inventory.area" * cohort_proportion)) AS DecayMediumToAir,
   SUM(DecaySlowAGToAir          * ("inventory.area" * cohort_proportion)) AS DecaySlowAGToAir,
   SUM(DecaySlowBGToAir          * ("inventory.area" * cohort_proportion)) AS DecaySlowBGToAir,
-  SUM(DecaySWStemSnagToAir      * ("inventory.area" * cohort_proportion)) AS DecaySWStemSnagToAir,
-  SUM(DecaySWBranchSnagToAir    * ("inventory.area" * cohort_proportion)) AS DecaySWBranchSnagToAir,
-  SUM(DecayHWStemSnagToAir      * ("inventory.area" * cohort_proportion)) AS DecayHWStemSnagToAir,
-  SUM(DecayHWBranchSnagToAir    * ("inventory.area" * cohort_proportion)) AS DecayHWBranchSnagToAir
+  SUM(DecaySWStemSnagToAir      * ("inventory.area" * cohort_proportion)) +
+  SUM(DecayHWStemSnagToAir      * ("inventory.area" * cohort_proportion)) AS DecayStemSnagToAir,
+  SUM(DecaySWBranchSnagToAir    * ("inventory.area" * cohort_proportion)) +
+  SUM(DecayHWBranchSnagToAir    * ("inventory.area" * cohort_proportion)) AS DecayBranchSnagToAir
 FROM annual_process_flux
 -- WHERE
 GROUP BY timestep

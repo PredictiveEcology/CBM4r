@@ -21,10 +21,10 @@ SELECT
   SUM(DecayMediumToAir            * cohort_proportion) AS DecayMediumToAir,
   SUM(DecaySlowAGToAir            * cohort_proportion) AS DecaySlowAGToAir,
   SUM(DecaySlowBGToAir            * cohort_proportion) AS DecaySlowBGToAir,
-  SUM(DecaySWStemSnagToAir        * cohort_proportion) AS DecaySWStemSnagToAir,
-  SUM(DecaySWBranchSnagToAir      * cohort_proportion) AS DecaySWBranchSnagToAir,
-  SUM(DecayHWStemSnagToAir        * cohort_proportion) AS DecayHWStemSnagToAir,
-  SUM(DecayHWBranchSnagToAir      * cohort_proportion) AS DecayHWBranchSnagToAir
+  SUM(DecaySWStemSnagToAir        * cohort_proportion) +
+  SUM(DecayHWStemSnagToAir        * cohort_proportion) AS DecayStemSnagToAir,
+  SUM(DecaySWBranchSnagToAir      * cohort_proportion) +
+  SUM(DecayHWBranchSnagToAir      * cohort_proportion) AS DecayBranchSnagToAir
 FROM annual_process_flux a
 LEFT JOIN raster_index b ON a.timestep = b.timestep AND a.cohort_index = b.cohort_index AND a.chunk_index = b.chunk_index
 -- WHERE
