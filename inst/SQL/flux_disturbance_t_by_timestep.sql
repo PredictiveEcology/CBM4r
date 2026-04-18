@@ -10,8 +10,8 @@ SELECT
   SUM(DisturbanceBioCO2Emission    * (area * cohort_proportion)) AS DisturbanceBioCO2Emission,
   SUM(DisturbanceBioCH4Emission    * (area * cohort_proportion)) AS DisturbanceBioCH4Emission,
   SUM(DisturbanceBioCOEmission     * (area * cohort_proportion)) AS DisturbanceBioCOEmission,
-  SUM(DisturbanceSoftProduction    * (area * cohort_proportion)) AS DisturbanceSoftProduction,
-  SUM(DisturbanceHardProduction    * (area * cohort_proportion)) AS DisturbanceHardProduction,
+  SUM(DisturbanceSoftProduction    * (area * cohort_proportion)) +
+  SUM(DisturbanceHardProduction    * (area * cohort_proportion)) AS DisturbanceProduction,
   SUM(DisturbanceDOMProduction     * (area * cohort_proportion)) AS DisturbanceDOMProduction,
   SUM(DisturbanceMerchToAir        * (area * cohort_proportion)) AS DisturbanceMerchToAir,
   SUM(DisturbanceFolToAir          * (area * cohort_proportion)) AS DisturbanceFolToAir,
@@ -33,10 +33,10 @@ SELECT
   SUM(DisturbanceMediumToAir       * (area * cohort_proportion)) AS DisturbanceMediumToAir,
   SUM(DisturbanceSlowAGToAir       * (area * cohort_proportion)) AS DisturbanceSlowAGToAir,
   SUM(DisturbanceSlowBGToAir       * (area * cohort_proportion)) AS DisturbanceSlowBGToAir,
-  SUM(DisturbanceSWStemSnagToAir   * (area * cohort_proportion)) AS DisturbanceSWStemSnagToAir,
-  SUM(DisturbanceSWBranchSnagToAir * (area * cohort_proportion)) AS DisturbanceSWBranchSnagToAir,
-  SUM(DisturbanceHWStemSnagToAir   * (area * cohort_proportion)) AS DisturbanceHWStemSnagToAir,
-  SUM(DisturbanceHWBranchSnagToAir * (area * cohort_proportion)) AS DisturbanceHWBranchSnagToAir
+  SUM(DisturbanceSWStemSnagToAir   * (area * cohort_proportion)) +
+  SUM(DisturbanceHWStemSnagToAir   * (area * cohort_proportion)) AS DisturbanceStemSnagToAir,
+  SUM(DisturbanceSWBranchSnagToAir * (area * cohort_proportion)) +
+  SUM(DisturbanceHWBranchSnagToAir * (area * cohort_proportion)) AS DisturbanceBranchSnagToAir
 FROM disturbance_flux
 -- WHERE
 GROUP BY timestep
