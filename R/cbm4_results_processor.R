@@ -10,8 +10,9 @@ cbm4_results_processor <- function(cbm4_data){
     return(cbm4_data)
   }
 
-  if (length(cbm4_data) == 0) stop("cbm4_data invalid")
+  if (length(cbm4_data) == 0)  stop("cbm4_data invalid")
   if (!file.exists(cbm4_data)) stop("cbm4_data not found: ", cbm4_data)
+  cbm4_data <- normalizePath(cbm4_data, winslash = "/", mustWork = FALSE)
 
   reticulate::import(
     "cbm4.app.spatial.results.sql_results_processor"

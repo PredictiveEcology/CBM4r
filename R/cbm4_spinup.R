@@ -46,6 +46,7 @@ cbm4_spinup <- function(
       "CBM4 ", shQuote(dataset$dataset_name), " dataset path invalid")
     if (dataset$dataset_name != "simulation" && !file.exists(dataset$path_or_uri)) stop(
       "CBM4 ", shQuote(dataset$dataset_name), " dataset not found: ", dataset$path_or_uri)
+    dataset$path_or_uri <- normalizePath(dataset$path_or_uri, winslash = "/", mustWork = FALSE)
   }
 
   cbmspec_config <- reticulate::dict(
