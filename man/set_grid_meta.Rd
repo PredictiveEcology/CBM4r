@@ -16,7 +16,7 @@ set_grid_meta(
 \arguments{
 \item{grid_meta}{data.table. Grid metadata.
 Required columns: \code{pixel_index},
-\code{admin_boundary} or \code{admin_boundary_id}.
+\code{admin_boundary}, \code{admin_abbrev}, or \code{admin_boundary_id}.
 \code{eco_boundary} or \code{eco_boundary_id},
 \code{spatial_unit}.
 Optional columns: \code{chunk_index}, \code{raster_index},

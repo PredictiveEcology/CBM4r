@@ -137,12 +137,22 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
   gcIncr <- data.table::as.data.table(gcIncr)
 
   # Set columns
+  if (!"spatial_unit" %in% names(gcMeta)){
+    if (any(c("admin_boundary_id", "admin_boundary", "admin_abbrev",
+              "eco_boundary_id", "eco_boundary") %in% names(gcMeta))){
+      set_table_spatial_units(gcMeta, "gcMeta", cbm_defaults_db = cbm_defaults_db, naOK = TRUE)
+      gcMeta[is.na(spatial_unit), spatial_unit := "?"]
+    }else{
+      gcMeta[, spatial_unit := "?"]
+    }
+  }
   if (!"sw" %in% names(gcMeta) & "sw_hw" %in% names(gcMeta)) gcMeta[, sw := sw_hw == "sw"]
 
   # Check table columns
-  check_table_columns_all("gcMeta", gcMeta, c("gcID", classifiers, "sw"))
+  check_table_columns_all("gcMeta", gcMeta, c("gcID", "spatial_unit", classifiers, "sw"))
   check_table_columns_all("gcIncr", gcIncr, c("gcID", "age", "merch_inc", "foliage_inc", "other_inc"))
 
+  # Check classifiers
   if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
   if (!all(sapply(gcMeta, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
     "classifiers must be integer, character, or factor")
@@ -150,36 +160,6 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
   # Check for data gaps
   if (any(do.call(c, lapply(split(gcIncr$age, gcIncr[["gcID"]]), diff)) > 1)) stop(
     "gcIncr must have increments for every year")
-
-  # Set spatial_unit
-  if (!"spatial_unit" %in% names(gcMeta)){
-
-    if (!"admin_boundary_id" %in% names(gcMeta)){
-      check_table_columns_all("gcMeta", gcMeta, "admin_boundary")
-      admin_boundary_tr <- cbmdbReadTable(cbm_defaults_db, "admin_boundary_tr")
-      gcMeta[, admin_boundary_id := admin_boundary_tr$admin_boundary_id[
-        match(admin_boundary, admin_boundary_tr$name)]]
-    }
-
-    if (!"eco_boundary_id" %in% names(gcMeta)){
-      check_table_columns_all("gcMeta", gcMeta, "eco_boundary")
-      eco_boundary_tr <- cbmdbReadTable(cbm_defaults_db, "eco_boundary_tr")
-      gcMeta[, eco_boundary_id := admin_boundary_tr$eco_boundary_id[
-        match(eco_boundary, eco_boundary_tr$name)]]
-    }
-
-    spatial_unit <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")
-    gcMeta[spatial_unit, spatial_unit := id, on = .(admin_boundary_id, eco_boundary_id)]
-
-    # Check spatial unit IDs
-    if (anyNA(gcMeta$spatial_unit)){
-      noMatch <- unique(gcMeta[is.na(spatial_unit), .(admin_boundary, eco_boundary_id)])
-      data.table::setkey(noMatch, admin_boundary, eco_boundary_id)
-      if (nrow(noMatch) > 0) stop(
-        "spatial_unit_id not found for: ",
-        paste(paste(noMatch$admin_boundary, "ecozone", noMatch$eco_boundary_id), collapse = "; "))
-    }
-  }
 
   # Format increments
   data.table::setnames(gcIncr, "age", "state.age")

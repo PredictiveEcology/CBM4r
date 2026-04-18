@@ -1,16 +1,13 @@
 
 testInputs_SK <- function(){
 
-  admin_boundary  <- "Saskatchewan"
-  eco_boundary_id <- 6
-
   list(
     grid_rast = terra::rast(ncol = 2, nrow = 2, xmin = 0, xmax = 2, ymin = 0, ymax = 2, crs = "local"),
     grid_meta = data.table::data.table(
       pixel_index = 1:4,
       area = 1,
-      admin_boundary = admin_boundary,
-      eco_boundary_id = eco_boundary_id
+      admin_boundary  = "Saskatchewan",
+      eco_boundary_id = 6
     ),
 
     classifiers = c("species", "prodClass"),
@@ -26,7 +23,7 @@ testInputs_SK <- function(){
         species = "species2", prodClass = "M",
         sw = FALSE
       )
-    ), admin_boundary = admin_boundary, eco_boundary_id = eco_boundary_id),
+    )),
 
     gcIncr = rbind(
       data.table::data.table(
