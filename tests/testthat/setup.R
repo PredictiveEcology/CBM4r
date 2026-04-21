@@ -2,7 +2,7 @@
 # Set virtual environment
 if (Sys.getenv("VIRTUAL_ENV") == ""){
 
-  cbm4_virtualenv <- Sys.getenv("RETICULATE_PYTHON_ENV", unset = "r-CBM4-2.17.10")
+  cbm4_virtualenv <- Sys.getenv("RETICULATE_PYTHON_ENV", unset = "r-CBM4")
   if (!reticulate::virtualenv_exists(cbm4_virtualenv)) stop("CBM4 Python virtual environment not found: ", cbm4_virtualenv)
 
   if (testthat::is_testing()){
