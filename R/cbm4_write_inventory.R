@@ -54,7 +54,8 @@ cbm4_write_inventory <- function(
     dataset_path = dataset_path,
     table_name   = NULL,
     table_data   = inv$flat,
-    partitioning = c("cohort_index", "chunk_index")
+    partitioning = c("cohort_index", "chunk_index"),
+    schema       = list(age = arrow::float32(), area = arrow::float32())
   )
   arrow_space_dataset_write_table(
     dataset_name = dataset_name,
@@ -130,7 +131,7 @@ cbm4_format_inventory <- function(
   if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
   # Set index and chunk_index
-  dataFull[, index := as.integer(.GRP - 1L), by = setdiff(names(dataFull), c("pixel_index", "raster_index", "area"))]
+  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("pixel_index", "raster_index", "area"))]
 
   if (!is.null(chunk_size) && !is.na(chunk_size)){
     dataFull[, chunk_index := floor(index / chunk_size)]

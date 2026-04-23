@@ -4,6 +4,7 @@ arrow_space_dataset_write_table <- function(
     dataset_name,
     table_data,
     table_name = NULL,
+    schema = NULL,
     dataset_path = file.path(dataset_dir, dataset_name),
     existing_data_behavior = "delete_matching",
     no_factors = TRUE,
@@ -15,10 +16,23 @@ arrow_space_dataset_write_table <- function(
 
   if (nrow(table_data) > 0){
 
-    # Convert factor columns to string
     if (no_factors){
       factCols <- names(table_data)[sapply(table_data, is.factor)]
-      if (length(factCols) > 0) table_data[, (factCols) := lapply(.SD, as.character), .SDcols = factCols]
+      schema <- as.list(schema)
+      for (col in setdiff(factCols, names(schema))) schema[[col]] <- arrow::string()
+    }
+
+    if (length(schema) > 0){
+
+      table_data   <- arrow::arrow_table(table_data)
+      table_schema <- arrow::schema(table_data)
+
+      for (col in names(schema)) table_schema[[col]] <- schema[[col]]
+
+      if (!identical(
+        lapply(arrow::schema(table_data), function(x) x$type$ToString()),
+        lapply(table_schema, function(x) x$type$ToString)
+      )) table_data <- table_data$cast(table_schema)
     }
 
     arrow::write_dataset(table_data, table_path, existing_data_behavior = existing_data_behavior, ...)

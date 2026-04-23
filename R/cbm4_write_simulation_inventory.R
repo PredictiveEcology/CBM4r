@@ -79,7 +79,8 @@ cbm4_write_simulation_inventory <- function(
     dataset_path = dataset_path,
     table_name   = NULL,
     table_data   = inv$flat,
-    partitioning = c("timestep", "cohort_index", "chunk_index")
+    partitioning = c("timestep", "cohort_index", "chunk_index"),
+    schema       = list(inventory.area = arrow::float32(), state.age = arrow::float32())
   )
   arrow_space_dataset_write_table(
     dataset_name = dataset_name,
@@ -174,7 +175,7 @@ cbm4_format_simulation_inventory <- function(
   if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
   # Set index
-  dataFull[, index := as.integer(.GRP - 1L), by = setdiff(names(dataFull), c("raster_index", "inventory.area"))]
+  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("raster_index", "inventory.area"))]
 
   # Set timestep
   dataFull[, timestep := as.integer(timestep)]

@@ -78,7 +78,8 @@ cbm4_write_parameters <- function(
     dataset_name = dataset_name,
     dataset_path = dataset_path,
     table_name   = paste0("table-", incTableName),
-    table_data   = incTable
+    table_data   = incTable,
+    schema       = list(inventory.spatial_unit = arrow::string())
   )
   cbm4_write_parameter_table_metadata(
     dataset_name = dataset_name,
