@@ -12,7 +12,7 @@ SELECT
   SUM(DisturbanceBioCO2Emission    * (c.area * a.cohort_proportion)) AS DisturbanceBioCO2Emission,
   SUM(DisturbanceBioCH4Emission    * (c.area * a.cohort_proportion)) AS DisturbanceBioCH4Emission,
   SUM(DisturbanceBioCOEmission     * (c.area * a.cohort_proportion)) AS DisturbanceBioCOEmission,
-  SUM(DisturbanceSoftProduction    * (c.area * a.cohort_proportion)) +,
+  SUM(DisturbanceSoftProduction    * (c.area * a.cohort_proportion)) +
   SUM(DisturbanceHardProduction    * (c.area * a.cohort_proportion)) AS DisturbanceProduction,
   SUM(DisturbanceDOMProduction     * (c.area * a.cohort_proportion)) AS DisturbanceDOMProduction,
   SUM(DisturbanceMerchToAir        * (c.area * a.cohort_proportion)) AS DisturbanceMerchToAir,
