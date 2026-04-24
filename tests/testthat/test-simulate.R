@@ -3,14 +3,13 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 
 ## SET UP ----
 
-projects <- list(
-  `SK_w_disturbances`  = testInputs_SK(),
-  `SK_wo_disturbances` = {
-    inputs <- testInputs_SK()
-    inputs[c("distMeta", "distEvents")] <- NULL
-    inputs
-  }
-)
+projects <- list()
+projects[["SK_w_disturbances"]]  <- testInputs_SK()
+projects[["SK_wo_disturbances"]] <- {
+  inputs <- testInputs_SK()
+  inputs[c("distMeta", "distEvents")] <- NULL
+  inputs
+}
 
 for (test in names(projects)){
   projects[[test]]$test      <- test
