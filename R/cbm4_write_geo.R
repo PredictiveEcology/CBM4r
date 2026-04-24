@@ -57,9 +57,9 @@ cbm4_write_geo <- function(
       table_name    = "table-pixels",
       table_data    = grid_meta,
       schema = list(
-        pixel_index       = arrow::int16(),
+        pixel_index       = arrow::int32(),
         chunk_index       = arrow::int8(),
-        raster_index      = arrow::int16(),
+        raster_index      = arrow::int32(),
         spatial_unit      = arrow::int8(),
         admin_boundary_id = arrow::int8(),
         admin_boundary    = arrow::dictionary(arrow::int8()),
