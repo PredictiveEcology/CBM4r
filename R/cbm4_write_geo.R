@@ -56,7 +56,19 @@ cbm4_write_geo <- function(
       dataset_path  = dataset_path,
       table_name    = "table-pixels",
       table_data    = grid_meta,
-      no_factors    = FALSE
+      schema = list(
+        pixel_index       = arrow::int16(),
+        chunk_index       = arrow::int8(),
+        raster_index      = arrow::int16(),
+        spatial_unit      = arrow::int8(),
+        admin_boundary_id = arrow::int8(),
+        admin_boundary    = arrow::dictionary(arrow::int8()),
+        eco_boundary_id   = arrow::int8(),
+        eco_boundary      = arrow::dictionary(arrow::int8()),
+        afforestation_pre_type     = arrow::dictionary(arrow::int8()),
+        historic_disturbance_type  = arrow::dictionary(arrow::int8()),
+        last_pass_disturbance_type = arrow::dictionary(arrow::int8())
+      )
     )
   }
 
@@ -105,20 +117,6 @@ set_grid_meta <- function(
 
   # Set defaults
   set_table_defaults(grid_meta)
-
-  # Set data types
-  colTypes <- list(
-    factor = c(
-      "admin_boundary", "eco_boundary",
-      "land_class", "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"),
-    integer = c(
-      "pixel_index", "chunk_index", "raster_index", "spatial_unit", "admin_boundary_id", "eco_boundary_id"),
-    numeric = "area"
-  )
-  colTypes <- lapply(colTypes, intersect, names(grid_meta))
-  for (col in colTypes$factor)  if (!is.factor(grid_meta[[col]]))  data.table::set(grid_meta, j = col, value = factor(grid_meta[[col]]))
-  for (col in colTypes$integer) if (!is.integer(grid_meta[[col]])) data.table::set(grid_meta, j = col, value = as.integer(grid_meta[[col]]))
-  for (col in colTypes$numeric) if (!is.numeric(grid_meta[[col]])) data.table::set(grid_meta, j = col, value = as.numeric(grid_meta[[col]]))
 
   data.table::setkey(grid_meta, pixel_index)
   data.table::setcolorder(grid_meta, intersect(c(
