@@ -158,32 +158,31 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
   if (!all(sapply(gcMeta, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
     "classifiers must be integer, character, or factor")
 
-  # Check for data gaps
-  if (any(do.call(c, lapply(split(gcIncr$age, gcIncr[["gcID"]]), diff)) > 1)) stop(
-    "gcIncr must have increments for every year")
+  if (any(is.na(gcIncr[, .(merch_inc, foliage_inc, other_inc)]))) stop("Increments contain NA values")
 
   # Format increments
   data.table::setnames(gcIncr, "age", "state.age")
-  incrSW <- gcMeta$sw[match(gcIncr[["gcID"]], gcMeta[["gcID"]])]
 
-  gcIncr[ incrSW, increment.SoftwoodMerch   := merch_inc]
-  gcIncr[ incrSW, increment.SoftwoodFoliage := foliage_inc]
-  gcIncr[ incrSW, increment.SoftwoodOther   := other_inc]
-  gcIncr[!incrSW, increment.SoftwoodMerch   := 0]
-  gcIncr[!incrSW, increment.SoftwoodFoliage := 0]
-  gcIncr[!incrSW, increment.SoftwoodOther   := 0]
+  gcIncr[gcMeta, sw := sw, on = "gcID"]
 
-  gcIncr[!incrSW, increment.HardwoodMerch   := merch_inc]
-  gcIncr[!incrSW, increment.HardwoodFoliage := foliage_inc]
-  gcIncr[!incrSW, increment.HardwoodOther   := other_inc]
-  gcIncr[ incrSW, increment.HardwoodMerch   := 0]
-  gcIncr[ incrSW, increment.HardwoodFoliage := 0]
-  gcIncr[ incrSW, increment.HardwoodOther   := 0]
+  gcIncr[sw==TRUE,  increment.SoftwoodMerch   := merch_inc]
+  gcIncr[sw==TRUE,  increment.SoftwoodFoliage := foliage_inc]
+  gcIncr[sw==TRUE,  increment.SoftwoodOther   := other_inc]
+  gcIncr[sw==FALSE, increment.HardwoodMerch   := merch_inc]
+  gcIncr[sw==FALSE, increment.HardwoodFoliage := foliage_inc]
+  gcIncr[sw==FALSE, increment.HardwoodOther   := other_inc]
 
+  gcIncr[is.na(increment.SoftwoodMerch),   increment.SoftwoodMerch   := 0]
+  gcIncr[is.na(increment.SoftwoodFoliage), increment.SoftwoodFoliage := 0]
+  gcIncr[is.na(increment.SoftwoodOther),   increment.SoftwoodOther   := 0]
+  gcIncr[is.na(increment.HardwoodMerch),   increment.HardwoodMerch   := 0]
+  gcIncr[is.na(increment.HardwoodFoliage), increment.HardwoodFoliage := 0]
+  gcIncr[is.na(increment.HardwoodOther),   increment.HardwoodOther   := 0]
+
+  gcIncr[, sw          := NULL]
   gcIncr[, merch_inc   := NULL]
   gcIncr[, foliage_inc := NULL]
   gcIncr[, other_inc   := NULL]
-  rm(incrSW)
 
   # Format metadata
   gcMeta <- gcMeta[, .SD, .SDcols = c("gcID", classifiers, "spatial_unit")]
