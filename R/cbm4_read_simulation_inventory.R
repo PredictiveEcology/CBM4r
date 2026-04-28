@@ -3,60 +3,46 @@
 #'
 #' Read inventory from a simulation CBM4 spatial parquet dataset.
 #'
-#' @template cbm4_data
+#' @template cbm4_results
 #' @template timestep
-#' @template dataset_name
-#' @template dataset_path
 #'
 #' @return `data.table`
 #' @export
-cbm4_read_simulation_inventory <- function(
-    cbm4_data = NULL,
-    timestep,
-    dataset_name = "simulation",
-    dataset_path = file.path(cbm4_data, dataset_name)
-){
+cbm4_read_simulation_inventory <- function(cbm4_results = NULL, timestep){
 
-  paths <- list(
-    pixels = file.path(dataset_path, paste0(dataset_name, "-table-pixels")),
-    index  = file.path(dataset_path, paste0(dataset_name, "-raster_index")),
-    flat   = file.path(dataset_path, dataset_name)
-  )
+  cbm4_results <- cbm4_results_processor(cbm4_results)
 
-  cohortDT <- merge(
-    merge(
-      arrow::open_dataset(paths$pixels) |>
-        dplyr::select(pixel_index, chunk_index, raster_index) |>
-        dplyr::collect() |> data.table::as.data.table(),
-      arrow::open_dataset(paths$index) |>
-        dplyr::filter(timestep == !!timestep) |>
-        dplyr::select(-timestep) |>
-        dplyr::collect() |> data.table::as.data.table(),
-      by = c("chunk_index", "raster_index")
-    )[, .(pixel_index, index, chunk_index, cohort_index)],
-    arrow::open_dataset(paths$flat) |>
-      dplyr::filter(timestep == !!timestep) |>
-      dplyr::select(-timestep) |>
-      dplyr::collect() |> data.table::as.data.table(),
-    by = c("index", "chunk_index", "cohort_index")
-  )
-  cohortDT[, c("index", "chunk_index", "cohort_index") := NULL]
+  cols <- cbm4_results$get_columns("simulation")
+  classifiers <- gsub("^classifiers\\.", "", cols[grepl("^classifiers\\.", cols)])
 
-  data.table::setkey(cohortDT, pixel_index)
-  data.table::setcolorder(cohortDT, unique(c(
-    "pixel_index",
-    names(cohortDT)[!grepl("^(classifiers|inventory|state|pools)\\.", names(cohortDT))],
-    names(cohortDT)[grepl("^classifiers\\.", names(cohortDT))],
-    names(cohortDT)[grepl("^inventory\\.", names(cohortDT))],
-    names(cohortDT)[grepl("^state\\.", names(cohortDT))],
-    names(cohortDT)[grepl("^pools\\.", names(cohortDT))]
-  )))
+  cbm4Summary <- cbm4_results_query(cbm4_results, c(
+    "SELECT",
+    "a.raster_index, b.chunk_index, b.cohort_index, b.cohort_proportion,",
+    sprintf("b.\"classifiers.%1$s\" AS %1$s,", classifiers),
+    sprintf("b.\"%1s\",", cols[grepl("^state\\.", cols)]),
+    sprintf("b.\"%1s\",", cols[grepl("^pools\\.", cols)]),
+    "FROM raster_index a LEFT JOIN simulation b ON a.index = b.index",
+    "WHERE a.timestep =", timestep,
+      "AND b.timestep =", timestep
+  ))
 
-  cohortDT[, names(cohortDT)[grepl("^inventory\\.", names(cohortDT))] := NULL]
+  # Merge with pixels table
+  results_dataset <- reticulate::py_get_attr(cbm4_results, "_results_dataset")$simulation_dataset
+  if ("pixels" %in% results_dataset$list_tables()){
 
-  classifierCols <- names(cohortDT)[grepl("^classifiers\\.", names(cohortDT))]
-  data.table::setnames(cohortDT, classifierCols, gsub("^classifiers\\.", "", classifierCols))
+    cbm4Summary <- merge(
+      cbm4Summary,
+      dplyr::collect(
+        results_dataset$read_table_pyarrow(
+          "pixels", read_cols = c("pixel_index", "raster_index", "chunk_index"))
+      ),
+      by = c("raster_index", "chunk_index"))
+    cbm4Summary[, c("raster_index", "chunk_index", "cohort_index") := NULL]
 
-  cohortDT
+    data.table::setkey(cbm4Summary, pixel_index)
+    data.table::setcolorder(cbm4Summary)
+  }
+
+  return(cbm4Summary)
 }
 
