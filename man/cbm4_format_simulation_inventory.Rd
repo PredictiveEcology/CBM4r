@@ -37,6 +37,17 @@ Column names of inventory identifiers.}
 \item{def_cohort_proportion}{integer. A value between 0-1.
 Percentage of the pixel's area that is attributed to the cohort.}
 
+\item{def_state.enabled}{integer. TODO}
+
+\item{def_state.growth_enabled}{integer. TODO}
+
+\item{def_state.growth_multiplier}{integer. TODO}
+
+\item{def_state.regeneration_delay}{integer. Regeneration delay.}
+
+\item{def_state.land_class}{character. Land class code.
+Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.}
+
 \item{...}{unused}
 }
 \value{

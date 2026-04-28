@@ -106,10 +106,16 @@ cbm4_write_simulation_inventory <- function(
 #' @template grid_meta
 #' @template timestep
 #' @template classifiers
+#' @param col_ignore character. Names of `cohortDT` columns to exclude
+#' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
 #' @param def_cohort_proportion integer. A value between 0-1.
 #' Percentage of the pixel's area that is attributed to the cohort.
-#' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
-#' @param col_ignore character. Names of `cohortDT` columns to exclude
+#' @param def_state.enabled integer. TODO
+#' @param def_state.growth_enabled integer. TODO
+#' @param def_state.growth_multiplier integer. TODO
+#' @param def_state.regeneration_delay integer. Regeneration delay.
+#' @param def_state.land_class character. Land class code.
+#' Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.
 #' @param ... unused
 #' @return list with items:
 #' **index**: `arrow_space` raster indexed `data.table`;
