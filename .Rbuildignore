@@ -1,4 +1,6 @@
 ^\.github$
+^\.positai$
+^\.claude$
 ^codecov\.yml$
 ^CBM4r\.Rproj$
 ^\.Rproj\.user$
