@@ -4,7 +4,7 @@
 \alias{cbm4_read_simulation_inventory}
 \title{CBM4 read simulation inventory}
 \usage{
-cbm4_read_simulation_inventory(cbm4_results = NULL, timestep)
+cbm4_read_simulation_inventory(cbm4_results, timestep)
 }
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
