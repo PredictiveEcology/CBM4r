@@ -4,26 +4,14 @@
 \alias{cbm4_read_simulation_inventory}
 \title{CBM4 read simulation inventory}
 \usage{
-cbm4_read_simulation_inventory(
-  cbm4_data = NULL,
-  timestep,
-  dataset_name = "simulation",
-  dataset_path = file.path(cbm4_data, dataset_name)
-)
+cbm4_read_simulation_inventory(cbm4_results = NULL, timestep)
 }
 \arguments{
-\item{cbm4_data}{character.
-Path to CBM4 spatial parquet datasets directory.
-May be omitted if full paths to datasets are provided.}
+\item{cbm4_results}{character or \code{SQLResultsProcessor}.
+Path to CBM4 spatial datasets directory
+or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
-
-\item{dataset_name}{character.
-Name of the CBM4 spatial parquet dataset.}
-
-\item{dataset_path}{character.
-Path to the CBM4 spatial parquet dataset.
-Defaults to \code{file.path(cbm4_data, dataset_name)}}
 }
 \value{
 \code{data.table}

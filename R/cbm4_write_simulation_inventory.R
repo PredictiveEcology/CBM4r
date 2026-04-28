@@ -80,7 +80,12 @@ cbm4_write_simulation_inventory <- function(
     table_name   = NULL,
     table_data   = inv$flat,
     partitioning = c("timestep", "cohort_index", "chunk_index"),
-    schema       = list(inventory.area = arrow::float32(), state.age = arrow::float32())
+    schema       = list(
+      inventory.area       = arrow::float32(),
+      state.age            = arrow::int32(),
+      state.growth_enabled = arrow::int8(),
+      state.enabled        = arrow::int8()
+    )
   )
   arrow_space_dataset_write_table(
     dataset_name = dataset_name,
@@ -113,10 +118,15 @@ cbm4_format_simulation_inventory <- function(
     cohortDT,
     grid_meta,
     timestep,
-    classifiers           = NULL,
-    def_cohort_proportion = 1L,
-    area_unit_conversion  = 0.0001,
-    col_ignore            = NULL,
+    classifiers = NULL,
+    col_ignore  = NULL,
+    area_unit_conversion = 0.0001,
+    def_cohort_proportion        = 1L,
+    def_state.enabled            = 1L,
+    def_state.growth_enabled     = 1L,
+    def_state.growth_multiplier  = 1L,
+    def_state.regeneration_delay = 0L,
+    def_state.land_class         = "UNFCCC_FL_R_FL",  # "Forest Land remaining Forest Land"
     ...
 ){
 
@@ -161,7 +171,10 @@ cbm4_format_simulation_inventory <- function(
   if (!data.table::is.data.table(grid_meta)) grid_meta <- data.table::as.data.table(grid_meta)
 
   # Join with pixel table
-  dataFull <- merge(cohortDT, grid_meta, by = "pixel_index", all.x = TRUE)
+  dataFull <- merge(
+    cohortDT,
+    grid_meta[, .SD, .SDcols = c("pixel_index", "raster_index", "chunk_index", cohortCols$inventory)],
+    by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
 
   # Rename and check cohort columns
