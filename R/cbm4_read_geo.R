@@ -15,17 +15,10 @@ cbm4_read_geo <- function(
     dataset_path = file.path(cbm4_results, dataset_name)
 ){
 
-  if (is.character(cbm4_results)){
-    geo_metadata <- arrow_space_dataset_read_table(
-      dataset_name = dataset_name,
-      dataset_path = dataset_path,
-      table_name   = "geo_metadata"
-    )
-  }else{
+  cbm4_results <- cbm4_results_processor(cbm4_results)
 
-    geo_metadata <- reticulate::py_get_attr(cbm4_results, "_results_dataset")[[
-      paste0(dataset_name, "_dataset")]]$get_geo_metadata()
-  }
+  geo_metadata <- reticulate::py_get_attr(cbm4_results, "_results_dataset")[[
+    paste0(dataset_name, "_dataset")]]$get_geo_metadata()
 
   terra::rast(
     crs  = geo_metadata$projection,
