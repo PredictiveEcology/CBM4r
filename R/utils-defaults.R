@@ -6,10 +6,11 @@ set_table_defaults <- function(table, envir = parent.frame()){
     if (!is.null(defVal)){
       if (!defCol %in% names(table)){
         if (is.character(defVal)) defVal <- factor(defVal)
-        table[, eval(defCol) := defVal]
+        i <- NULL
       }else{
-        table[is.na(eval(defCol)), eval(defCol) := defVal]
+        i <- which(is.na(table[[defCol]]))
       }
+      data.table::set(table, i = i, j = defCol, value = defVal)
     }
   }
 }
