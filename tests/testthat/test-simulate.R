@@ -159,177 +159,114 @@ for (project in projects) test_that(paste("cbm4_read_geo:", project$test), {
 
 })
 
-for (project in projects) test_that(paste("cbm4_results_pools_by_timestep:", project$test), {
+for (project in projects) test_that(paste("cbm4_results_raster:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
-  grid_area    <- project$grid_area
   testthat::skip_if(is.null(cbm4_results))
 
-  cbm4Summary <- list()
-  for (units in c("t", "Mt")){
+  expect_s3_class(cbm4_results_raster(cbm4_data,    list = TRUE), "data.table")
+  expect_s3_class(cbm4_results_raster(cbm4_results, list = TRUE), "data.table")
 
-    cbm4Summary[[units]] <- cbm4_results_pools_by_timestep(cbm4_data, units)
+  rast_view_columns <- list(
+    "spatial_pool_indicators"                  = "SoftwoodMerch",
+    "spatial_composite_pool_indicators"        = "Softwood Merchantable",
+    "spatial_flux_indicators"                  = "DecayDOMCO2Emission",
+    "spatial_composite_flux_indicators"        = "Emissions - Emissions By Gas - Total CO2",
+    "spatial_disturbance_indicators"           = "DisturbanceSoftProduction",
+    "spatial_composite_disturbance_indicators" = "Ecosystem Transfers - Ecosystem to Forest Products - Total Harvest (Biomass + Snags)"
+  )
 
-    expect_s3_class(cbm4Summary[[units]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[units]]), "timestep")
-    expect_equal(cbm4Summary[[units]]$timestep, 0:2)
+  for (view_name in names(rast_view_columns)){
 
-    cbm4SumSubset <- cbm4_results_pools_by_timestep(cbm4_results, units, timesteps = 1)
+    resRast <- cbm4_results_raster(
+      cbm4_results,
+      view_name   = view_name,
+      view_column = rast_view_columns[[view_name]],
+      timesteps   = 1
+    )
 
-    expect_s3_class(cbm4SumSubset, "data.table")
-    expect_equal(data.table::key(cbm4SumSubset), "timestep")
-    expect_equal(cbm4SumSubset$timestep, 1)
+    expect_s4_class(resRast, "SpatRaster")
+    expect_equal(names(resRast), "1")
+
+    # Check using cbm4_data
+    expect_equal(terra::values(resRast), terra::values(
+      cbm4_results_raster(
+        cbm4_data,
+        view_name   = view_name,
+        view_column = rast_view_columns[[view_name]],
+        timesteps   = 1
+      )
+    ))
   }
-
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
-
-  expect_equal(
-    cbm4Summary[["t"]],
-    cbm4_results_pools_by_timestep(cbm4_results, "t"),
-    ignore_attr = TRUE)
 })
 
-for (project in projects) test_that(paste("cbm4_results_flux_by_timestep:", project$test), {
+for (project in projects) test_that(paste("cbm4_results_totals:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
-  grid_area    <- project$grid_area
   testthat::skip_if(is.null(cbm4_results))
 
-  cbm4Summary <- list()
-  for (units in c("t", "Mt")){
+  expect_s3_class(cbm4_results_totals(cbm4_data,    list = TRUE), "data.table")
+  expect_s3_class(cbm4_results_totals(cbm4_results, list = TRUE), "data.table")
 
-    cbm4Summary[[units]] <- cbm4_results_flux_by_timestep(cbm4_data, units)
+  total_view_columns <- list(
+    "pool_indicators"                  = "SoftwoodMerch",
+    "composite_pool_indicators"        = "Softwood Merchantable",
+    "flux_indicators"                  = "DecayDOMCO2Emission",
+    "composite_flux_indicators"        = "Emissions - Emissions By Gas - Total CO2",
+    "disturbance_indicators"           = "DisturbanceSoftProduction",
+    "composite_disturbance_indicators" = "Ecosystem Transfers - Ecosystem to Forest Products - Total Harvest (Biomass + Snags)"
+  )
+  total_view_timesteps <- list(
+    "pool_indicators"                  = 0:2,
+    "composite_pool_indicators"        = 0:2,
+    "flux_indicators"                  = 1:2,
+    "composite_flux_indicators"        = 1:2,
+    "disturbance_indicators"           = if (!is.null(project$distEvents)) 1:2 else integer(),
+    "composite_disturbance_indicators" = if (!is.null(project$distEvents)) 1:2 else integer()
+  )
 
-    expect_s3_class(cbm4Summary[[units]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[units]]), "timestep")
-    expect_equal(cbm4Summary[[units]]$timestep, 1:2)
+  for (view_name in names(total_view_columns)){
 
-    cbm4SumSubset <- cbm4_results_flux_by_timestep(cbm4_results, units, timesteps = 1)
+    resTotals <- cbm4_results_totals(cbm4_results, view_name = view_name)
 
-    expect_s3_class(cbm4SumSubset, "data.table")
-    expect_equal(data.table::key(cbm4SumSubset), "timestep")
-    expect_equal(cbm4SumSubset$timestep, 1L)
+    expect_s3_class(resTotals, "data.frame")
+    expect_gt(ncol(resTotals), 2)
+    expect_equal(resTotals$timestep, total_view_timesteps[[view_name]])
+
+    # Check setting units
+    expect_equal(
+      cbm4_results_totals(cbm4_results, view_name = view_name, units = "Mt")[, -c("timestep")],
+      resTotals[, -c("timestep")] / 10^6,
+      ignore_attr = TRUE, tolerance = 0.000001)
+
+    expect_equal(
+      cbm4_results_totals(cbm4_results, view_name = view_name, units = "t/ha")[, -c("timestep", "area")],
+      resTotals[, -c("timestep")] / (project$grid_area * length(unique(project$cohortDT$pixel_index))),
+      ignore_attr = TRUE, tolerance = 0.000001)
+
+    # Check subsetting columns and timesteps
+    resTotals <- cbm4_results_totals(
+      cbm4_results,
+      view_name    = view_name,
+      view_columns = total_view_columns[[view_name]],
+      timesteps    = 1:2
+    )
+
+    expect_s3_class(resTotals, "data.frame")
+    expect_equal(names(resTotals), c("timestep", total_view_columns[[view_name]]))
+    expect_equal(resTotals$timestep, intersect(total_view_timesteps[[view_name]], 1:2))
+
+    # Check using cbm4_data
+    expect_equal(resTotals, cbm4_results_totals(
+      cbm4_data,
+      view_name    = view_name,
+      view_columns = total_view_columns[[view_name]],
+      timesteps    = 1:2
+    ), ignore_attr = TRUE)
   }
-
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
-
-  expect_equal(
-    cbm4Summary[["t"]],
-    cbm4_results_flux_by_timestep(cbm4_results, "t"),
-    ignore_attr = TRUE)
 })
-
-for (project in projects) test_that(paste("cbm4_results_emissions_by_timestep:", project$test), {
-
-  cbm4_data    <- project$cbm4_data
-  cbm4_results <- project$cbm4_results
-  grid_area    <- project$grid_area
-  testthat::skip_if(is.null(cbm4_results))
-
-  cbm4Summary <- list()
-  for (units in c("t", "Mt")){
-
-    cbm4Summary[[units]] <- cbm4_results_emissions_by_timestep(cbm4_data, units)
-
-    expect_s3_class(cbm4Summary[[units]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[units]]), "timestep")
-    expect_equal(cbm4Summary[[units]]$timestep, 1:2)
-
-    cbm4SumSubset <- cbm4_results_emissions_by_timestep(cbm4_results, units, timesteps = 1)
-
-    expect_s3_class(cbm4SumSubset, "data.table")
-    expect_equal(data.table::key(cbm4SumSubset), "timestep")
-    expect_equal(cbm4SumSubset$timestep, 1L)
-  }
-
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
-
-  expect_equal(
-    cbm4Summary[["t"]],
-    cbm4_results_emissions_by_timestep(cbm4_results, "t"),
-    ignore_attr = TRUE)
-})
-
-for (project in projects) test_that(paste("cbm4_results_pools_by_pixel:", project$test), {
-
-  cbm4_data    <- project$cbm4_data
-  cbm4_results <- project$cbm4_results
-  grid_area    <- project$grid_area
-  testthat::skip_if(is.null(cbm4_results))
-
-  cbm4Summary <- list()
-  for (units in c("t/ha", "t", "Mt")){
-
-    cbm4Summary[[units]] <- cbm4_results_pools_by_pixel(cbm4_results, units, timestep = 1)
-
-    expect_s3_class(cbm4Summary[[units]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[units]]), "pixel_index")
-    expect_equal(cbm4Summary[[units]]$pixel_index, c(1, 3, 4))
-  }
-
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["t/ha"]][, -1] * grid_area, ignore_attr = TRUE)
-
-  expect_equal(
-    cbm4Summary[["t"]],
-    cbm4_results_pools_by_pixel(cbm4_results, "t", timestep = 1),
-    ignore_attr = TRUE)
-})
-
-for (project in projects) test_that(paste("cbm4_results_flux_by_pixel:", project$test), {
-
-  cbm4_data    <- project$cbm4_data
-  cbm4_results <- project$cbm4_results
-  grid_area    <- project$grid_area
-  testthat::skip_if(is.null(cbm4_results))
-
-  cbm4Summary <- list()
-  for (units in c("t/ha", "t", "Mt")){
-
-    cbm4Summary[[units]] <- cbm4_results_flux_by_pixel(cbm4_results, units, timestep = 1)
-
-    expect_s3_class(cbm4Summary[[units]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[units]]), "pixel_index")
-    expect_equal(cbm4Summary[[units]]$pixel_index, c(1, 3, 4))
-  }
-
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["t/ha"]][, -1] * grid_area, ignore_attr = TRUE)
-
-  expect_equal(
-    cbm4Summary[["t"]],
-    cbm4_results_flux_by_pixel(cbm4_results, "t", timestep = 1),
-    ignore_attr = TRUE)
-})
-
-for (project in projects) test_that(paste("cbm4_results_emissions_by_pixel:", project$test), {
-
-  cbm4_data    <- project$cbm4_data
-  cbm4_results <- project$cbm4_results
-  grid_area    <- project$grid_area
-  testthat::skip_if(is.null(cbm4_results))
-
-  cbm4Summary <- list()
-  for (units in c("t/ha", "t", "Mt")){
-
-    cbm4Summary[[units]] <- cbm4_results_emissions_by_pixel(cbm4_results, units, timestep = 1)
-
-    expect_s3_class(cbm4Summary[[units]], "data.table")
-    expect_equal(data.table::key(cbm4Summary[[units]]), "pixel_index")
-    expect_equal(cbm4Summary[[units]]$pixel_index, c(1, 3, 4))
-  }
-
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["Mt"]][, -1] * 10^6, ignore_attr = TRUE)
-  expect_equal(cbm4Summary[["t"]][, -1], cbm4Summary[["t/ha"]][, -1] * grid_area, ignore_attr = TRUE)
-
-  expect_equal(
-    cbm4Summary[["t"]],
-    cbm4_results_emissions_by_pixel(cbm4_results, "t", timestep = 1),
-    ignore_attr = TRUE)
-})
-
 
 
 
