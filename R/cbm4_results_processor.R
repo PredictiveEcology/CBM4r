@@ -2,9 +2,10 @@
 #' CBM4 results processor
 #'
 #' @template cbm4_data
+#' @param views logical. Require views to be available
 #' @return `SQLResultsProcessor`
 #' @export
-cbm4_results_processor <- function(cbm4_data){
+cbm4_results_processor <- function(cbm4_data, views = TRUE){
 
   if (inherits(cbm4_data, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")){
     return(cbm4_data)
@@ -14,7 +15,7 @@ cbm4_results_processor <- function(cbm4_data){
   if (!file.exists(cbm4_data)) stop("cbm4_data not found: ", cbm4_data)
   cbm4_data <- normalizePath(cbm4_data, winslash = "/", mustWork = FALSE)
 
-  simulation_dataset_set_disturbance_schema(cbm4_data)
+  if (views) simulation_dataset_set_disturbance_schema(cbm4_data)
 
   reticulate::import(
     "cbm4.app.spatial.results.sql_results_processor"
@@ -52,7 +53,7 @@ simulation_dataset_set_disturbance_schema <- function(cbm4_data){
       arrow::arrow_table(schema = arrow::unify_schemas(
         arrow::schema(
           cohort_proportion     = arrow::float(),
-          disturbance_type      = arrow::int32(),
+          disturbance_type      = arrow::int64(),
           disturbance_type_name = arrow::string(),
           disturbance_number    = arrow::int32(),
           disturbance_id        = arrow::int32(),

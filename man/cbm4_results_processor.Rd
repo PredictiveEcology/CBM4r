@@ -4,12 +4,14 @@
 \alias{cbm4_results_processor}
 \title{CBM4 results processor}
 \usage{
-cbm4_results_processor(cbm4_data)
+cbm4_results_processor(cbm4_data, views = TRUE)
 }
 \arguments{
 \item{cbm4_data}{character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
+
+\item{views}{logical. Require views to be available}
 }
 \value{
 \code{SQLResultsProcessor}
