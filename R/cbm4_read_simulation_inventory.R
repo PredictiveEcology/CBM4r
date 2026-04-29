@@ -10,7 +10,7 @@
 #' @export
 cbm4_read_simulation_inventory <- function(cbm4_results, timestep){
 
-  cbm4_results <- cbm4_results_processor(cbm4_results)
+  cbm4_results <- cbm4_results_processor(cbm4_results, views = FALSE)
 
   cols <- cbm4_results$get_columns("simulation")
   classifiers <- gsub("^classifiers\\.", "", cols[grepl("^classifiers\\.", cols)])
