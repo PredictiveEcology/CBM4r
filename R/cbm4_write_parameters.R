@@ -147,7 +147,6 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
       gcMeta[, spatial_unit := "?"]
     }
   }
-  if (!"sw" %in% names(gcMeta) & "sw_hw" %in% names(gcMeta)) gcMeta[, sw := sw_hw == "sw"]
 
   # Check table columns
   check_table_columns_all("gcMeta", gcMeta, c("gcID", "spatial_unit", classifiers, "sw"))
