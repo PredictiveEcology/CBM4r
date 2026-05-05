@@ -47,5 +47,7 @@ arrow_space_dataset_copy <- function(
       overwrite     = overwrite
     )
   }
+
+  return(invisible())
 }
 

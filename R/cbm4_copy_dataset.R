@@ -29,8 +29,6 @@ cbm4_copy_dataset <- function(
     template_path = template_path,
     ...
   )
-
-  return(invisible())
 }
 
 
