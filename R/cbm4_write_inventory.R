@@ -14,13 +14,13 @@
 #' @export
 cbm4_write_inventory <- function(
     cbm4_data = NULL,
-    cbm_defaults_db,
     cohortDT,
     classifiers,
     grid_rast,
     grid_meta,
     dataset_name = "inventory",
     dataset_path = file.path(cbm4_data, dataset_name),
+    cbm_defaults_db = getOption("CBM4r.db.path"),
     ...
 ){
 

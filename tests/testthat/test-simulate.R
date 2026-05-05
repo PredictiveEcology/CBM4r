@@ -26,12 +26,11 @@ for (project in projects) test_that(paste("cbm4_write_inventory:", project$test)
 
   cbm4_write_inventory(
     cbm4_data,
-    cbm_defaults_db = cbm_defaults_db,
-    cohortDT        = project$cohortDT,
-    classifiers     = project$classifiers,
-    grid_rast       = project$grid_rast,
-    grid_meta       = project$grid_meta,
-    chunk_size      = 2
+    cohortDT    = project$cohortDT,
+    classifiers = project$classifiers,
+    grid_rast   = project$grid_rast,
+    grid_meta   = project$grid_meta,
+    chunk_size  = 2
   )
 
   expect_true(file.exists(file.path(cbm4_data, "inventory")))
@@ -45,9 +44,8 @@ for (project in projects) test_that(paste("cbm4_write_disturbance:", project$tes
 
   cbm4_write_disturbance(
     cbm4_data,
-    cbm_defaults_db = cbm_defaults_db,
-    distMeta        = project$distMeta,
-    distEvents      = project$distEvents
+    distMeta   = project$distMeta,
+    distEvents = project$distEvents
   )
 
   expect_true(file.exists(file.path(cbm4_data, "disturbance")))
@@ -61,10 +59,9 @@ for (project in projects) test_that(paste("cbm4_write_spinup_parameters:", proje
 
   cbm4_write_spinup_parameters(
     cbm4_data,
-    cbm_defaults_db = cbm_defaults_db,
-    classifiers     = project$classifiers,
-    gcMeta          = project$gcMeta,
-    gcIncr          = project$gcIncr
+    classifiers = project$classifiers,
+    gcMeta      = project$gcMeta,
+    gcIncr      = project$gcIncr
   )
 
   expect_true(file.exists(file.path(cbm4_data, "spinup_parameters")))
@@ -78,10 +75,9 @@ for (project in projects) test_that(paste("cbm4_write_step_parameters:", project
 
   cbm4_write_step_parameters(
     cbm4_data,
-    cbm_defaults_db = cbm_defaults_db,
-    classifiers     = project$classifiers,
-    gcMeta          = project$gcMeta,
-    gcIncr          = project$gcIncr
+    classifiers = project$classifiers,
+    gcMeta      = project$gcMeta,
+    gcIncr      = project$gcIncr
   )
 
   expect_true(file.exists(file.path(cbm4_data, "step_parameters")))
@@ -93,7 +89,7 @@ for (project in projects) test_that(paste("cbm4_spinup:", project$test), {
   cbm4_data <- project$cbm4_data
   testthat::skip_if(!file.exists(file.path(cbm4_data, "inventory")))
 
-  cbm4_spinup(cbm4_data, cbm_defaults_db = cbm_defaults_db)
+  cbm4_spinup(cbm4_data)
 
   expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=0")))
 
@@ -104,7 +100,7 @@ for (project in projects) test_that(paste("cbm4_step:", project$test), {
   cbm4_data <- project$cbm4_data
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=0")))
 
-  cbm4_step(cbm4_data, cbm_defaults_db = cbm_defaults_db, timestep = 1)
+  cbm4_step(cbm4_data, timestep = 1)
 
   expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=1")))
 
@@ -122,7 +118,7 @@ for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_
     cohortDT = cohortDT,
     timestep = 1)
 
-  cbm4_step(cbm4_data, cbm_defaults_db = cbm_defaults_db, timestep = 2)
+  cbm4_step(cbm4_data, timestep = 2)
 
   expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=2")))
 

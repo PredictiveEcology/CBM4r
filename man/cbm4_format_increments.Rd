@@ -9,7 +9,7 @@ cbm4_format_increments(
   gcIncr,
   classifiers,
   long = TRUE,
-  cbm_defaults_db = NULL
+  cbm_defaults_db = getOption("CBM4r.db.path")
 )
 }
 \arguments{

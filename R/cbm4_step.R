@@ -19,11 +19,11 @@
 #' @export
 cbm4_step <- function(
     cbm4_data = NULL,
-    cbm_defaults_db,
     timestep,
     area_unit_conversion    = 0.0001,
     write_parameters        = FALSE,
     max_workers             = NULL,
+    cbm_defaults_db         = getOption("CBM4r.db.path"),
     step_parameters_dataset = file.path(cbm4_data, "step_parameters"),
     inventory_dataset       = file.path(cbm4_data, "inventory"),
     disturbance_dataset     = file.path(cbm4_data, "disturbance"),

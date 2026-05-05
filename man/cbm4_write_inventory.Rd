@@ -6,13 +6,13 @@
 \usage{
 cbm4_write_inventory(
   cbm4_data = NULL,
-  cbm_defaults_db,
   cohortDT,
   classifiers,
   grid_rast,
   grid_meta,
   dataset_name = "inventory",
   dataset_path = file.path(cbm4_data, dataset_name),
+  cbm_defaults_db = getOption("CBM4r.db.path"),
   ...
 )
 }
@@ -20,9 +20,6 @@ cbm4_write_inventory(
 \item{cbm4_data}{character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
-
-\item{cbm_defaults_db}{character.
-Path to CBM defaults SQLite database.}
 
 \item{cohortDT}{data.table. Cohort inventory.}
 
@@ -45,6 +42,9 @@ Name of the CBM4 spatial parquet dataset.}
 \item{dataset_path}{character.
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
+
+\item{cbm_defaults_db}{character.
+Path to CBM defaults SQLite database.}
 
 \item{...}{arguments to \code{\link{cbm4_format_inventory}} or \code{\link{set_grid_meta}}}
 }

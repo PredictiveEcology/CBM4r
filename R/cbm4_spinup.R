@@ -14,8 +14,8 @@
 #' @export
 cbm4_spinup <- function(
     cbm4_data = NULL,
-    cbm_defaults_db,
     max_workers = NULL,
+    cbm_defaults_db = getOption("CBM4r.db.path"),
     spinup_parameters_dataset = file.path(cbm4_data, "spinup_parameters"),
     inventory_dataset         = file.path(cbm4_data, "inventory"),
     simulation_dataset        = file.path(cbm4_data, "simulation")

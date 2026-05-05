@@ -1,5 +1,8 @@
 
-cbmdbReadTable <- function(cbm_defaults_db, tableName, localeID = 1){
+# Read a CBM defaults SQLite database table
+cbm_defaults_db_table <- function(tableName,
+                                  cbm_defaults_db = getOption("CBM4r.db.path"),
+                                  localeID        = getOption("CBM4r.db.localeID")){
 
   if (length(cbm_defaults_db) == 0)  stop("cbm_defaults_db path invalid")
   if (!file.exists(cbm_defaults_db)) stop("cbm_defaults_db not found: ", cbm_defaults_db)

@@ -9,13 +9,13 @@ cbm4_format_disturbance(
   distEvents,
   grid_meta,
   classifiers = NULL,
-  cbm_defaults_db = NULL,
   def_proportion = 1L,
   def_enable_merge = 0L,
   def_sort_id = 0L,
   def_filter_id = 0L,
   def_undisturbed_transition_id = 0L,
   def_disturbed_transition_id = 0L,
+  cbm_defaults_db = getOption("CBM4r.db.path"),
   ...
 )
 }
@@ -29,9 +29,6 @@ cbm4_format_disturbance(
 \item{classifiers}{character.
 Column names of inventory identifiers.}
 
-\item{cbm_defaults_db}{character.
-Path to CBM defaults SQLite database.}
-
 \item{def_proportion}{integer. TODO}
 
 \item{def_enable_merge}{integer. TODO}
@@ -43,6 +40,9 @@ Path to CBM defaults SQLite database.}
 \item{def_undisturbed_transition_id}{integer. Set to 0 to indicate no transitions.}
 
 \item{def_disturbed_transition_id}{integer. Set to 0 to indicate no transitions.}
+
+\item{cbm_defaults_db}{character.
+Path to CBM defaults SQLite database.}
 
 \item{...}{unused}
 }

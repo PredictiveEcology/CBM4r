@@ -40,15 +40,15 @@ cbm4_write_step_parameters  <- function(...){
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 cbm4_write_parameters <- function(
     cbm4_data = NULL,
-    cbm_defaults_db,
     gcMeta,
     gcIncr,
     classifiers,
     dataset_name,
     spinup,
-    template_name = "inventory",
-    template_path = file.path(cbm4_data, template_name),
-    dataset_path  = file.path(cbm4_data, dataset_name)
+    template_name   = "inventory",
+    template_path   = file.path(cbm4_data, template_name),
+    dataset_path    = file.path(cbm4_data, dataset_name),
+    cbm_defaults_db = getOption("CBM4r.db.path")
 ){
 
   # Initiate dataset from template
@@ -131,7 +131,8 @@ cbm4_write_parameters <- function(
 #'
 #' @return data.table
 #' @keywords internal
-cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm_defaults_db = NULL){
+cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE,
+                                   cbm_defaults_db = getOption("CBM4r.db.path")){
 
   # Read tables
   gcMeta <- data.table::as.data.table(gcMeta)
@@ -141,7 +142,7 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE, cbm
   if (!"spatial_unit" %in% names(gcMeta)){
     if (any(c("admin_boundary_id", "admin_boundary", "admin_abbrev",
               "eco_boundary_id", "eco_boundary") %in% names(gcMeta))){
-      set_table_spatial_units(gcMeta, "gcMeta", cbm_defaults_db = cbm_defaults_db, naOK = TRUE)
+      set_table_spatial_units(gcMeta, cbm_defaults_db, naOK = TRUE)
       gcMeta[is.na(spatial_unit), spatial_unit := "?"]
     }else{
       gcMeta[, spatial_unit := "?"]

@@ -2,16 +2,16 @@
 cbm4_write_parameters_decay <- function(
     cbm4_data = NULL,
     dataset_name,
-    cbm_defaults_db,
-    dataset_path  = file.path(cbm4_data, dataset_name)
+    dataset_path    = file.path(cbm4_data, dataset_name),
+    cbm_defaults_db = getOption("CBM4r.db.path")
 ){
 
   # Read and format parameters
-  params <- cbmdbReadTable(cbm_defaults_db, "decay_parameter")
+  params <- cbm_defaults_db_table("decay_parameter", cbm_defaults_db)
 
   domPools <- merge(
-    cbmdbReadTable(cbm_defaults_db, "dom_pool"),
-    cbmdbReadTable(cbm_defaults_db, "pool"),
+    cbm_defaults_db_table("dom_pool", cbm_defaults_db),
+    cbm_defaults_db_table("pool",     cbm_defaults_db),
     by.x = "pool_id", by.y = "id")
 
   decayRemap <- list(
@@ -48,17 +48,17 @@ cbm4_write_parameters_decay <- function(
 cbm4_write_parameters_turnover <- function(
     cbm4_data = NULL,
     dataset_name,
-    cbm_defaults_db,
-    dataset_path  = file.path(cbm4_data, dataset_name)
+    dataset_path    = file.path(cbm4_data, dataset_name),
+    cbm_defaults_db = getOption("CBM4r.db.path")
 ){
 
   # Read and format parameters
   params <- merge(
     merge(
-      cbmdbReadTable(cbm_defaults_db, "spatial_unit")[, .(inventory.spatial_unit = id, id = eco_boundary_id)],
-      cbmdbReadTable(cbm_defaults_db, "eco_boundary"),
+      cbm_defaults_db_table("spatial_unit", cbm_defaults_db)[, .(inventory.spatial_unit = id, id = eco_boundary_id)],
+      cbm_defaults_db_table("eco_boundary", cbm_defaults_db),
       by = "id")[, .(inventory.spatial_unit, id = turnover_parameter_id)],
-    cbmdbReadTable(cbm_defaults_db, "turnover_parameter")[, .(
+    cbm_defaults_db_table("turnover_parameter", cbm_defaults_db)[, .(
       id,
       turnover.sw_merch                      = stem_turnover,     # merch = stem; same for SW or HW
       turnover.sw_foliage                    = sw_foliage,
@@ -85,7 +85,7 @@ cbm4_write_parameters_turnover <- function(
 
   data.table::setkey(params, inventory.spatial_unit)
   params[, id := NULL]
-  params[, turnover.slow_mixing_rate := cbmdbReadTable(cbm_defaults_db, "slow_mixing_rate")$rate]
+  params[, turnover.slow_mixing_rate := cbm_defaults_db_table("slow_mixing_rate", cbm_defaults_db)$rate]
 
   # Write parameters
   table_name <- "parameters_turnover"
@@ -105,13 +105,13 @@ cbm4_write_parameters_turnover <- function(
 cbm4_write_parameters_root <- function(
     cbm4_data = NULL,
     dataset_name,
-    cbm_defaults_db,
-    dataset_path  = file.path(cbm4_data, dataset_name)
+    dataset_path    = file.path(cbm4_data, dataset_name),
+    cbm_defaults_db = getOption("CBM4r.db.path")
 ){
 
   # Read and format parameters
   params <- cbind(
-    cbmdbReadTable(cbm_defaults_db, "root_parameter")[, .(
+    cbm_defaults_db_table("root_parameter", cbm_defaults_db)[, .(
       root.hw_a  = hw_a,
       root.sw_a  = sw_a,
       root.hw_b  = hw_b,
@@ -119,7 +119,7 @@ cbm4_write_parameters_root <- function(
       root.frp_b = frp_b,
       root.frp_c = frp_c
     )],
-    cbmdbReadTable(cbm_defaults_db, "biomass_to_carbon_rate")[, .(
+    cbm_defaults_db_table("biomass_to_carbon_rate", cbm_defaults_db)[, .(
       root.biomass_to_carbon_rate = rate
     )]
   )
@@ -142,15 +142,15 @@ cbm4_write_parameters_root <- function(
 cbm4_write_parameters_spinup <- function(
     cbm4_data = NULL,
     dataset_name,
-    cbm_defaults_db,
-    dataset_path  = file.path(cbm4_data, dataset_name)
+    dataset_path    = file.path(cbm4_data, dataset_name),
+    cbm_defaults_db = getOption("CBM4r.db.path")
 ){
 
   # Read and format parameters
   params <- merge(
-    cbmdbReadTable(cbm_defaults_db, "spatial_unit")[, .(
+    cbm_defaults_db_table("spatial_unit", cbm_defaults_db)[, .(
       inventory.spatial_unit = id, id = spinup_parameter_id, mean_annual_temperature)],
-    cbmdbReadTable(cbm_defaults_db, "spinup_parameter"),
+    cbm_defaults_db_table("spinup_parameter", cbm_defaults_db),
     by = "id", all.x = TRUE)
 
   data.table::setkey(params, inventory.spatial_unit)
@@ -178,12 +178,12 @@ cbm4_write_parameters_spinup <- function(
 cbm4_write_parameters_mean_annual_temp <- function(
     cbm4_data = NULL,
     dataset_name,
-    cbm_defaults_db,
-    dataset_path  = file.path(cbm4_data, dataset_name)
+    dataset_path    = file.path(cbm4_data, dataset_name),
+    cbm_defaults_db = getOption("CBM4r.db.path")
 ){
 
   # Read and format parameters
-  params <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")[, .(
+  params <- cbm_defaults_db_table("spatial_unit", cbm_defaults_db)[, .(
     inventory.spatial_unit = id,
     mean_annual_temperature
   )]

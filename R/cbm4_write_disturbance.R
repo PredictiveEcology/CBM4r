@@ -106,13 +106,13 @@ cbm4_format_disturbance <- function(
     distEvents,
     grid_meta,
     classifiers = NULL,
-    cbm_defaults_db = NULL,
     def_proportion                = 1L,
     def_enable_merge              = 0L,
     def_sort_id                   = 0L,
     def_filter_id                 = 0L,
     def_undisturbed_transition_id = 0L,
     def_disturbed_transition_id   = 0L,
+    cbm_defaults_db = getOption("CBM4r.db.path"),
     ...
 ){
 
@@ -154,7 +154,7 @@ cbm4_format_disturbance <- function(
   # Set disturbance_type_id
   if (!"disturbance_type_id" %in% names(dataFull)){
 
-    disturbance_type_tr <- cbmdbReadTable(cbm_defaults_db, "disturbance_type_tr")
+    disturbance_type_tr <- cbm_defaults_db_table("disturbance_type_tr", cbm_defaults_db)
 
     dataFull[, disturbance_type_id := disturbance_type_tr$disturbance_type_id[
       match(disturbance_type, disturbance_type_tr$name)]]
@@ -167,7 +167,7 @@ cbm4_format_disturbance <- function(
   # Set disturbance_type
   if (!"disturbance_type" %in% names(dataFull)){
 
-    disturbance_type_tr <- cbmdbReadTable(cbm_defaults_db, "disturbance_type_tr")
+    disturbance_type_tr <- cbm_defaults_db_table("disturbance_type_tr", cbm_defaults_db)
 
     dataFull[, disturbance_type := factor(
       disturbance_type_tr$name[match(disturbance_type_id, disturbance_type_tr$disturbance_type_id)],

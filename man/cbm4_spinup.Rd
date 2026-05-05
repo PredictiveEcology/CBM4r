@@ -6,8 +6,8 @@
 \usage{
 cbm4_spinup(
   cbm4_data = NULL,
-  cbm_defaults_db,
   max_workers = NULL,
+  cbm_defaults_db = getOption("CBM4r.db.path"),
   spinup_parameters_dataset = file.path(cbm4_data, "spinup_parameters"),
   inventory_dataset = file.path(cbm4_data, "inventory"),
   simulation_dataset = file.path(cbm4_data, "simulation")
@@ -18,13 +18,13 @@ cbm4_spinup(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
 
-\item{cbm_defaults_db}{character.
-Path to CBM defaults SQLite database.}
-
 \item{max_workers}{integer.
 Number of parallel processes to use.
 NULL or NA will bypass this and and cap processing at the system's available resources.
 A positive integer will spawn multiple processes assigned to each \code{chunk_index}.}
+
+\item{cbm_defaults_db}{character.
+Path to CBM defaults SQLite database.}
 
 \item{spinup_parameters_dataset}{character.
 Path to spinup parameters CBM4 spatial parquet dataset.

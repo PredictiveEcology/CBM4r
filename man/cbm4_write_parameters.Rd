@@ -6,7 +6,6 @@
 \usage{
 cbm4_write_parameters(
   cbm4_data = NULL,
-  cbm_defaults_db,
   gcMeta,
   gcIncr,
   classifiers,
@@ -14,16 +13,14 @@ cbm4_write_parameters(
   spinup,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
-  dataset_path = file.path(cbm4_data, dataset_name)
+  dataset_path = file.path(cbm4_data, dataset_name),
+  cbm_defaults_db = getOption("CBM4r.db.path")
 )
 }
 \arguments{
 \item{cbm4_data}{character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
-
-\item{cbm_defaults_db}{character.
-Path to CBM defaults SQLite database.}
 
 \item{gcMeta}{data.table. Growth curve metadata}
 
@@ -47,6 +44,9 @@ Defaults to \code{file.path(cbm4_data, template_name)}}
 \item{dataset_path}{character.
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
+
+\item{cbm_defaults_db}{character.
+Path to CBM defaults SQLite database.}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.

@@ -49,9 +49,4 @@ if (as.logical(Sys.getenv("CI", "false"))){
                       .local_envir = testthat::teardown_env())
 }
 
-# Download CBM-CFS3 defaults database
-cbm_defaults_db <- file.path(testDirs$temp$inputs, "cbm_defaults.db")
-if (!file.exists(cbm_defaults_db)) download.file(
-  "https://raw.githubusercontent.com/cat-cfs/libcbm_py/main/libcbm/resources/cbm_defaults_db/cbm_defaults_v1.2.9300.391.db",
-  cbm_defaults_db, mode = "wb", quiet = TRUE)
 

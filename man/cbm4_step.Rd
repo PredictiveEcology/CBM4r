@@ -6,11 +6,11 @@
 \usage{
 cbm4_step(
   cbm4_data = NULL,
-  cbm_defaults_db,
   timestep,
   area_unit_conversion = 1e-04,
   write_parameters = FALSE,
   max_workers = NULL,
+  cbm_defaults_db = getOption("CBM4r.db.path"),
   step_parameters_dataset = file.path(cbm4_data, "step_parameters"),
   inventory_dataset = file.path(cbm4_data, "inventory"),
   disturbance_dataset = file.path(cbm4_data, "disturbance"),
@@ -21,9 +21,6 @@ cbm4_step(
 \item{cbm4_data}{character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
-
-\item{cbm_defaults_db}{character.
-Path to CBM defaults SQLite database.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 
@@ -36,6 +33,9 @@ This will have 1 row for every cohort and timestep (just the increments at the c
 Number of parallel processes to use.
 NULL or NA will bypass this and and cap processing at the system's available resources.
 A positive integer will spawn multiple processes assigned to each \code{chunk_index}.}
+
+\item{cbm_defaults_db}{character.
+Path to CBM defaults SQLite database.}
 
 \item{step_parameters_dataset}{character.
 Path to step parameters CBM4 spatial parquet dataset.

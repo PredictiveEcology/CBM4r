@@ -4,18 +4,18 @@
 #' @export
 cbm4_set_grid_meta <- function(
     grid_meta,
-    cbm_defaults_db = NULL,
     def_afforestation_pre_type     = "None",
     def_historic_disturbance_type  = "Wildfire",
     def_last_pass_disturbance_type = "Wildfire",
+    cbm_defaults_db = getOption("CBM4r.db.path"),
     ...){
 
   set_grid_meta(
     grid_meta,
-    cbm_defaults_db,
     def_afforestation_pre_type     = def_afforestation_pre_type,
     def_historic_disturbance_type  = def_historic_disturbance_type,
     def_last_pass_disturbance_type = def_last_pass_disturbance_type,
+    cbm_defaults_db = cbm_defaults_db
   )
 }
 
@@ -44,10 +44,10 @@ cbm4_set_grid_meta <- function(
 #' @keywords internal
 set_grid_meta <- function(
     grid_meta,
-    cbm_defaults_db = NULL,
     def_afforestation_pre_type     = "None",
     def_historic_disturbance_type  = "Wildfire",
     def_last_pass_disturbance_type = "Wildfire",
+    cbm_defaults_db = getOption("CBM4r.db.path"),
     ...
 ){
 
@@ -59,7 +59,7 @@ set_grid_meta <- function(
   if (!"raster_index" %in% names(grid_meta)) data.table::set(grid_meta, j = "raster_index", value = grid_meta$pixel_index - 1)
 
   # Set spatial units
-  set_table_spatial_units(grid_meta, "grid_meta", cbm_defaults_db = cbm_defaults_db)
+  set_table_spatial_units(grid_meta, cbm_defaults_db)
 
   # Set defaults
   set_table_defaults(grid_meta)
@@ -75,7 +75,7 @@ set_grid_meta <- function(
   return(grid_meta)
 }
 
-set_table_spatial_units <- function(table, tableName = "table", naOK = FALSE, cbm_defaults_db = NULL){
+set_table_spatial_units <- function(table, cbm_defaults_db = getOption("CBM4r.db.path"), naOK = FALSE){
 
   if (nrow(table) == 0){
     if (!"admin_boundary" %in% names(table)) table[, admin_boundary := character(0)]
@@ -126,10 +126,10 @@ set_table_spatial_units <- function(table, tableName = "table", naOK = FALSE, cb
 
   if (!all(c("admin_boundary", "eco_boundary", "spatial_unit") %in% names(table))){
 
-    admin_tr <- cbmdbReadTable(cbm_defaults_db, "admin_boundary_tr")[, .(admin_boundary_id, admin_boundary = name)]
+    admin_tr <- cbm_defaults_db_table("admin_boundary_tr", cbm_defaults_db)[, .(admin_boundary_id, admin_boundary = name)]
     if (naOK) admin_tr <- rbind(admin_tr, data.frame(admin_boundary_id = 0, admin_boundary = "?"))
 
-    eco_tr <- cbmdbReadTable(cbm_defaults_db, "eco_boundary_tr")[, .(eco_boundary_id, eco_boundary = name)]
+    eco_tr <- cbm_defaults_db_table("eco_boundary_tr", cbm_defaults_db)[, .(eco_boundary_id, eco_boundary = name)]
     if (naOK) eco_tr <- rbind(eco_tr, data.frame(eco_boundary_id = 0, eco_boundary = "?"))
 
     if (!"admin_boundary" %in% names(table)){
@@ -146,7 +146,7 @@ set_table_spatial_units <- function(table, tableName = "table", naOK = FALSE, cb
 
     if (!"spatial_unit" %in% names(table)){
 
-      spatial_unit <- cbmdbReadTable(cbm_defaults_db, "spatial_unit")[, .(id, admin_boundary_id, eco_boundary_id)]
+      spatial_unit <- cbm_defaults_db_table("spatial_unit", cbm_defaults_db)[, .(id, admin_boundary_id, eco_boundary_id)]
       if (naOK) spatial_unit <- rbind(spatial_unit, data.frame(id = 0, admin_boundary_id = 0, eco_boundary_id = 0))
 
       if (!"admin_boundary_id" %in% names(table)){
