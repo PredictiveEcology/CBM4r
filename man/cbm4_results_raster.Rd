@@ -6,8 +6,8 @@
 \usage{
 cbm4_results_raster(
   cbm4_results,
-  view_name,
-  view_column,
+  view_name = NULL,
+  view_column = NULL,
   timesteps = NULL,
   list = FALSE
 )
@@ -17,7 +17,8 @@ cbm4_results_raster(
 Path to CBM4 spatial datasets directory
 or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
 
-\item{view_name}{character. \code{SQLResultsProcessor} view name.}
+\item{view_name}{character. \code{SQLResultsProcessor} view name.
+If NULL the function will return an empty study area grid.}
 
 \item{view_column}{character. \code{SQLResultsProcessor} view column name.}
 

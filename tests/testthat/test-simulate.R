@@ -144,26 +144,21 @@ for (project in projects) test_that(paste("cbm4_results_processor:", project$tes
 
 })
 
-for (project in projects) test_that(paste("cbm4_read_geo:", project$test), {
-
-  cbm4_data    <- project$cbm4_data
-  cbm4_results <- project$cbm4_results
-  testthat::skip_if(is.null(cbm4_results))
-
-  expect_true(terra::compareGeom(project$grid_rast, cbm4_read_geo(cbm4_data)))
-  expect_true(terra::compareGeom(project$grid_rast, cbm4_read_geo(cbm4_results)))
-
-})
-
 for (project in projects) test_that(paste("cbm4_results_raster:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   testthat::skip_if(is.null(cbm4_results))
 
+  # Check listing options
   expect_s3_class(cbm4_results_raster(cbm4_data,    list = TRUE), "data.table")
   expect_s3_class(cbm4_results_raster(cbm4_results, list = TRUE), "data.table")
 
+  # Check creating empty grid
+  expect_true(terra::compareGeom(cbm4_results_raster(cbm4_data),  project$grid_rast))
+  expect_true(terra::compareGeom(cbm4_results_grid(cbm4_results), project$grid_rast))
+
+  # Check setting values from views
   rast_view_columns <- list(
     "spatial_pool_indicators"                  = "SoftwoodMerch",
     "spatial_composite_pool_indicators"        = "Softwood Merchantable",
@@ -182,7 +177,7 @@ for (project in projects) test_that(paste("cbm4_results_raster:", project$test),
       timesteps   = 1
     )
 
-    expect_s4_class(resRast, "SpatRaster")
+    expect_true(terra::compareGeom(resRast, project$grid_rast))
     expect_equal(names(resRast), "1")
 
     # Check using cbm4_data

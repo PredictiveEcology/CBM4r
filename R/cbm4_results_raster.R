@@ -5,13 +5,20 @@
 #'
 #' @template cbm4_results
 #' @param view_name character. `SQLResultsProcessor` view name.
+#' If NULL the function will return an empty study area grid.
 #' @param view_column character. `SQLResultsProcessor` view column name.
 #' @template timesteps
 #' @param list logical. Return a table of options.
 #'
 #' @return `SpatRaster`
 #' @export
-cbm4_results_raster <- function(cbm4_results, view_name, view_column, timesteps = NULL, list = FALSE){
+cbm4_results_raster <- function(
+    cbm4_results,
+    view_name   = NULL,
+    view_column = NULL,
+    timesteps   = NULL,
+    list        = FALSE
+){
 
   cbm4_results <- cbm4_results_processor(cbm4_results)
 
@@ -19,6 +26,10 @@ cbm4_results_raster <- function(cbm4_results, view_name, view_column, timesteps 
     data.table::as.data.table(cbm4_results$views)[, .(name, column_names)][
       grepl("_indicators$", name) & !grepl("age_indicators", name) & grepl("^spatial_", name)]
   )
+
+  cbm4_grid <- cbm4_results_grid(cbm4_results)
+
+  if (is.null(view_name)) return(cbm4_grid)
 
   querySQL <- sprintf(paste(
     "SELECT timestep, chunk_index, raster_index,",
@@ -36,15 +47,47 @@ cbm4_results_raster <- function(cbm4_results, view_name, view_column, timesteps 
 
   if (is.null(timesteps)) timesteps <- unique(queryTbl$timestep)
 
-  cbm4Geo  <- cbm4_read_geo(cbm4_results)
-  cbm4Rast <- do.call(c, lapply(timesteps, function(t){
-    cbm4Rast_t <- terra::deepcopy(cbm4Geo)
-    with(queryTbl[timestep == t,], terra::set.values(cbm4Rast_t, raster_index + 1, value))
-    cbm4Rast_t
+  cbm4_rast <- do.call(c, lapply(timesteps, function(t){
+    cbm4_rast_t <- terra::deepcopy(cbm4_grid)
+    with(queryTbl[timestep == t,], terra::set.values(cbm4_rast_t, raster_index + 1, value))
+    cbm4_rast_t
   }))
-  names(cbm4Rast) <- timesteps
+  names(cbm4_rast) <- timesteps
 
-  return(cbm4Rast)
+  return(cbm4_rast)
+}
+
+#' CBM4 results grid
+#'
+#' Recreate a study area grid from a CBM4 spatial parquet dataset.
+#'
+#' @template cbm4_results
+#' @template dataset_name
+#' @template dataset_path
+#'
+#' @return `SpatRaster`
+#' @keywords internal
+cbm4_results_grid <- function(
+    cbm4_results,
+    dataset_name = "simulation",
+    dataset_path = file.path(cbm4_results, dataset_name)
+){
+
+  cbm4_results <- cbm4_results_processor(cbm4_results)
+
+  geo_metadata <- reticulate::py_get_attr(cbm4_results, "_results_dataset")[[
+    paste0(dataset_name, "_dataset")]]$get_geo_metadata()
+
+  terra::rast(
+    crs  = geo_metadata$projection,
+    ncol = geo_metadata$ncols,
+    nrow = geo_metadata$nrows,
+    res  = geo_metadata$geo_transform_1,
+    xmin = geo_metadata$geo_transform_0,
+    xmax = geo_metadata$geo_transform_0 + (geo_metadata$geo_transform_1 * geo_metadata$ncols),
+    ymin = geo_metadata$geo_transform_3 - (geo_metadata$geo_transform_1 * geo_metadata$nrows),
+    ymax = geo_metadata$geo_transform_3
+  )
 }
 
 
