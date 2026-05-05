@@ -1,4 +1,5 @@
 
+# Check: table has all columns
 check_table_columns_all <- function(tableName, table, colNames){
 
   if (!is.data.frame(table)) stop(tableName, " object is not a data.frame")
@@ -8,6 +9,7 @@ check_table_columns_all <- function(tableName, table, colNames){
     paste(shQuote(setdiff(colNames, names(table))), collapse = ", "))
 }
 
+# Check: table has any of columns
 check_table_columns_any <- function(tableName, table, colNames){
 
   if (!is.data.frame(table)) stop(tableName, " object is not a data.frame")
