@@ -200,8 +200,8 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
   }
 
   # Check table columns
-  check_table_columns_all("gc_meta", gc_meta, c("gcID", "spatial_unit", classifiers, "sw"))
-  check_table_columns_all("gc_incr", gc_incr, c("gcID", "age", "merch_inc", "foliage_inc", "other_inc"))
+  check_table_columns_all("gc_meta", gc_meta, c("gc_id", "spatial_unit", classifiers, "sw"))
+  check_table_columns_all("gc_incr", gc_incr, c("gc_id", "age", "merch_inc", "foliage_inc", "other_inc"))
 
   # Check classifiers
   if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
@@ -213,7 +213,7 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
   # Format increments
   data.table::setnames(gc_incr, "age", "state.age")
 
-  gc_incr[gc_meta, sw := sw, on = "gcID"]
+  gc_incr[gc_meta, sw := sw, on = "gc_id"]
 
   gc_incr[sw==TRUE,  increment.SoftwoodMerch   := merch_inc]
   gc_incr[sw==TRUE,  increment.SoftwoodFoliage := foliage_inc]
@@ -235,13 +235,13 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
   gc_incr[, other_inc   := NULL]
 
   # Format metadata
-  gc_meta <- gc_meta[, .SD, .SDcols = c("gcID", classifiers, "spatial_unit")]
-  data.table::setattr(gc_meta, "names", c("gcID", paste0("classifiers.", classifiers), "inventory.spatial_unit"))
+  gc_meta <- gc_meta[, .SD, .SDcols = c("gc_id", classifiers, "spatial_unit")]
+  data.table::setattr(gc_meta, "names", c("gc_id", paste0("classifiers.", classifiers), "inventory.spatial_unit"))
 
   if (long){
 
-    gc_incr <- merge(gc_meta, gc_incr, by = "gcID")
-    gc_incr[, eval("gcID") := NULL]
+    gc_incr <- merge(gc_meta, gc_incr, by = "gc_id")
+    gc_incr[, eval("gc_id") := NULL]
 
     # Add row for increments above greatest age
     gcIncrWC <- gc_incr[state.age == max(state.age), .SD, by = c(paste0("classifiers.", classifiers), "inventory.spatial_unit")]
@@ -259,14 +259,14 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
       ))
     gc_incr <- data.table::mergelist(
       lapply(incCols, function(incCol){
-        incWide <- data.table::dcast(gc_incr, gcID ~ state.age, value.var = incCol)
+        incWide <- data.table::dcast(gc_incr, gc_id ~ state.age, value.var = incCol)
         data.table::setnames(incWide, names(incWide)[-1], paste0(incCol, ".", names(incWide)[-1]))
         incWide
       }),
-      on = "gcID", how = "left")
+      on = "gc_id", how = "left")
 
-    gc_incr <- merge(gc_meta, gc_incr, by = "gcID")
-    gc_incr[, gcID := NULL]
+    gc_incr <- merge(gc_meta, gc_incr, by = "gc_id")
+    gc_incr[, gc_id := NULL]
   }
 
   return(gc_incr)

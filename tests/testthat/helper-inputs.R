@@ -32,26 +32,26 @@ testInputs_SK <- function(){
 
     gc_meta = cbind(rbind(
       data.table::data.table(
-        gcID = 1,
+        gc_id = 1,
         species = "species1", prodClass = "P",
         sw = TRUE
       ),
       data.table::data.table(
-        gcID = 2,
+        gc_id = 2,
         species = "species2", prodClass = "M",
         sw = FALSE
       )
     )),
     gc_incr = rbind(
       data.table::data.table(
-        gcID        = 1,
+        gc_id       = 1,
         age         = 0:150,
         merch_inc   = seq(0, 1, length.out = 151),
         foliage_inc = seq(0, 1, length.out = 151),
         other_inc   = seq(0, 1, length.out = 151)
       ),
       data.table::data.table(
-        gcID        = 2,
+        gc_id       = 2,
         age         = 0:150,
         merch_inc   = seq(0, 1, length.out = 151),
         foliage_inc = seq(0, 1, length.out = 151),
