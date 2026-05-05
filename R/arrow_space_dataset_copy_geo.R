@@ -28,7 +28,7 @@ arrow_space_dataset_copy_geo <- function(
   if (length(template_path) == 0)  stop("template_path is invalid")
   if (!file.exists(template_path)) stop(
     "template_path not found: ", template_path,
-    "\nUse cbm4_write_geo to initiate a new dataset.")
+    "\nUse `cbm4_write_geo` to initiate a new dataset")
 
   arrow_space <- reticulate::import("arrow_space")
   if (!is.null(tags)) pd <- reticulate::import("pandas")

@@ -5,7 +5,7 @@
 #'
 #' @template cbm4_data
 #' @inheritParams cbm4_format_disturbance
-#' @param ... arguments to \code{\link{cbm4_format_disturbance}} or \code{\link{set_grid_meta}}
+#' @param ... arguments to \code{\link{cbm4_format_disturbance}}
 #' @template dataset_name
 #' @template dataset_path
 #' @template template_name
@@ -14,11 +14,11 @@
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_disturbance <- function(
-    cbm4_data     = NULL,
+    cbm4_data = NULL,
+    grid_meta,
     distMeta      = NULL,
     distEvents    = NULL,
     classifiers   = NULL,
-    grid_meta     = NULL,
     template_name = "inventory",
     template_path = file.path(cbm4_data, template_name),
     dataset_name  = "disturbance",
@@ -28,37 +28,25 @@ cbm4_write_disturbance <- function(
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
-    arrow_space_dataset_copy_geo(
-      dataset_name  = dataset_name,
-      dataset_path  = dataset_path,
-      template_name = template_name,
-      template_path = template_path,
-      partitions    = list("disturbance_order" = "int64", "timestep" = "int64", "chunk_index" = "int64"),
-      tags          = if (length(classifiers) > 0) list(classifier = paste0("classifiers.", classifiers))
-    )
+    if (!is.null(template_name)){
+      arrow_space_dataset_copy_geo(
+        dataset_name  = dataset_name,
+        dataset_path  = dataset_path,
+        template_name = template_name,
+        template_path = template_path,
+        partitions    = list("disturbance_order" = "int64", "timestep" = "int64", "chunk_index" = "int64"),
+        tags          = if (length(classifiers) > 0) list(classifier = paste0("classifiers.", classifiers))
+      )
+    }else stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
   }
 
-  # Write disturbances
   if (!is.null(distEvents) && nrow(distEvents) > 0){
-
-    # Read grid metadata
-    if (!is.null(grid_meta)){
-      set_grid_meta(grid_meta, ...)
-
-    }else{
-      grid_meta <- arrow_space_dataset_read_table(
-        dataset_name = template_name,
-        dataset_path = template_path,
-        table_name   = "table-pixels",
-        col_select   = c("pixel_index", "chunk_index", "raster_index")
-      )
-    }
 
     # Format disturbances
     dist <- cbm4_format_disturbance(
+      grid_meta = grid_meta,
       distMeta,
       distEvents,
-      grid_meta,
       classifiers,
       ...)
 
@@ -85,10 +73,10 @@ cbm4_write_disturbance <- function(
 
 #' CBM4 format disturbance
 #'
+#' @template grid_meta
 #' @param distMeta data.table. Disturbance metadata.
 #' @param distEvents data.table. Disturbance events.
 #' @template classifiers
-#' @template grid_meta
 #' @template cbm_defaults_db
 #' @param def_proportion integer. TODO
 #' @param def_enable_merge integer. TODO
@@ -102,9 +90,9 @@ cbm4_write_disturbance <- function(
 #' **index**: `arrow_space` raster indexed `data.table`;
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_disturbance <- function(
+    grid_meta,
     distMeta,
     distEvents,
-    grid_meta,
     classifiers = NULL,
     def_proportion                = 1L,
     def_enable_merge              = 0L,

@@ -7,9 +7,8 @@
 cbm4_write_geo(
   cbm4_data = NULL,
   dataset_name,
-  grid_rast = NULL,
-  grid_meta = NULL,
-  write_pixels = TRUE,
+  grid_meta,
+  grid_rast,
   dataset_path = file.path(cbm4_data, dataset_name),
   ...
 )
@@ -22,29 +21,19 @@ May be omitted if full paths to datasets are provided.}
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}
 
+\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
+
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
-
-\item{grid_meta}{data.table. Grid metadata.
-Required columns: \code{pixel_index},
-\code{admin_boundary}, \code{admin_abbrev}, or \code{admin_boundary_id}.
-\code{eco_boundary} or \code{eco_boundary_id},
-\code{spatial_unit}.
-Optional columns: \code{chunk_index}, \code{raster_index},
-\code{afforestation_pre_type}, \code{historic_disturbance_type}, \code{last_pass_disturbance_type}.}
-
-\item{write_pixels}{logical. Write pixel table to file. If \code{TRUE}, grid_meta is required.}
 
 \item{dataset_path}{character.
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
 
-\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}} or \code{\link{set_grid_meta}}}
+\item{...}{arguments to \code{\link{arrow_space_dataset_write_geo}}}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.
 }
 \description{
 Initiate a CBM4 spatial parquet dataset with study area geographic metadata.
-The dataset can contain an additional "pixels" metadata table with
-mapping grid pixel locations to their parallel processing partition chunks.
 }

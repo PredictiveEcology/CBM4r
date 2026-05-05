@@ -1,26 +1,5 @@
 
 #' CBM4 set grid metadata
-#' @inherit set_grid_meta description params return
-#' @export
-cbm4_set_grid_meta <- function(
-    grid_meta,
-    def_afforestation_pre_type     = "None",
-    def_historic_disturbance_type  = "Wildfire",
-    def_last_pass_disturbance_type = "Wildfire",
-    cbm_defaults_db = getOption("CBM4r.db.path"),
-    ...){
-
-  set_grid_meta(
-    grid_meta,
-    def_afforestation_pre_type     = def_afforestation_pre_type,
-    def_historic_disturbance_type  = def_historic_disturbance_type,
-    def_last_pass_disturbance_type = def_last_pass_disturbance_type,
-    cbm_defaults_db = cbm_defaults_db
-  )
-}
-
-
-#' set_grid_meta
 #'
 #' Format `grid_meta` table by reference.
 #'
@@ -31,6 +10,7 @@ cbm4_set_grid_meta <- function(
 #' `spatial_unit`.
 #' Optional columns: `chunk_index`, `raster_index`,
 #' `afforestation_pre_type`, `historic_disturbance_type`, `last_pass_disturbance_type`.
+#' @template grid_rast
 #' @template cbm_defaults_db
 #' @param def_afforestation_pre_type character. Land use before forestation.
 #' Defined in CBM defaults database tables 'afforestation_pre_type'
@@ -41,15 +21,15 @@ cbm4_set_grid_meta <- function(
 #' @param ... unused
 #'
 #' @return `data.table` updated by reference.
-#' @keywords internal
-set_grid_meta <- function(
+#' @export
+cbm4_set_grid_meta <- function(
     grid_meta,
+    grid_rast = NULL,
     def_afforestation_pre_type     = "None",
     def_historic_disturbance_type  = "Wildfire",
     def_last_pass_disturbance_type = "Wildfire",
     cbm_defaults_db = getOption("CBM4r.db.path"),
-    ...
-){
+    ...){
 
   if (is.null(grid_meta)) stop("grid_meta required")
 
@@ -57,6 +37,17 @@ set_grid_meta <- function(
 
   if (!"chunk_index"  %in% names(grid_meta)) data.table::set(grid_meta, j = "chunk_index",  value = 0L)
   if (!"raster_index" %in% names(grid_meta)) data.table::set(grid_meta, j = "raster_index", value = grid_meta$pixel_index - 1)
+
+  # Set area
+  if (!"area" %in% names(grid_meta)){
+
+    if (is.null(grid_rast)) stop("grid_rast required to calculate area")
+    if (!inherits(grid_rast, "SpatRaster")) grid_rast <- tryCatch(
+      terra::rast(grid_rast), error = function(e) stop(
+        "failed to read grid_rast as SpatRaster: ", e$message))
+
+    grid_meta[, area := prod(terra::res(chunks$rast) * terra::linearUnits(chunks$rast))]
+  }
 
   # Set spatial units
   set_table_spatial_units(grid_meta, cbm_defaults_db)
@@ -74,6 +65,7 @@ set_grid_meta <- function(
 
   return(grid_meta)
 }
+
 
 set_table_spatial_units <- function(table, cbm_defaults_db = getOption("CBM4r.db.path"), naOK = FALSE){
 

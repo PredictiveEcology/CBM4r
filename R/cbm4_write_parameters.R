@@ -53,13 +53,15 @@ cbm4_write_parameters <- function(
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
-    arrow_space_dataset_copy_geo(
-      dataset_name  = dataset_name,
-      dataset_path  = dataset_path,
-      template_name = template_name,
-      template_path = template_path,
-      partitions    = list("chunk_index" = "int64")
-    )
+    if (!is.null(template_name)){
+      arrow_space_dataset_copy_geo(
+        dataset_name  = dataset_name,
+        dataset_path  = dataset_path,
+        template_name = template_name,
+        template_path = template_path,
+        partitions    = list("chunk_index" = "int64")
+      )
+    }else stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
   }
 
   # Format increments

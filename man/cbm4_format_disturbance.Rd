@@ -5,9 +5,9 @@
 \title{CBM4 format disturbance}
 \usage{
 cbm4_format_disturbance(
+  grid_meta,
   distMeta,
   distEvents,
-  grid_meta,
   classifiers = NULL,
   def_proportion = 1L,
   def_enable_merge = 0L,
@@ -20,11 +20,11 @@ cbm4_format_disturbance(
 )
 }
 \arguments{
+\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
+
 \item{distMeta}{data.table. Disturbance metadata.}
 
 \item{distEvents}{data.table. Disturbance events.}
-
-\item{grid_meta}{data.table. Grid metadata.}
 
 \item{classifiers}{character.
 Column names of inventory identifiers.}

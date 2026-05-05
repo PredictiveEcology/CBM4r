@@ -20,16 +20,27 @@ for (test in names(projects)){
 
 ## SIMULATE ----
 
+for (project in projects) test_that(paste("cbm4_set_grid_meta:", project$test), {
+
+  cbm4_set_grid_meta(project$grid_meta, project$grid_rast)
+
+  expect_true("chunk_index"  %in% names(project$grid_meta))
+  expect_true("raster_index" %in% names(project$grid_meta))
+  expect_true("area"         %in% names(project$grid_meta))
+  expect_true("spatial_unit" %in% names(project$grid_meta))
+
+})
+
 for (project in projects) test_that(paste("cbm4_write_inventory:", project$test), {
 
   cbm4_data <- project$cbm4_data
 
   cbm4_write_inventory(
     cbm4_data,
+    grid_meta   = project$grid_meta,
+    grid_rast   = project$grid_rast,
     cohortDT    = project$cohortDT,
     classifiers = project$classifiers,
-    grid_rast   = project$grid_rast,
-    grid_meta   = project$grid_meta,
     chunk_size  = 2
   )
 
@@ -44,6 +55,7 @@ for (project in projects) test_that(paste("cbm4_write_disturbance:", project$tes
 
   cbm4_write_disturbance(
     cbm4_data,
+    grid_meta  = project$grid_meta,
     distMeta   = project$distMeta,
     distEvents = project$distEvents
   )
@@ -111,12 +123,18 @@ for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_
   cbm4_data <- project$cbm4_data
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=1")))
 
-  cohortDT <- cbm4_read_simulation_inventory(cbm4_data, timestep = 1)
+  cohortDT <- cbm4_read_simulation_inventory(
+    cbm4_data,
+    grid_meta = project$grid_meta,
+    timestep  = 1
+  )
 
   cbm4_write_simulation_inventory(
     cbm4_data,
-    cohortDT = cohortDT,
-    timestep = 1)
+    grid_meta = project$grid_meta,
+    cohortDT  = cohortDT,
+    timestep  = 1
+  )
 
   cbm4_step(cbm4_data, timestep = 2)
 

@@ -6,10 +6,10 @@
 \usage{
 cbm4_write_inventory(
   cbm4_data = NULL,
+  grid_meta,
+  grid_rast,
   cohortDT,
   classifiers,
-  grid_rast,
-  grid_meta,
   dataset_name = "inventory",
   dataset_path = file.path(cbm4_data, dataset_name),
   cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -21,20 +21,14 @@ cbm4_write_inventory(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
 
+\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
+
+\item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
+
 \item{cohortDT}{data.table. Cohort inventory.}
 
 \item{classifiers}{character.
 Column names of inventory identifiers.}
-
-\item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
-
-\item{grid_meta}{data.table. Grid metadata.
-Required columns: \code{pixel_index},
-\code{admin_boundary}, \code{admin_abbrev}, or \code{admin_boundary_id}.
-\code{eco_boundary} or \code{eco_boundary_id},
-\code{spatial_unit}.
-Optional columns: \code{chunk_index}, \code{raster_index},
-\code{afforestation_pre_type}, \code{historic_disturbance_type}, \code{last_pass_disturbance_type}.}
 
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}
@@ -46,7 +40,7 @@ Defaults to \code{file.path(cbm4_data, dataset_name)}}
 \item{cbm_defaults_db}{character.
 Path to CBM defaults SQLite database.}
 
-\item{...}{arguments to \code{\link{cbm4_format_inventory}} or \code{\link{set_grid_meta}}}
+\item{...}{arguments to \code{\link{cbm4_format_inventory}}}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.

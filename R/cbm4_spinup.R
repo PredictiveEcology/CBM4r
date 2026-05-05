@@ -73,17 +73,6 @@ cbm4_spinup <- function(
 
   spatial_cbm4_app$spinup_all(reticulate::dict(spinupIn))
 
-  # Copy pixels table
-  arrow_space_dataset_copy_table(
-    dataset_name  = "simulation",
-    dataset_path  = simulation_dataset,
-    template_name = "inventory",
-    template_path = inventory_dataset,
-    table_name    = "table-pixels",
-    overwrite     = TRUE,
-    skip_missing  = TRUE
-  )
-
   return(invisible())
 }
 

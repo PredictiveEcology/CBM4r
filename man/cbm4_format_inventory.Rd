@@ -5,8 +5,8 @@
 \title{CBM4 format inventory}
 \usage{
 cbm4_format_inventory(
-  cohortDT,
   grid_meta,
+  cohortDT,
   chunk_size = NULL,
   def_delay = 0L,
   def_land_class = "UNFCCC_FL_R_FL",
@@ -17,9 +17,9 @@ cbm4_format_inventory(
 )
 }
 \arguments{
-\item{cohortDT}{data.table. Cohort inventory.}
+\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 
-\item{grid_meta}{data.table. Grid metadata.}
+\item{cohortDT}{data.table. Cohort inventory.}
 
 \item{chunk_size}{integer. Size of parallel processing chunks.}
 

@@ -5,7 +5,7 @@
 #'
 #' @template cbm4_data
 #' @inheritParams cbm4_format_simulation_inventory
-#' @param ... arguments to \code{\link{cbm4_format_simulation_inventory}} or \code{\link{set_grid_meta}}
+#' @param ... arguments to \code{\link{cbm4_format_simulation_inventory}}
 #' @template dataset_name
 #' @template dataset_path
 #' @template template_name
@@ -15,10 +15,10 @@
 #' @export
 cbm4_write_simulation_inventory <- function(
     cbm4_data = NULL,
+    grid_meta,
     cohortDT,
     timestep,
     classifiers   = NULL,
-    grid_meta     = NULL,
     template_name = "inventory",
     template_path = file.path(cbm4_data, template_name),
     dataset_name  = "simulation",
@@ -28,47 +28,24 @@ cbm4_write_simulation_inventory <- function(
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
-
-    arrow_space_dataset_copy_geo(
-      dataset_name  = dataset_name,
-      dataset_path  = dataset_path,
-      template_name = template_name,
-      template_path = template_path,
-      partitions    = list("timestep" = "int32", "cohort_index" = "int64", "chunk_index" = "int64"),
-      tags          = list(classifier = paste0("classifiers.", classifiers))
-    )
-
-    # Copy pixels table
-    arrow_space_dataset_copy_table(
-      dataset_name  = dataset_name,
-      dataset_path  = dataset_path,
-      template_name = template_name,
-      template_path = template_path,
-      table_name    = "table-pixels",
-      overwrite     = TRUE
-    )
-  }
-
-  # Read grid metadata
-  if (!is.null(grid_meta)){
-    set_grid_meta(grid_meta, ...)
-
-  }else{
-    grid_meta <- arrow_space_dataset_read_table(
-      dataset_name = template_name,
-      dataset_path = template_path,
-      table_name   = "table-pixels",
-      col_select   = c("pixel_index", "chunk_index", "raster_index",
-                       "area", "admin_boundary", "eco_boundary", "spatial_unit")
-    )
+    if (!is.null(template_name)){
+      arrow_space_dataset_copy_geo(
+        dataset_name  = dataset_name,
+        dataset_path  = dataset_path,
+        template_name = template_name,
+        template_path = template_path,
+        partitions    = list("timestep" = "int32", "cohort_index" = "int64", "chunk_index" = "int64"),
+        tags          = list(classifier = paste0("classifiers.", classifiers))
+      )
+    }else stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name`")
   }
 
   # Format inventory
   inv <- cbm4_format_simulation_inventory(
+    grid_meta   = grid_meta,
     cohortDT    = cohortDT,
     classifiers = classifiers,
     timestep    = timestep,
-    grid_meta   = grid_meta,
     ...)
 
   # Write inventory
@@ -102,8 +79,8 @@ cbm4_write_simulation_inventory <- function(
 
 #' CBM4 format simulation inventory
 #'
-#' @param cohortDT data.table. Cohort inventory.
 #' @template grid_meta
+#' @param cohortDT data.table. Cohort inventory.
 #' @template timestep
 #' @template classifiers
 #' @param col_ignore character. Names of `cohortDT` columns to exclude
@@ -121,8 +98,8 @@ cbm4_write_simulation_inventory <- function(
 #' **index**: `arrow_space` raster indexed `data.table`;
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_simulation_inventory <- function(
-    cohortDT,
     grid_meta,
+    cohortDT,
     timestep,
     classifiers = NULL,
     col_ignore  = NULL,

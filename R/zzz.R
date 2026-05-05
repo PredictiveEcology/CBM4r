@@ -67,7 +67,7 @@ utils::globalVariables(c(
   )
 ))
 
-# CBM4 dataset 'pixels' table columns
+# grid_meta columns
 utils::globalVariables(c(
   "pixel_index", "area"
 ))

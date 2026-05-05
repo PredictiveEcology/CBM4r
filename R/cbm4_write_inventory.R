@@ -8,16 +8,16 @@
 #' @template classifiers
 #' @inheritParams cbm4_write_geo
 #' @inheritParams cbm4_format_inventory
-#' @param ... arguments to \code{\link{cbm4_format_inventory}} or \code{\link{set_grid_meta}}
+#' @param ... arguments to \code{\link{cbm4_format_inventory}}
 #'
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_inventory <- function(
     cbm4_data = NULL,
+    grid_meta,
+    grid_rast,
     cohortDT,
     classifiers,
-    grid_rast,
-    grid_meta,
     dataset_name = "inventory",
     dataset_path = file.path(cbm4_data, dataset_name),
     cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -29,24 +29,24 @@ cbm4_write_inventory <- function(
   if (!all(sapply(cohortDT, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
     "classifiers must be integer, character, or factor")
 
-  # Format grid_meta
-  set_grid_meta(grid_meta, cbm_defaults_db = cbm_defaults_db, ...)
-
-  # Format inventory
-  inv <- cbm4_format_inventory(cohortDT = cohortDT, grid_meta = grid_meta, ...)
-
   # Initiate dataset
   cbm4_write_geo(
     cbm4_data,
     dataset_name    = dataset_name,
     dataset_path    = dataset_path,
-    grid_rast       = grid_rast,
     grid_meta       = grid_meta,
+    grid_rast       = grid_rast,
     cbm_defaults_db = cbm_defaults_db,
     partitions      = list("cohort_index" = "int64", "chunk_index" = "int64"),
     tags            = list(classifier = classifiers),
     write_pixels    = TRUE
   )
+
+  # Format inventory
+  inv <- cbm4_format_inventory(
+    grid_meta = grid_meta,
+    cohortDT  = cohortDT,
+    ...)
 
   # Write inventory
   arrow_space_dataset_write_table(
@@ -79,8 +79,8 @@ cbm4_write_inventory <- function(
 
 #' CBM4 format inventory
 #'
-#' @param cohortDT data.table. Cohort inventory.
 #' @template grid_meta
+#' @param cohortDT data.table. Cohort inventory.
 #' @param chunk_size integer. Size of parallel processing chunks.
 #' @param def_delay integer. Regeneration delay.
 #' @param def_land_class character. Land class code.
@@ -95,8 +95,8 @@ cbm4_write_inventory <- function(
 #' **index**: `arrow_space` raster indexed `data.table`;
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_inventory <- function(
-    cohortDT,
     grid_meta,
+    cohortDT,
     chunk_size            = NULL,
     def_delay             = 0L,
     def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"

@@ -5,17 +5,18 @@
 #'
 #' @template cbm4_results
 #' @template timestep
+#' @template grid_meta
 #'
 #' @return `data.table`
 #' @export
-cbm4_read_simulation_inventory <- function(cbm4_results, timestep){
+cbm4_read_simulation_inventory <- function(cbm4_results, timestep, grid_meta = NULL){
 
   cbm4_results <- cbm4_results_processor(cbm4_results, views = FALSE)
 
   cols <- cbm4_results$get_columns("simulation")
   classifiers <- gsub("^classifiers\\.", "", cols[grepl("^classifiers\\.", cols)])
 
-  cbm4Summary <- cbm4_results_query(cbm4_results, c(
+  cbm4_inv <- cbm4_results_query(cbm4_results, c(
     "SELECT",
     "a.raster_index, b.chunk_index, b.cohort_index, b.cohort_proportion,",
     sprintf("b.\"classifiers.%1$s\" AS %1$s,", classifiers),
@@ -26,23 +27,16 @@ cbm4_read_simulation_inventory <- function(cbm4_results, timestep){
       "AND b.timestep =", timestep
   ))
 
-  # Merge with pixels table
-  results_dataset <- reticulate::py_get_attr(cbm4_results, "_results_dataset")$simulation_dataset
-  if ("pixels" %in% results_dataset$list_tables()){
-
-    cbm4Summary <- merge(
-      cbm4Summary,
-      dplyr::collect(
-        results_dataset$read_table_pyarrow(
-          "pixels", read_cols = c("pixel_index", "raster_index", "chunk_index"))
-      ),
-      by = c("raster_index", "chunk_index"))
-    cbm4Summary[, c("raster_index", "chunk_index", "cohort_index") := NULL]
-
-    data.table::setkey(cbm4Summary, pixel_index)
-    data.table::setcolorder(cbm4Summary)
+  # Set pixel index
+  if (!is.null(grid_meta)){
+    cbm4_inv <- cbm4_inv[grid_meta, pixel_index := pixel_index, on = c("raster_index", "chunk_index")]
+    data.table::setkey(cbm4_inv, pixel_index)
+    data.table::setcolorder(cbm4_inv)
+    cbm4_inv[, chunk_index  := NULL]
+    cbm4_inv[, raster_index := NULL]
   }
 
-  return(cbm4Summary)
+  return(cbm4_inv)
 }
+
 

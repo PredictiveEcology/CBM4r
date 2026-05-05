@@ -5,8 +5,8 @@
 \title{CBM4 format simulation inventory}
 \usage{
 cbm4_format_simulation_inventory(
-  cohortDT,
   grid_meta,
+  cohortDT,
   timestep,
   classifiers = NULL,
   col_ignore = NULL,
@@ -21,9 +21,9 @@ cbm4_format_simulation_inventory(
 )
 }
 \arguments{
-\item{cohortDT}{data.table. Cohort inventory.}
+\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 
-\item{grid_meta}{data.table. Grid metadata.}
+\item{cohortDT}{data.table. Cohort inventory.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 

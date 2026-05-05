@@ -4,7 +4,7 @@
 \alias{cbm4_read_simulation_inventory}
 \title{CBM4 read simulation inventory}
 \usage{
-cbm4_read_simulation_inventory(cbm4_results, timestep)
+cbm4_read_simulation_inventory(cbm4_results, timestep, grid_meta = NULL)
 }
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
@@ -12,6 +12,8 @@ Path to CBM4 spatial datasets directory
 or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
+
+\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 }
 \value{
 \code{data.table}
