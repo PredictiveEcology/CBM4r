@@ -5,17 +5,17 @@
 \title{CBM4 format increments}
 \usage{
 cbm4_format_increments(
-  gcMeta,
-  gcIncr,
+  gc_meta,
+  gc_incr,
   classifiers,
   long = TRUE,
   cbm_defaults_db = getOption("CBM4r.db.path")
 )
 }
 \arguments{
-\item{gcMeta}{data.table. Growth curve metadata}
+\item{gc_meta}{data.table. Growth curve metadata}
 
-\item{gcIncr}{data.table. Growth curve carbon increments}
+\item{gc_incr}{data.table. Growth curve carbon increments}
 
 \item{classifiers}{character.
 Column names of inventory identifiers.}

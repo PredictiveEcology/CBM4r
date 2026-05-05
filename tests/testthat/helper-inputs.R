@@ -2,17 +2,18 @@
 testInputs_SK <- function(){
 
   list(
-    grid_rast = terra::rast(ncol = 2, nrow = 2, xmin = 0, xmax = 2, ymin = 0, ymax = 2, crs = "local"),
+
     grid_meta = data.table::data.table(
       pixel_index = 1:4,
       area = 1,
       admin_boundary  = "Saskatchewan",
       eco_boundary_id = 6
     ),
+    grid_rast = terra::rast(ncol = 2, nrow = 2, xmin = 0, xmax = 2, ymin = 0, ymax = 2, crs = "local"),
 
     classifiers = c("species", "prodClass"),
 
-    gcMeta = cbind(rbind(
+    gc_meta = cbind(rbind(
       data.table::data.table(
         gcID = 1,
         species = "species1", prodClass = "P",
@@ -24,8 +25,7 @@ testInputs_SK <- function(){
         sw = FALSE
       )
     )),
-
-    gcIncr = rbind(
+    gc_incr = rbind(
       data.table::data.table(
         gcID        = 1,
         age         = 0:150,

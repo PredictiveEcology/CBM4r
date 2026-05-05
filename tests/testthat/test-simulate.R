@@ -71,9 +71,9 @@ for (project in projects) test_that(paste("cbm4_write_spinup_parameters:", proje
 
   cbm4_write_spinup_parameters(
     cbm4_data,
-    classifiers = project$classifiers,
-    gcMeta      = project$gcMeta,
-    gcIncr      = project$gcIncr
+    gc_meta     = project$gc_meta,
+    gc_incr     = project$gc_incr,
+    classifiers = project$classifiers
   )
 
   expect_true(file.exists(file.path(cbm4_data, "spinup_parameters")))
@@ -87,9 +87,9 @@ for (project in projects) test_that(paste("cbm4_write_step_parameters:", project
 
   cbm4_write_step_parameters(
     cbm4_data,
-    classifiers = project$classifiers,
-    gcMeta      = project$gcMeta,
-    gcIncr      = project$gcIncr
+    gc_meta     = project$gc_meta,
+    gc_incr     = project$gc_incr,
+    classifiers = project$classifiers
   )
 
   expect_true(file.exists(file.path(cbm4_data, "step_parameters")))

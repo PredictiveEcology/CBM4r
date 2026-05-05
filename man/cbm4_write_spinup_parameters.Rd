@@ -6,8 +6,8 @@
 \usage{
 cbm4_write_spinup_parameters(
   cbm4_data = NULL,
-  gcMeta,
-  gcIncr,
+  gc_meta,
+  gc_incr,
   classifiers,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
@@ -21,9 +21,9 @@ cbm4_write_spinup_parameters(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
 
-\item{gcMeta}{data.table. Growth curve metadata}
+\item{gc_meta}{data.table. Growth curve metadata}
 
-\item{gcIncr}{data.table. Growth curve carbon increments}
+\item{gc_incr}{data.table. Growth curve carbon increments}
 
 \item{classifiers}{character.
 Column names of inventory identifiers.}

@@ -15,8 +15,8 @@
 #' @export
 cbm4_write_spinup_parameters <- function(
     cbm4_data = NULL,
-    gcMeta,
-    gcIncr,
+    gc_meta,
+    gc_incr,
     classifiers,
     template_name   = "inventory",
     template_path   = file.path(cbm4_data, template_name),
@@ -41,8 +41,8 @@ cbm4_write_spinup_parameters <- function(
   # Format increments
   incTable <- cbm4_format_increments(
     cbm_defaults_db = cbm_defaults_db,
-    gcMeta          = gcMeta,
-    gcIncr          = gcIncr,
+    gc_meta          = gc_meta,
+    gc_incr          = gc_incr,
     classifiers     = classifiers,
     long            = FALSE
   )
@@ -101,8 +101,8 @@ cbm4_write_spinup_parameters <- function(
 #' @export
 cbm4_write_step_parameters <- function(
     cbm4_data = NULL,
-    gcMeta,
-    gcIncr,
+    gc_meta,
+    gc_incr,
     classifiers,
     template_name   = "inventory",
     template_path   = file.path(cbm4_data, template_name),
@@ -127,8 +127,8 @@ cbm4_write_step_parameters <- function(
   # Format increments
   incTable <- cbm4_format_increments(
     cbm_defaults_db = cbm_defaults_db,
-    gcMeta          = gcMeta,
-    gcIncr          = gcIncr,
+    gc_meta          = gc_meta,
+    gc_incr          = gc_incr,
     classifiers     = classifiers,
     long            = TRUE
   )
@@ -173,81 +173,81 @@ cbm4_write_step_parameters <- function(
 
 #' CBM4 format increments
 #'
-#' @param gcMeta data.table. Growth curve metadata
-#' @param gcIncr data.table. Growth curve carbon increments
+#' @param gc_meta data.table. Growth curve metadata
+#' @param gc_incr data.table. Growth curve carbon increments
 #' @template classifiers
 #' @param long logical. Format table long or wide.
 #' @template cbm_defaults_db
 #'
 #' @return data.table
 #' @keywords internal
-cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE,
+cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
                                    cbm_defaults_db = getOption("CBM4r.db.path")){
 
   # Read tables
-  gcMeta <- data.table::as.data.table(gcMeta)
-  gcIncr <- data.table::as.data.table(gcIncr)
+  gc_meta <- data.table::as.data.table(gc_meta)
+  gc_incr <- data.table::as.data.table(gc_incr)
 
   # Set columns
-  if (!"spatial_unit" %in% names(gcMeta)){
+  if (!"spatial_unit" %in% names(gc_meta)){
     if (any(c("admin_boundary_id", "admin_boundary", "admin_abbrev",
-              "eco_boundary_id", "eco_boundary") %in% names(gcMeta))){
-      set_table_spatial_units(gcMeta, cbm_defaults_db, naOK = TRUE)
-      gcMeta[is.na(spatial_unit), spatial_unit := "?"]
+              "eco_boundary_id", "eco_boundary") %in% names(gc_meta))){
+      set_table_spatial_units(gc_meta, cbm_defaults_db, naOK = TRUE)
+      gc_meta[is.na(spatial_unit), spatial_unit := "?"]
     }else{
-      gcMeta[, spatial_unit := "?"]
+      gc_meta[, spatial_unit := "?"]
     }
   }
 
   # Check table columns
-  check_table_columns_all("gcMeta", gcMeta, c("gcID", "spatial_unit", classifiers, "sw"))
-  check_table_columns_all("gcIncr", gcIncr, c("gcID", "age", "merch_inc", "foliage_inc", "other_inc"))
+  check_table_columns_all("gc_meta", gc_meta, c("gcID", "spatial_unit", classifiers, "sw"))
+  check_table_columns_all("gc_incr", gc_incr, c("gcID", "age", "merch_inc", "foliage_inc", "other_inc"))
 
   # Check classifiers
   if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
-  if (!all(sapply(gcMeta, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
+  if (!all(sapply(gc_meta, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
     "classifiers must be integer, character, or factor")
 
-  if (any(is.na(gcIncr[, .(merch_inc, foliage_inc, other_inc)]))) stop("Increments contain NA values")
+  if (any(is.na(gc_incr[, .(merch_inc, foliage_inc, other_inc)]))) stop("Increments contain NA values")
 
   # Format increments
-  data.table::setnames(gcIncr, "age", "state.age")
+  data.table::setnames(gc_incr, "age", "state.age")
 
-  gcIncr[gcMeta, sw := sw, on = "gcID"]
+  gc_incr[gc_meta, sw := sw, on = "gcID"]
 
-  gcIncr[sw==TRUE,  increment.SoftwoodMerch   := merch_inc]
-  gcIncr[sw==TRUE,  increment.SoftwoodFoliage := foliage_inc]
-  gcIncr[sw==TRUE,  increment.SoftwoodOther   := other_inc]
-  gcIncr[sw==FALSE, increment.HardwoodMerch   := merch_inc]
-  gcIncr[sw==FALSE, increment.HardwoodFoliage := foliage_inc]
-  gcIncr[sw==FALSE, increment.HardwoodOther   := other_inc]
+  gc_incr[sw==TRUE,  increment.SoftwoodMerch   := merch_inc]
+  gc_incr[sw==TRUE,  increment.SoftwoodFoliage := foliage_inc]
+  gc_incr[sw==TRUE,  increment.SoftwoodOther   := other_inc]
+  gc_incr[sw==FALSE, increment.HardwoodMerch   := merch_inc]
+  gc_incr[sw==FALSE, increment.HardwoodFoliage := foliage_inc]
+  gc_incr[sw==FALSE, increment.HardwoodOther   := other_inc]
 
-  gcIncr[is.na(increment.SoftwoodMerch),   increment.SoftwoodMerch   := 0]
-  gcIncr[is.na(increment.SoftwoodFoliage), increment.SoftwoodFoliage := 0]
-  gcIncr[is.na(increment.SoftwoodOther),   increment.SoftwoodOther   := 0]
-  gcIncr[is.na(increment.HardwoodMerch),   increment.HardwoodMerch   := 0]
-  gcIncr[is.na(increment.HardwoodFoliage), increment.HardwoodFoliage := 0]
-  gcIncr[is.na(increment.HardwoodOther),   increment.HardwoodOther   := 0]
+  gc_incr[is.na(increment.SoftwoodMerch),   increment.SoftwoodMerch   := 0]
+  gc_incr[is.na(increment.SoftwoodFoliage), increment.SoftwoodFoliage := 0]
+  gc_incr[is.na(increment.SoftwoodOther),   increment.SoftwoodOther   := 0]
+  gc_incr[is.na(increment.HardwoodMerch),   increment.HardwoodMerch   := 0]
+  gc_incr[is.na(increment.HardwoodFoliage), increment.HardwoodFoliage := 0]
+  gc_incr[is.na(increment.HardwoodOther),   increment.HardwoodOther   := 0]
 
-  gcIncr[, sw          := NULL]
-  gcIncr[, merch_inc   := NULL]
-  gcIncr[, foliage_inc := NULL]
-  gcIncr[, other_inc   := NULL]
+  gc_incr[, sw          := NULL]
+  gc_incr[, merch_inc   := NULL]
+  gc_incr[, foliage_inc := NULL]
+  gc_incr[, other_inc   := NULL]
 
   # Format metadata
-  gcMeta <- gcMeta[, .SD, .SDcols = c("gcID", classifiers, "spatial_unit")]
-  data.table::setattr(gcMeta, "names", c("gcID", paste0("classifiers.", classifiers), "inventory.spatial_unit"))
+  gc_meta <- gc_meta[, .SD, .SDcols = c("gcID", classifiers, "spatial_unit")]
+  data.table::setattr(gc_meta, "names", c("gcID", paste0("classifiers.", classifiers), "inventory.spatial_unit"))
 
   if (long){
 
-    gcIncr <- merge(gcMeta, gcIncr, by = "gcID")
-    gcIncr[, eval("gcID") := NULL]
+    gc_incr <- merge(gc_meta, gc_incr, by = "gcID")
+    gc_incr[, eval("gcID") := NULL]
 
     # Add row for increments above greatest age
-    gcIncrWC <- gcIncr[state.age == max(state.age), .SD, by = c(paste0("classifiers.", classifiers), "inventory.spatial_unit")]
+    gcIncrWC <- gc_incr[state.age == max(state.age), .SD, by = c(paste0("classifiers.", classifiers), "inventory.spatial_unit")]
     gcIncrWC[["state.age"]] <- "?"
-    gcIncr <- rbind(gcIncr, gcIncrWC)
-    data.table::setkeyv(gcIncr, c(paste0("classifiers.", classifiers), "inventory.spatial_unit"))
+    gc_incr <- rbind(gc_incr, gcIncrWC)
+    data.table::setkeyv(gc_incr, c(paste0("classifiers.", classifiers), "inventory.spatial_unit"))
 
   }else{
 
@@ -257,19 +257,19 @@ cbm4_format_increments <- function(gcMeta, gcIncr, classifiers, long = TRUE,
         paste0("Softwood", c("Merch", "Foliage", "Other")),
         paste0("Hardwood", c("Merch", "Foliage", "Other"))
       ))
-    gcIncr <- data.table::mergelist(
+    gc_incr <- data.table::mergelist(
       lapply(incCols, function(incCol){
-        incWide <- data.table::dcast(gcIncr, gcID ~ state.age, value.var = incCol)
+        incWide <- data.table::dcast(gc_incr, gcID ~ state.age, value.var = incCol)
         data.table::setnames(incWide, names(incWide)[-1], paste0(incCol, ".", names(incWide)[-1]))
         incWide
       }),
       on = "gcID", how = "left")
 
-    gcIncr <- merge(gcMeta, gcIncr, by = "gcID")
-    gcIncr[, gcID := NULL]
+    gc_incr <- merge(gc_meta, gc_incr, by = "gcID")
+    gc_incr[, gcID := NULL]
   }
 
-  return(gcIncr)
+  return(gc_incr)
 }
 
 
