@@ -1,4 +1,6 @@
 
+# Set table column defaults by reference
+# Defaults are set by arguments named as the column name prefixed with 'def_'
 set_table_defaults <- function(table, envir = parent.frame()){
   for (defArg in names(envir)[grepl("^def\\_", names(envir))]){
     defCol <- sub("^def\\_", "", defArg)
@@ -13,5 +15,6 @@ set_table_defaults <- function(table, envir = parent.frame()){
       data.table::set(table, i = i, j = defCol, value = defVal)
     }
   }
+  return(table)
 }
 
