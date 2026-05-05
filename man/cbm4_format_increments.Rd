@@ -18,7 +18,7 @@ cbm4_format_increments(
 \item{gc_incr}{data.table. Growth curve carbon increments}
 
 \item{classifiers}{character.
-Column names of inventory identifiers.}
+Column names of cohort inventory identifiers.}
 
 \item{long}{logical. Format table long or wide.}
 

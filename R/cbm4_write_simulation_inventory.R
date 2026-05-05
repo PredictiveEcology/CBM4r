@@ -16,7 +16,7 @@
 cbm4_write_simulation_inventory <- function(
     cbm4_data = NULL,
     grid_meta,
-    cohortDT,
+    cohorts,
     timestep,
     classifiers   = NULL,
     template_name = "inventory",
@@ -43,7 +43,7 @@ cbm4_write_simulation_inventory <- function(
   # Format inventory
   inv <- cbm4_format_simulation_inventory(
     grid_meta   = grid_meta,
-    cohortDT    = cohortDT,
+    cohorts     = cohorts,
     classifiers = classifiers,
     timestep    = timestep,
     ...)
@@ -80,10 +80,10 @@ cbm4_write_simulation_inventory <- function(
 #' CBM4 format simulation inventory
 #'
 #' @template grid_meta
-#' @param cohortDT data.table. Cohort inventory.
+#' @param cohorts data.table. Cohort inventory.
 #' @template timestep
 #' @template classifiers
-#' @param col_ignore character. Names of `cohortDT` columns to exclude
+#' @param col_ignore character. Names of `cohorts` columns to exclude
 #' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
 #' @param def_cohort_proportion integer. A value between 0-1.
 #' Percentage of the pixel's area that is attributed to the cohort.
@@ -99,7 +99,7 @@ cbm4_write_simulation_inventory <- function(
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_simulation_inventory <- function(
     grid_meta,
-    cohortDT,
+    cohorts,
     timestep,
     classifiers = NULL,
     col_ignore  = NULL,
@@ -133,7 +133,7 @@ cbm4_format_simulation_inventory <- function(
     )
   )
   if (is.null(classifiers)){
-    cohortCols$classifiers <- setdiff(names(cohortDT), c(
+    cohortCols$classifiers <- setdiff(names(cohorts), c(
       "pixel_index", "index", "cohort_index", "chunk_index", "cohort_proportion", "timestep",
       do.call(c, lapply(names(cohortCols), function(colType) paste0(colType, ".", cohortCols[[colType]]))),
       do.call(c, cohortCols)
@@ -141,7 +141,7 @@ cbm4_format_simulation_inventory <- function(
   }
 
   # Check columns
-  check_table_columns_all("cohortDT", cohortDT, "pixel_index")
+  check_table_columns_all("cohorts", cohorts, "pixel_index")
 
   gridCols <- c(
     "pixel_index", "chunk_index", "raster_index",
@@ -150,12 +150,12 @@ cbm4_format_simulation_inventory <- function(
   check_table_columns_all("grid_meta", grid_meta, gridCols)
 
   # Cast to data.table
-  if (!data.table::is.data.table(cohortDT))  cohortDT  <- data.table::as.data.table(cohortDT)
   if (!data.table::is.data.table(grid_meta)) grid_meta <- data.table::as.data.table(grid_meta)
+  if (!data.table::is.data.table(cohorts))   cohorts   <- data.table::as.data.table(cohorts)
 
   # Join with pixel table
   dataFull <- merge(
-    cohortDT,
+    cohorts,
     grid_meta[, .SD, .SDcols = c("pixel_index", "raster_index", "chunk_index", cohortCols$inventory)],
     by = "pixel_index", all.x = TRUE)
   dataFull[, pixel_index := NULL]
@@ -163,11 +163,11 @@ cbm4_format_simulation_inventory <- function(
   # Rename and check cohort columns
   for (colType in names(cohortCols)){
     data.table::setnames(dataFull, cohortCols[[colType]], paste0(colType, ".", cohortCols[[colType]]), skip_absent = TRUE)
-    check_table_columns_all("cohortDT", dataFull, paste0(colType, ".", cohortCols[[colType]]))
+    check_table_columns_all("cohorts", dataFull, paste0(colType, ".", cohortCols[[colType]]))
   }
 
   # Drop columns
-  col_ignore <- intersect(col_ignore, names(cohortDT))
+  col_ignore <- intersect(col_ignore, names(cohorts))
   if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
   # Set index

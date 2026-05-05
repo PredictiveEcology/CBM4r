@@ -6,7 +6,7 @@
 \usage{
 cbm4_format_simulation_inventory(
   grid_meta,
-  cohortDT,
+  cohorts,
   timestep,
   classifiers = NULL,
   col_ignore = NULL,
@@ -23,14 +23,14 @@ cbm4_format_simulation_inventory(
 \arguments{
 \item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 
-\item{cohortDT}{data.table. Cohort inventory.}
+\item{cohorts}{data.table. Cohort inventory.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 
 \item{classifiers}{character.
-Column names of inventory identifiers.}
+Column names of cohort inventory identifiers.}
 
-\item{col_ignore}{character. Names of \code{cohortDT} columns to exclude}
+\item{col_ignore}{character. Names of \code{cohorts} columns to exclude}
 
 \item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
 

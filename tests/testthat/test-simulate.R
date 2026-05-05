@@ -39,7 +39,7 @@ for (project in projects) test_that(paste("cbm4_write_inventory:", project$test)
     cbm4_data,
     grid_meta   = project$grid_meta,
     grid_rast   = project$grid_rast,
-    cohortDT    = project$cohortDT,
+    cohorts     = project$cohorts,
     classifiers = project$classifiers,
     chunk_size  = 2
   )
@@ -123,7 +123,7 @@ for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_
   cbm4_data <- project$cbm4_data
   testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=1")))
 
-  cohortDT <- cbm4_read_simulation_inventory(
+  cohorts <- cbm4_read_simulation_inventory(
     cbm4_data,
     grid_meta = project$grid_meta,
     timestep  = 1
@@ -132,7 +132,7 @@ for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_
   cbm4_write_simulation_inventory(
     cbm4_data,
     grid_meta = project$grid_meta,
-    cohortDT  = cohortDT,
+    cohorts   = cohorts,
     timestep  = 1
   )
 
@@ -252,7 +252,7 @@ for (project in projects) test_that(paste("cbm4_results_totals:", project$test),
 
     expect_equal(
       cbm4_results_totals(cbm4_results, view_name = view_name, units = "t/ha")[, -c("timestep", "area")],
-      resTotals[, -c("timestep")] / (project$grid_area * length(unique(project$cohortDT$pixel_index))),
+      resTotals[, -c("timestep")] / (project$grid_area * length(unique(project$cohorts$pixel_index))),
       ignore_attr = TRUE, tolerance = 0.000001)
 
     # Check subsetting columns and timesteps

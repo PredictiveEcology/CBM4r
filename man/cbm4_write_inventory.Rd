@@ -8,7 +8,7 @@ cbm4_write_inventory(
   cbm4_data = NULL,
   grid_meta,
   grid_rast,
-  cohortDT,
+  cohorts,
   classifiers,
   dataset_name = "inventory",
   dataset_path = file.path(cbm4_data, dataset_name),
@@ -25,10 +25,10 @@ May be omitted if full paths to datasets are provided.}
 
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
 
-\item{cohortDT}{data.table. Cohort inventory.}
+\item{cohorts}{data.table. Cohort inventory.}
 
 \item{classifiers}{character.
-Column names of inventory identifiers.}
+Column names of cohort inventory identifiers.}
 
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}

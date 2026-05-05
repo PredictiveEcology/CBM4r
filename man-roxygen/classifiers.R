@@ -1,3 +1,3 @@
 #' @param classifiers character.
-#' Column names of inventory identifiers.
+#' Column names of cohort inventory identifiers.
 NULL

@@ -6,7 +6,7 @@
 \usage{
 cbm4_format_inventory(
   grid_meta,
-  cohortDT,
+  cohorts,
   chunk_size = NULL,
   def_delay = 0L,
   def_land_class = "UNFCCC_FL_R_FL",
@@ -19,7 +19,7 @@ cbm4_format_inventory(
 \arguments{
 \item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 
-\item{cohortDT}{data.table. Cohort inventory.}
+\item{cohorts}{data.table. Cohort inventory.}
 
 \item{chunk_size}{integer. Size of parallel processing chunks.}
 
@@ -33,7 +33,7 @@ Percentage of the pixel's area that is attributed to the cohort.}
 
 \item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
 
-\item{col_ignore}{character. Names of \code{cohortDT} columns to exclude}
+\item{col_ignore}{character. Names of \code{cohorts} columns to exclude}
 
 \item{...}{unused}
 }

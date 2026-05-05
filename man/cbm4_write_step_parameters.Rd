@@ -26,7 +26,7 @@ May be omitted if full paths to datasets are provided.}
 \item{gc_incr}{data.table. Growth curve carbon increments}
 
 \item{classifiers}{character.
-Column names of inventory identifiers.}
+Column names of cohort inventory identifiers.}
 
 \item{template_name}{character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}

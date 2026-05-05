@@ -27,7 +27,7 @@ cbm4_format_disturbance(
 \item{dist_events}{data.table. Disturbance events.}
 
 \item{classifiers}{character.
-Column names of inventory identifiers.}
+Column names of cohort inventory identifiers.}
 
 \item{def_proportion}{integer. TODO}
 

@@ -11,6 +11,23 @@ testInputs_SK <- function(){
     ),
     grid_rast = terra::rast(ncol = 2, nrow = 2, xmin = 0, xmax = 2, ymin = 0, ymax = 2, crs = "local"),
 
+    cohorts = rbind(
+      data.table::data.table(
+        pixel_index = 1,
+        species = "species1", prodClass = "P",
+        age = 100
+      ),
+      data.table::data.table(
+        pixel_index = 3,
+        species = "species1", prodClass = "P",
+        age = 100
+      ),
+      data.table::data.table(
+        pixel_index = 4,
+        species = "species2", prodClass = "M",
+        age = 50
+      )
+    ),
     classifiers = c("species", "prodClass"),
 
     gc_meta = cbind(rbind(
@@ -42,24 +59,6 @@ testInputs_SK <- function(){
       )
     ),
 
-    cohortDT = rbind(
-      data.table::data.table(
-        pixel_index = 1,
-        species = "species1", prodClass = "P",
-        age = 100
-      ),
-      data.table::data.table(
-        pixel_index = 3,
-        species = "species1", prodClass = "P",
-        age = 100
-      ),
-      data.table::data.table(
-        pixel_index = 4,
-        species = "species2", prodClass = "M",
-        age = 50
-      )
-    ),
-
     dist_meta = rbind(
       data.table::data.table(
         disturbance_id = 1,
@@ -84,3 +83,5 @@ testInputs_SK <- function(){
     )
   )
 }
+
+

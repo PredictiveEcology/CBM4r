@@ -16,17 +16,17 @@ cbm4_write_inventory <- function(
     cbm4_data = NULL,
     grid_meta,
     grid_rast,
-    cohortDT,
+    cohorts,
     classifiers,
-    dataset_name = "inventory",
-    dataset_path = file.path(cbm4_data, dataset_name),
+    dataset_name    = "inventory",
+    dataset_path    = file.path(cbm4_data, dataset_name),
     cbm_defaults_db = getOption("CBM4r.db.path"),
     ...
 ){
 
   if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
-  if (!all(classifiers %in% names(cohortDT))) stop("cohortDT requires all classifiers")
-  if (!all(sapply(cohortDT, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
+  if (!all(classifiers %in% names(cohorts))) stop("cohorts requires all classifiers")
+  if (!all(sapply(cohorts, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
     "classifiers must be integer, character, or factor")
 
   # Initiate dataset
@@ -45,7 +45,7 @@ cbm4_write_inventory <- function(
   # Format inventory
   inv <- cbm4_format_inventory(
     grid_meta = grid_meta,
-    cohortDT  = cohortDT,
+    cohorts   = cohorts,
     ...)
 
   # Write inventory
@@ -80,7 +80,7 @@ cbm4_write_inventory <- function(
 #' CBM4 format inventory
 #'
 #' @template grid_meta
-#' @param cohortDT data.table. Cohort inventory.
+#' @param cohorts data.table. Cohort inventory.
 #' @param chunk_size integer. Size of parallel processing chunks.
 #' @param def_delay integer. Regeneration delay.
 #' @param def_land_class character. Land class code.
@@ -88,7 +88,7 @@ cbm4_write_inventory <- function(
 #' @param def_cohort_proportion integer. A value between 0-1.
 #' Percentage of the pixel's area that is attributed to the cohort.
 #' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
-#' @param col_ignore character. Names of `cohortDT` columns to exclude
+#' @param col_ignore character. Names of `cohorts` columns to exclude
 #' @param ... unused
 #'
 #' @return list with items:
@@ -96,7 +96,7 @@ cbm4_write_inventory <- function(
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_inventory <- function(
     grid_meta,
-    cohortDT,
+    cohorts,
     chunk_size            = NULL,
     def_delay             = 0L,
     def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
@@ -107,7 +107,7 @@ cbm4_format_inventory <- function(
 ){
 
   # Check table columns
-  check_table_columns_all("cohortDT", cohortDT, c("pixel_index", "age"))
+  check_table_columns_all("cohorts", cohorts, c("pixel_index", "age"))
 
   gridCols <- c(
     "pixel_index",
@@ -117,17 +117,17 @@ cbm4_format_inventory <- function(
   check_table_columns_all("grid_meta", grid_meta, gridCols)
 
   # Cast to data.table
-  if (!data.table::is.data.table(cohortDT))  cohortDT  <- data.table::as.data.table(cohortDT)
+  if (!data.table::is.data.table(cohorts))  cohorts  <- data.table::as.data.table(cohorts)
   if (!data.table::is.data.table(grid_meta)) grid_meta <- data.table::as.data.table(grid_meta)
 
   # Join with pixel table
   dataFull <- merge(
-    cohortDT,
+    cohorts,
     grid_meta[, .SD, .SDcols = intersect(c("chunk_index", "raster_index", gridCols), names(grid_meta))],
     by = "pixel_index", all.x = TRUE)
 
   # Drop columns
-  col_ignore <- intersect(col_ignore, names(cohortDT))
+  col_ignore <- intersect(col_ignore, names(cohorts))
   if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
   # Set index and chunk_index
