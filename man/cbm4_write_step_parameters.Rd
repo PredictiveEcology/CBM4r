@@ -4,10 +4,46 @@
 \alias{cbm4_write_step_parameters}
 \title{CBM4 write step parameters}
 \usage{
-cbm4_write_step_parameters(...)
+cbm4_write_step_parameters(
+  cbm4_data = NULL,
+  gcMeta,
+  gcIncr,
+  classifiers,
+  template_name = "inventory",
+  template_path = file.path(cbm4_data, template_name),
+  dataset_name = "step_parameters",
+  dataset_path = file.path(cbm4_data, dataset_name),
+  cbm_defaults_db = getOption("CBM4r.db.path")
+)
 }
 \arguments{
-\item{...}{arguments to \code{\link{cbm4_write_parameters}}}
+\item{cbm4_data}{character.
+Path to CBM4 spatial parquet datasets directory.
+May be omitted if full paths to datasets are provided.}
+
+\item{gcMeta}{data.table. Growth curve metadata}
+
+\item{gcIncr}{data.table. Growth curve carbon increments}
+
+\item{classifiers}{character.
+Column names of inventory identifiers.}
+
+\item{template_name}{character.
+Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}
+
+\item{template_path}{character.
+Path to CBM4 spatial parquet dataset to use as a template for the new dataset.
+Defaults to \code{file.path(cbm4_data, template_name)}}
+
+\item{dataset_name}{character.
+Name of the CBM4 spatial parquet dataset.}
+
+\item{dataset_path}{character.
+Path to the CBM4 spatial parquet dataset.
+Defaults to \code{file.path(cbm4_data, dataset_name)}}
+
+\item{cbm_defaults_db}{character.
+Path to CBM defaults SQLite database.}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.
