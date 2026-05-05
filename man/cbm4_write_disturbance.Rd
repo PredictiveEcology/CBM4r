@@ -7,8 +7,8 @@
 cbm4_write_disturbance(
   cbm4_data = NULL,
   grid_meta,
-  distMeta = NULL,
-  distEvents = NULL,
+  dist_meta = NULL,
+  dist_events = NULL,
   classifiers = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
@@ -24,9 +24,9 @@ May be omitted if full paths to datasets are provided.}
 
 \item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 
-\item{distMeta}{data.table. Disturbance metadata.}
+\item{dist_meta}{data.table. Disturbance metadata.}
 
-\item{distEvents}{data.table. Disturbance events.}
+\item{dist_events}{data.table. Disturbance events.}
 
 \item{classifiers}{character.
 Column names of inventory identifiers.}

@@ -60,7 +60,7 @@ testInputs_SK <- function(){
       )
     ),
 
-    distMeta = rbind(
+    dist_meta = rbind(
       data.table::data.table(
         disturbance_id = 1,
         disturbance_type = "Wildfire"
@@ -70,7 +70,7 @@ testInputs_SK <- function(){
         disturbance_type = "Clearcut harvesting without salvage"
       )
     ),
-    distEvents = rbind(
+    dist_events = rbind(
       data.table::data.table(
         pixel_index = 3,
         disturbance_id = 1,

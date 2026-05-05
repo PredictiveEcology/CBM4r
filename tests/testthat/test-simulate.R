@@ -7,7 +7,7 @@ projects <- list()
 projects[["SK_w_disturbances"]]  <- testInputs_SK()
 projects[["SK_wo_disturbances"]] <- {
   inputs <- testInputs_SK()
-  inputs[c("distMeta", "distEvents")] <- NULL
+  inputs[c("dist_meta", "dist_events")] <- NULL
   inputs
 }
 
@@ -55,9 +55,9 @@ for (project in projects) test_that(paste("cbm4_write_disturbance:", project$tes
 
   cbm4_write_disturbance(
     cbm4_data,
-    grid_meta  = project$grid_meta,
-    distMeta   = project$distMeta,
-    distEvents = project$distEvents
+    grid_meta   = project$grid_meta,
+    dist_meta   = project$dist_meta,
+    dist_events = project$dist_events
   )
 
   expect_true(file.exists(file.path(cbm4_data, "disturbance")))
@@ -232,8 +232,8 @@ for (project in projects) test_that(paste("cbm4_results_totals:", project$test),
     "composite_pool_indicators"        = 0:2,
     "flux_indicators"                  = 1:2,
     "composite_flux_indicators"        = 1:2,
-    "disturbance_indicators"           = if (!is.null(project$distEvents)) 1:2 else integer(),
-    "composite_disturbance_indicators" = if (!is.null(project$distEvents)) 1:2 else integer()
+    "disturbance_indicators"           = if (!is.null(project$dist_events)) 1:2 else integer(),
+    "composite_disturbance_indicators" = if (!is.null(project$dist_events)) 1:2 else integer()
   )
 
   for (view_name in names(total_view_columns)){
