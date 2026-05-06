@@ -4,7 +4,7 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 ## SET UP ----
 
 projects <- list(
-  SK_w_disturbances  = readTestInputs("SK"),
+  SK_w_disturbances  = readTestInputs("SK", disturbances = TRUE),
   SK_wo_disturbances = readTestInputs("SK", disturbances = FALSE)
 )
 
@@ -17,6 +17,20 @@ for (test in names(projects)){
 
 ## SIMULATE ----
 
+for (project in projects) test_that(paste("cbm4_grid_meta:", project$test), {
+
+  grid_meta <- cbm4_grid_meta(
+    grid_rast       = project$grid_rast,
+    admin_boundary  = project$grid_meta$admin_boundary,
+    eco_boundary_id = project$grid_meta$eco_boundary_id
+  )
+
+  expect_true("chunk_index"  %in% names(grid_meta))
+  expect_true("raster_index" %in% names(grid_meta))
+  expect_true("area"         %in% names(grid_meta))
+  expect_true("spatial_unit" %in% names(grid_meta))
+})
+
 for (project in projects) test_that(paste("cbm4_set_grid_meta:", project$test), {
 
   cbm4_set_grid_meta(project$grid_meta, project$grid_rast)
@@ -25,7 +39,6 @@ for (project in projects) test_that(paste("cbm4_set_grid_meta:", project$test), 
   expect_true("raster_index" %in% names(project$grid_meta))
   expect_true("area"         %in% names(project$grid_meta))
   expect_true("spatial_unit" %in% names(project$grid_meta))
-
 })
 
 for (project in projects) test_that(paste("cbm4_write_inventory:", project$test), {
