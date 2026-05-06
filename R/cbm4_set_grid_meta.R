@@ -46,7 +46,7 @@ cbm4_set_grid_meta <- function(
       terra::rast(grid_rast), error = function(e) stop(
         "failed to read grid_rast as SpatRaster: ", e$message))
 
-    grid_meta[, area := prod(terra::res(chunks$rast) * terra::linearUnits(chunks$rast))]
+    grid_meta[, area := prod(terra::res(grid_rast) * terra::linearUnits(grid_rast))]
   }
 
   # Set spatial units
