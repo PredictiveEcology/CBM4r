@@ -5,7 +5,7 @@
 \title{CBM4 create virtualenv}
 \usage{
 cbm4_virtualenv_create(
-  virtualenv,
+  envname = "r-CBM4",
   version = NULL,
   upgrade = FALSE,
   quiet = FALSE,
@@ -13,15 +13,15 @@ cbm4_virtualenv_create(
 )
 }
 \arguments{
-\item{virtualenv}{character. TODO}
+\item{envname}{character. Virtual environment name.}
 
-\item{version}{character. TODO}
+\item{version}{character. CBM4 version.}
 
-\item{upgrade}{logical. TODO}
+\item{upgrade}{logical. Upgrade Python packages.}
 
-\item{quiet}{logical. TODO}
+\item{quiet}{logical. Silence pip output.}
 
-\item{...}{TODO}
+\item{...}{arguments to \code{\link[reticulate]{virtualenv_create}}}
 }
 \description{
 Create a Python virtual environment to run CBM4.

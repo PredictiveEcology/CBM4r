@@ -3,14 +3,14 @@
 #'
 #' Create a Python virtual environment to run CBM4.
 #'
-#' @param virtualenv character. TODO
-#' @param version character. TODO
-#' @param upgrade logical. TODO
-#' @param quiet logical. TODO
-#' @param ... TODO
+#' @param envname character. Virtual environment name.
+#' @param version character. CBM4 version.
+#' @param upgrade logical. Upgrade Python packages.
+#' @param quiet logical. Silence pip output.
+#' @param ... arguments to \code{\link[reticulate]{virtualenv_create}}
 #'
 #' @export
-cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, quiet = FALSE, ...){
+cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade = FALSE, quiet = FALSE, ...){
 
   # Using gert to clone repos due to issues connecting with reticulate
   # This may be due to recent VPN connection issues to Github (2025-03)
@@ -22,14 +22,14 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
   vers <- cbm4_versions(version)
 
   # Initiate virtual environment with GDAL
-  if (!reticulate::virtualenv_exists(virtualenv)){
+  if (!reticulate::virtualenv_exists(envname)){
 
-    reticulate::virtualenv_create(virtualenv, version = vers$python, ...)
+    reticulate::virtualenv_create(envname, version = vers$python, ...)
 
     if (identical(.Platform$OS.type, "windows")){
 
       reticulate::virtualenv_install(
-        virtualenv,
+        envname,
         packages = vers$gdal_win,
         pip_options = c("--upgrade"[upgrade], "-q"[quiet])
       )
@@ -44,7 +44,7 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
       )) stop("gdal >=", vers[["gdal"]][["min"]], ",<=", vers[["gdal"]][["max"]], " not found")
 
       reticulate::virtualenv_install(
-        virtualenv,
+        envname,
         packages = paste0("gdal[numpy]==", gdalVers),
         pip_options = c("--no-cache-dir", "--no-build-isolation", "--upgrade"[upgrade], "-q"[quiet])
       )
@@ -58,7 +58,7 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
     "cbmspec_cbm3" = "https://github.com/cat-cfs/cbmspec.cbm3.python.git"
   )
 
-  envPackages <- trimws(reticulate::py_list_packages(virtualenv)$package)
+  envPackages <- trimws(reticulate::py_list_packages(envname)$package)
 
   for (package in names(packages)){
 
@@ -84,7 +84,7 @@ cbm4_virtualenv_create <- function(virtualenv, version = NULL, upgrade = FALSE, 
 
     if (install){
       reticulate::virtualenv_install(
-        virtualenv,
+        envname,
         packages = pkg_path,
         pip_options = c("--upgrade"[upgrade], "-q"[quiet])
       )

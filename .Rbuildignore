@@ -5,5 +5,8 @@
 ^CBM4r\.Rproj$
 ^\.Rproj\.user$
 ^man-roxygen$
-^wip/
 ^data-raw$
+^doc$
+^Meta$
+^cbm4_data$
+^wip$
