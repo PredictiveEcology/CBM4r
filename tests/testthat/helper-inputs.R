@@ -1,87 +1,24 @@
 
-testInputs_SK <- function(){
+readTestInputs <- function(testName, disturbances = TRUE){
 
-  list(
+  testdata <- system.file(file.path("testdata", testName), package = "CBM4r")
 
-    grid_meta = data.table::data.table(
-      pixel_index = 1:4,
-      area = 1,
-      admin_boundary  = "Saskatchewan",
-      eco_boundary_id = 6
-    ),
-    grid_rast = terra::rast(ncol = 2, nrow = 2, xmin = 0, xmax = 2, ymin = 0, ymax = 2, crs = "local"),
-
-    cohorts = rbind(
-      data.table::data.table(
-        pixel_index = 1,
-        species = "species1", prodClass = "P",
-        age = 100
-      ),
-      data.table::data.table(
-        pixel_index = 3,
-        species = "species1", prodClass = "P",
-        age = 100
-      ),
-      data.table::data.table(
-        pixel_index = 4,
-        species = "species2", prodClass = "M",
-        age = 50
-      )
-    ),
-    classifiers = c("species", "prodClass"),
-
-    gc_meta = cbind(rbind(
-      data.table::data.table(
-        gc_id = 1,
-        species = "species1", prodClass = "P",
-        sw = TRUE
-      ),
-      data.table::data.table(
-        gc_id = 2,
-        species = "species2", prodClass = "M",
-        sw = FALSE
-      )
-    )),
-    gc_incr = rbind(
-      data.table::data.table(
-        gc_id       = 1,
-        age         = 0:150,
-        merch_inc   = seq(0, 1, length.out = 151),
-        foliage_inc = seq(0, 1, length.out = 151),
-        other_inc   = seq(0, 1, length.out = 151)
-      ),
-      data.table::data.table(
-        gc_id       = 2,
-        age         = 0:150,
-        merch_inc   = seq(0, 1, length.out = 151),
-        foliage_inc = seq(0, 1, length.out = 151),
-        other_inc   = seq(0, 1, length.out = 151)
-      )
-    ),
-
-    dist_meta = rbind(
-      data.table::data.table(
-        disturbance_id = 1,
-        disturbance_type = "Wildfire"
-      ),
-      data.table::data.table(
-        disturbance_id = 2,
-        disturbance_type = "Clearcut harvesting without salvage"
-      )
-    ),
-    dist_events = rbind(
-      data.table::data.table(
-        pixel_index = 3,
-        disturbance_id = 1,
-        timestep = 1
-      ),
-      data.table::data.table(
-        pixel_index = 4,
-        disturbance_id = 2,
-        timestep = 2
-      )
-    )
+  testInputs <- list(
+    grid_meta   = data.table::fread(file.path(testdata, "grid_meta.csv")),
+    grid_rast   = do.call(terra::rast, data.table::fread(file.path(testdata, "grid_rast.csv"))),
+    cohorts     = data.table::fread(file.path(testdata, "cohorts.csv")),
+    classifiers = readLines(file.path(testdata, "classifiers.txt")),
+    gc_meta     = data.table::fread(file.path(testdata, "gc_meta.csv")),
+    gc_incr     = data.table::fread(file.path(testdata, "gc_incr.csv"))
   )
-}
 
+  if (disturbances){
+    testInputs <- c(testInputs, list(
+      dist_meta   = data.table::fread(file.path(testdata, "dist_meta.csv")),
+      dist_events = data.table::fread(file.path(testdata, "dist_events.csv"))
+    ))
+  }
+
+  return(testInputs)
+}
 
