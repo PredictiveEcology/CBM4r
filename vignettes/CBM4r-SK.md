@@ -1,26 +1,13 @@
----
-title: "CBM4r Example: Saskatchewan"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{CBM4r Example: Saskatchewan}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+CBM4r Example: Saskatchewan
+================
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
-
-```{r setup}
+``` r
 library(CBM4r)
 ```
 
 ## Set inputs
 
-```{r inputs}
+``` r
 # Set input test data directory
 testdata <- system.file(file.path("testdata", "SK"), package = "CBM4r")
 
@@ -42,9 +29,12 @@ dist_events <- data.table::fread(file.path(testdata, "dist_events.csv"))
 
 ## Set up Python virtual environment
 
-```{r virtualeenv}
+``` r
 # Create CBM4 virtual environment
 cbm4_virtualenv_create("r-CBM4")
+#> Already up to date, nothing to merge
+#> Performing fast-forward merge, no commit needed
+#> Performing fast-forward merge, no commit needed
 
 # Use CBM4 virtual environment
 reticulate::use_virtualenv("r-CBM4")
@@ -54,15 +44,14 @@ reticulate::use_virtualenv("r-CBM4")
 
 ### Set output path
 
-```{r paths}
+``` r
 # Set CBM4 output data directory path
 cbm4_data <- "cbm4_data"
-
 ```
 
 ### Set study area metadata
 
-```{r grid_meta}
+``` r
 # Set study area metadata
 grid_meta <- cbm4_grid_meta(
   grid_rast       =  grid_rast,
@@ -81,7 +70,7 @@ cbm4_set_grid_meta(grid_meta, grid_rast = grid_rast)
 
 ### Run spinup
 
-```{r spinup}
+``` r
 # Write inventory to CBM4 data directory
 cbm4_write_inventory(
   cbm4_data,
@@ -101,12 +90,11 @@ cbm4_write_spinup_parameters(
 
 # Run CBM4 spinup
 cbm4_spinup(cbm4_data)
-
 ```
 
 ### Run annual steps
 
-```{r step}
+``` r
 # Write annual step parameters to CBM4 data directory
 cbm4_write_step_parameters(
   cbm4_data,
@@ -132,12 +120,12 @@ cbm4_step(cbm4_data, timestep = 2)
 
 ## Read results
 
-```{r results_processor}
+``` r
 # Get CBM4 SQLResultsProcessor
 cbm4_results <- cbm4_results_processor(cbm4_data)
 ```
 
-```{r results_totals, results = "hide"}
+``` r
 # Read pools totals by timestep
 cbm4_results_totals(
   cbm4_results,
@@ -166,7 +154,7 @@ cbm4_results_totals(
 totalOpts <- cbm4_results_totals(cbm4_results, list = TRUE)
 ```
 
-```{r results_raster, results = "hide", fig.show = "hide"}
+``` r
 # Read Net Primary Productivity (NPP) raster
 rastNPP <- cbm4_results_raster(
   cbm4_results, 
@@ -187,4 +175,3 @@ terra::plot(
 # View a list of results that can be read into a raster
 rastOpts <- cbm4_results_raster(cbm4_results, list = TRUE)
 ```
-

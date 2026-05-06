@@ -6,4 +6,4 @@
 
 ### Examples
 
-- [CBM4r Example: Saskatchewan](doc/CBM4r-SK.html)
+- [CBM4r Example: Saskatchewan](vignettes/CBM4r-SK.md)
