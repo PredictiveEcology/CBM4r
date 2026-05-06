@@ -1,6 +1,6 @@
 Package: CBM4r
 Title: CBM4 in R
-Version: 0.0.0.9000
+Version: 1.0.0.9000
 Authors@R: 
     person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
 Description: R interface to CBM4 Python applications. 
