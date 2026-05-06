@@ -4,12 +4,17 @@
 \alias{cbm4_results_processor}
 \title{CBM4 results processor}
 \usage{
-cbm4_results_processor(cbm4_data, views = TRUE)
+cbm4_results_processor(cbm4_data, max_workers = NULL, views = TRUE)
 }
 \arguments{
 \item{cbm4_data}{character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
+
+\item{max_workers}{integer.
+Number of parallel processes to use.
+NULL or NA will bypass this and and cap processing at the system's available resources.
+A positive integer will spawn multiple processes assigned to each \code{chunk_index}.}
 
 \item{views}{logical. Require views to be available}
 }

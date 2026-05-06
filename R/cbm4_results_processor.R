@@ -2,10 +2,15 @@
 #' CBM4 results processor
 #'
 #' @template cbm4_data
+#' @template max_workers
 #' @param views logical. Require views to be available
 #' @return `SQLResultsProcessor`
 #' @export
-cbm4_results_processor <- function(cbm4_data, views = TRUE){
+cbm4_results_processor <- function(
+    cbm4_data,
+    max_workers = NULL,
+    views       = TRUE
+){
 
   if (!is.character(cbm4_data)) return(cbm4_data)
 
@@ -17,7 +22,7 @@ cbm4_results_processor <- function(cbm4_data, views = TRUE){
 
   reticulate::import(
     "cbm4.app.spatial.results.sql_results_processor"
-  )$SQLResultsProcessor$for_simulation(cbm4_data)
+  )$SQLResultsProcessor$for_simulation(cbm4_data, max_workers = max_workers)
 }
 
 # If simulation data does not contain disturbances:
