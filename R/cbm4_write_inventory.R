@@ -1,0 +1,172 @@
+
+#' CBM4 write inventory
+#'
+#' Write inventory to a CBM4 spatial parquet dataset.
+#'
+#' @template cbm4_data
+#' @template cbm_defaults_db
+#' @template classifiers
+#' @inheritParams cbm4_write_geo
+#' @inheritParams cbm4_format_inventory
+#' @param ... arguments to \code{\link{cbm4_format_inventory}}
+#'
+#' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
+#' @export
+cbm4_write_inventory <- function(
+    cbm4_data = NULL,
+    grid_meta,
+    grid_rast,
+    cohorts,
+    classifiers,
+    dataset_name    = "inventory",
+    dataset_path    = file.path(cbm4_data, dataset_name),
+    cbm_defaults_db = getOption("CBM4r.db.path"),
+    ...
+){
+
+  if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
+  if (!all(classifiers %in% names(cohorts))) stop("cohorts requires all classifiers")
+  if (!all(sapply(cohorts, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
+    "classifiers must be integer, character, or factor")
+
+  # Format inventory
+  inv <- cbm4_format_inventory(
+    grid_meta = grid_meta,
+    cohorts   = cohorts,
+    ...)
+
+  # Initiate dataset
+  cbm4_write_geo(
+    cbm4_data,
+    dataset_name    = dataset_name,
+    dataset_path    = dataset_path,
+    grid_meta       = grid_meta,
+    grid_rast       = grid_rast,
+    cbm_defaults_db = cbm_defaults_db,
+    partitions      = list("cohort_index" = "int64", "chunk_index" = "int64"),
+    tags            = list(classifier = classifiers),
+    write_pixels    = TRUE
+  )
+
+  # Write inventory
+  arrow_space_dataset_write_table(
+    dataset_name = dataset_name,
+    dataset_path = dataset_path,
+    table_name   = NULL,
+    table_data   = inv$flat,
+    partitioning = c("cohort_index", "chunk_index"),
+    schema       = list(age = arrow::float32(), area = arrow::float32())
+  )
+  arrow_space_dataset_write_table(
+    dataset_name = dataset_name,
+    dataset_path = dataset_path,
+    table_name   = "raster_index",
+    table_data   = inv$index,
+    partitioning = c("cohort_index", "chunk_index")
+  )
+
+  # Write CBM defaults database to file
+  arrow_space_dataset_write_file_or_dir(
+    dataset_name = dataset_name,
+    dataset_path = dataset_path,
+    file_name    = "cbm_defaults",
+    file_path    = cbm_defaults_db
+  )
+
+  return(invisible())
+}
+
+
+#' CBM4 format inventory
+#'
+#' @template grid_meta
+#' @param cohorts data.table. Cohort inventory.
+#' @param chunk_size integer. Size of parallel processing chunks.
+#' @param def_delay integer. Regeneration delay.
+#' @param def_land_class character. Land class code.
+#' Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.
+#' @param def_cohort_proportion integer. A value between 0-1.
+#' Percentage of the pixel's area that is attributed to the cohort.
+#' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
+#' @param col_ignore character. Names of `cohorts` columns to exclude
+#' @param ... unused
+#'
+#' @return list with items:
+#' **index**: `arrow_space` raster indexed `data.table`;
+#' **flat**: `arrow_space` flattened dataset `data.table`
+cbm4_format_inventory <- function(
+    grid_meta,
+    cohorts,
+    chunk_size            = NULL,
+    def_delay             = 0L,
+    def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
+    def_cohort_proportion = 1L,
+    area_unit_conversion  = 0.0001,
+    col_ignore            = NULL,
+    ...
+){
+
+  # Check table columns
+  check_table_columns_all("cohorts", cohorts, c("pixel_index", "age"))
+
+  gridCols <- c(
+    "pixel_index",
+    "area", "admin_boundary", "eco_boundary", "spatial_unit",
+    "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+  )
+  check_table_columns_all("grid_meta", grid_meta, gridCols)
+
+  # Cast to data.table
+  if (!data.table::is.data.table(cohorts))  cohorts  <- data.table::as.data.table(cohorts)
+  if (!data.table::is.data.table(grid_meta)) grid_meta <- data.table::as.data.table(grid_meta)
+
+  # Join with pixel table
+  dataFull <- merge(
+    cohorts,
+    grid_meta[, .SD, .SDcols = intersect(c("chunk_index", "raster_index", gridCols), names(grid_meta))],
+    by = "pixel_index", all.x = TRUE)
+
+  # Drop columns
+  col_ignore <- intersect(col_ignore, names(cohorts))
+  if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
+
+  # Set index and chunk_index
+  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("pixel_index", "raster_index", "area"))]
+
+  if (!is.null(chunk_size) && !is.na(chunk_size)){
+    dataFull[, chunk_index := floor(index / chunk_size)]
+    data.table::set(
+      grid_meta, j = "chunk_index",
+      value = dataFull$chunk_index[match(grid_meta$pixel_index, dataFull$pixel_index)])
+  }
+
+  # Set indices
+  if (!"chunk_index"  %in% names(dataFull)) dataFull[, chunk_index  := 0L]
+  if (!"raster_index" %in% names(dataFull)) dataFull[, raster_index := pixel_index - 1L]
+  if (!"cohort_index" %in% names(dataFull)) dataFull[, cohort_index := 0L]
+  dataFull[, pixel_index := NULL]
+
+  # Set area
+  if (is.integer(dataFull$area)) dataFull[, area := as.numeric(area)]
+  dataFull[, area := sum(area) * area_unit_conversion, by = index]
+
+  # Split by raster key and unique groups
+  dataIndex <- dataFull[, .(index, raster_index, cohort_index, chunk_index)]
+  data.table::setkeyv(dataIndex, names(dataIndex))
+
+  dataFull <- unique(dataFull[, .SD, .SDcols = setdiff(names(dataFull), "raster_index")])
+  data.table::setkeyv(dataFull, setdiff(names(dataIndex), "raster_index"))
+  data.table::setcolorder(dataFull)
+
+  # Set defaults
+  set_table_defaults(dataFull)
+
+  # Return
+  list(
+    index = dataIndex,
+    flat  = dataFull
+  )
+}
+
+
+

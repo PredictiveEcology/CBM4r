@@ -1,0 +1,100 @@
+
+testInputs <- list(
+
+  grid_meta = data.table::data.table(
+    pixel_index     = 1:4,
+    admin_boundary  = "Saskatchewan",
+    eco_boundary_id = 6
+  ),
+  grid_rast = data.table::data.table(
+    ncol = 2, nrow = 2,
+    xmin = 0, xmax = 2, ymin = 0, ymax = 2,
+    crs = "local"
+  ),
+
+  cohorts = rbind(
+    data.table::data.table(
+      pixel_index = 1,
+      species     = "species1",
+      prodClass   = "P",
+      age         = 100
+    ),
+    data.table::data.table(
+      pixel_index = 3,
+      species     = "species1",
+      prodClass   = "P",
+      age         = 100
+    ),
+    data.table::data.table(
+      pixel_index = 4,
+      species     = "species2",
+      prodClass   = "M",
+      age         = 50
+    )
+  ),
+  classifiers = c("species", "prodClass"),
+
+  gc_meta = cbind(rbind(
+    data.table::data.table(
+      gc_id     = 1,
+      species   = "species1",
+      prodClass = "P",
+      sw        = TRUE
+    ),
+    data.table::data.table(
+      gc_id     = 2,
+      species   = "species2",
+      prodClass = "M",
+      sw        = FALSE
+    )
+  )),
+  gc_incr = rbind(
+    data.table::data.table(
+      gc_id       = 1,
+      age         = 0:150,
+      merch_inc   = seq(0, 1, length.out = 151),
+      foliage_inc = seq(0, 1, length.out = 151),
+      other_inc   = seq(0, 1, length.out = 151)
+    ),
+    data.table::data.table(
+      gc_id       = 2,
+      age         = 0:150,
+      merch_inc   = seq(0, 1, length.out = 151),
+      foliage_inc = seq(0, 1, length.out = 151),
+      other_inc   = seq(0, 1, length.out = 151)
+    )
+  ),
+
+  dist_meta = rbind(
+    data.table::data.table(
+      disturbance_id   = 1,
+      disturbance_type = "Wildfire"
+    ),
+    data.table::data.table(
+      disturbance_id   = 2,
+      disturbance_type = "Clearcut harvesting without salvage"
+    )
+  ),
+  dist_events = rbind(
+    data.table::data.table(
+      pixel_index    = 3,
+      disturbance_id = 1,
+      timestep       = 1
+    ),
+    data.table::data.table(
+      pixel_index    = 4,
+      disturbance_id = 2,
+      timestep       = 2
+    )
+  )
+)
+
+testdata <- file.path("inst", "testdata", "SK")
+unlink(testdata, recursive = TRUE)
+dir.create(testdata, recursive = TRUE, showWarnings = FALSE)
+
+writeLines(testInputs$classifiers, file.path(testdata, paste0("classifiers", ".txt")))
+for (table in c("grid_meta", "grid_rast", "cohorts", "gc_meta", "gc_incr", "dist_meta", "dist_events")){
+  data.table::fwrite(testInputs[[table]], file.path(testdata, paste0(table, ".csv")))
+}
+
