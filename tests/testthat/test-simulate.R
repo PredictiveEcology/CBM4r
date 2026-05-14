@@ -9,9 +9,12 @@ projects <- list(
 )
 
 for (test in names(projects)){
+
   projects[[test]]$test      <- test
   projects[[test]]$cbm4_data <- file.path(testDirs$temp$outputs, test)
   unlink(projects[[test]]$cbm4_data, recursive = TRUE)
+
+  projects[[test]]$grid_area <- terra::cellSize(projects[[test]]$grid_rast, unit = "m")[1, 1][[1]]
 }
 
 
@@ -22,23 +25,62 @@ for (project in projects) test_that(paste("cbm4_grid_meta:", project$test), {
   grid_meta <- cbm4_grid_meta(
     grid_rast       = project$grid_rast,
     admin_boundary  = project$grid_meta$admin_boundary,
-    eco_boundary_id = project$grid_meta$eco_boundary_id
+    eco_boundary_id = project$grid_meta$eco_boundary_id,
+    chunk_meta      = NULL,
+    chunk_size      = NULL
   )
 
-  expect_true("chunk_index"  %in% names(grid_meta))
-  expect_true("raster_index" %in% names(grid_meta))
-  expect_true("area"         %in% names(grid_meta))
-  expect_true("spatial_unit" %in% names(grid_meta))
+  expect_equal(grid_meta$pixel_index,  1:4)
+  expect_equal(grid_meta$chunk_index,  rep(0, 4))
+  expect_equal(grid_meta$raster_index, 0:3)
+  expect_equal(grid_meta$area,         rep(project$grid_area, 4))
+  expect_true(all(c(
+    "admin_boundary", "eco_boundary", "spatial_unit",
+    "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+  ) %in% names(grid_meta)))
+
+  grid_meta_chunks <- cbm4_grid_meta(
+    grid_rast       = project$grid_rast,
+    admin_boundary  = project$grid_meta$admin_boundary,
+    eco_boundary_id = project$grid_meta$eco_boundary_id,
+    chunk_meta      = NULL,
+    chunk_size      = 2
+  )
+  expect_equal(grid_meta[,        .SD, .SDcols = setdiff(names(grid_meta), "chunk_index")],
+               grid_meta_chunks[, .SD, .SDcols = setdiff(names(grid_meta), "chunk_index")])
+  expect_equal(grid_meta_chunks$chunk_index, c(0, 0, 1, 1))
+
+  grid_meta_chunks <- cbm4_grid_meta(
+    grid_rast       = project$grid_rast,
+    admin_boundary  = project$grid_meta$admin_boundary,
+    eco_boundary_id = project$grid_meta$eco_boundary_id,
+    chunk_meta      = project$cohorts,
+    chunk_size      = 1
+  )
+  expect_equal(grid_meta[,        .SD, .SDcols = setdiff(names(grid_meta), "chunk_index")],
+               grid_meta_chunks[, .SD, .SDcols = setdiff(names(grid_meta), "chunk_index")])
+  expect_equal(grid_meta_chunks$chunk_index, c(0, NA, 0, 1))
+
 })
 
 for (project in projects) test_that(paste("cbm4_set_grid_meta:", project$test), {
 
-  cbm4_set_grid_meta(project$grid_meta, project$grid_rast)
+  cbm4_set_grid_meta(
+    project$grid_meta,
+    project$grid_rast,
+    chunk_meta = project$cohorts,
+    chunk_size = 1
+  )
 
-  expect_true("chunk_index"  %in% names(project$grid_meta))
-  expect_true("raster_index" %in% names(project$grid_meta))
-  expect_true("area"         %in% names(project$grid_meta))
-  expect_true("spatial_unit" %in% names(project$grid_meta))
+  grid_meta <- project$grid_meta
+  expect_equal(grid_meta$pixel_index,  1:4)
+  expect_equal(grid_meta$chunk_index, c(0, NA, 0, 1))
+  expect_equal(grid_meta$raster_index, 0:3)
+  expect_equal(grid_meta$area,         rep(project$grid_area, 4))
+  expect_true(all(c(
+    "admin_boundary", "eco_boundary", "spatial_unit",
+    "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
+  ) %in% names(grid_meta)))
 })
 
 for (project in projects) test_that(paste("cbm4_write_inventory:", project$test), {
@@ -50,8 +92,7 @@ for (project in projects) test_that(paste("cbm4_write_inventory:", project$test)
     grid_meta   = project$grid_meta,
     grid_rast   = project$grid_rast,
     cohorts     = project$cohorts,
-    classifiers = project$classifiers,
-    chunk_size  = 1
+    classifiers = project$classifiers
   )
 
   expect_true(file.exists(file.path(cbm4_data, "inventory")))
@@ -163,9 +204,7 @@ for (test in names(projects)){
   cbm4_data <- projects[[test]]$cbm4_data
 
   if (file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=2"))){
-
     projects[[test]]$cbm4_results <- tryCatch(cbm4_results_processor(cbm4_data), error = function(e) NULL)
-    projects[[test]]$grid_area    <- terra::cellSize(projects[[test]]$grid_rast, unit = "ha")[1, 1][[1]]
   }
 }
 
@@ -186,8 +225,8 @@ for (project in projects) test_that(paste("cbm4_results_raster:", project$test),
   expect_s3_class(cbm4_results_raster(cbm4_results, list = TRUE), "data.table")
 
   # Check creating empty grid
-  expect_true(terra::compareGeom(cbm4_results_raster(cbm4_data),  project$grid_rast))
-  expect_true(terra::compareGeom(cbm4_results_grid(cbm4_results), project$grid_rast))
+  expect_true(terra::compareGeom(cbm4_results_raster(cbm4_data),    project$grid_rast))
+  expect_true(terra::compareGeom(cbm4_results_raster(cbm4_results), project$grid_rast))
 
   # Check setting values from views
   rast_view_columns <- list(
@@ -265,7 +304,7 @@ for (project in projects) test_that(paste("cbm4_results_totals:", project$test),
 
     expect_equal(
       cbm4_results_totals(cbm4_results, view_name = view_name, units = "t/ha")[, -c("timestep", "area")],
-      resTotals[, -c("timestep")] / (project$grid_area * length(unique(project$cohorts$pixel_index))),
+      resTotals[, -c("timestep")] / ((project$grid_area / 10000) * length(unique(project$cohorts$pixel_index))),
       ignore_attr = TRUE, tolerance = 0.000001)
 
     # Check subsetting columns and timesteps

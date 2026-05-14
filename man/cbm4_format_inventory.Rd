@@ -7,7 +7,6 @@
 cbm4_format_inventory(
   grid_meta,
   cohorts,
-  chunk_size = NULL,
   def_delay = 0L,
   def_land_class = "UNFCCC_FL_R_FL",
   def_cohort_proportion = 1L,
@@ -20,8 +19,6 @@ cbm4_format_inventory(
 \item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 
 \item{cohorts}{data.table. Cohort inventory.}
-
-\item{chunk_size}{integer. Size of parallel processing chunks.}
 
 \item{def_delay}{integer. Regeneration delay.}
 

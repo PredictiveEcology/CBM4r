@@ -11,6 +11,9 @@
 #' Optional columns: `chunk_index`, `raster_index`,
 #' `afforestation_pre_type`, `historic_disturbance_type`, `last_pass_disturbance_type`.
 #' @template grid_rast
+#' @param chunk_size integer. Size of parallel processing chunks.
+#' @param chunk_meta data.table. Table to use to group pixels by shared characteristics.
+#' Required columns: `pixel_index` and at least one other column.
 #' @template cbm_defaults_db
 #' @param def_afforestation_pre_type character. Land use before forestation.
 #' Defined in CBM defaults database tables 'afforestation_pre_type'
@@ -25,6 +28,8 @@
 cbm4_set_grid_meta <- function(
     grid_meta,
     grid_rast = NULL,
+    chunk_size = NULL,
+    chunk_meta = NULL,
     def_afforestation_pre_type     = "None",
     def_historic_disturbance_type  = "Wildfire",
     def_last_pass_disturbance_type = "Wildfire",
@@ -34,6 +39,24 @@ cbm4_set_grid_meta <- function(
   if (is.null(grid_meta)) stop("grid_meta required")
 
   check_table_columns_all("grid_meta", grid_meta, "pixel_index")
+
+  if (!is.null(chunk_size) && !is.na(chunk_size)){
+
+    if (!is.null(chunk_meta)){
+
+      check_table_columns_all("chunk_meta", chunk_meta, "pixel_index")
+      chunk_groups <- data.table::as.data.table(chunk_meta)
+      chunk_groups[, chunk_index := ceiling(.GRP / chunk_size) - 1, by = setdiff(names(chunk_meta), "pixel_index")]
+      grid_meta[chunk_groups, chunk_index := chunk_index, on = "pixel_index"]
+      rm(chunk_groups)
+
+    }else{
+
+      grid_meta[, chunk_index := ceiling(1:nrow(grid_meta) / chunk_size) - 1]
+    }
+
+    grid_meta[, raster_index := pixel_index - 1]
+  }
 
   if (!"chunk_index"  %in% names(grid_meta)) data.table::set(grid_meta, j = "chunk_index",  value = 0L)
   if (!"raster_index" %in% names(grid_meta)) data.table::set(grid_meta, j = "raster_index", value = grid_meta$pixel_index - 1)
