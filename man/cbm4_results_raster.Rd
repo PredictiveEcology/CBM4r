@@ -9,6 +9,7 @@ cbm4_results_raster(
   view_name = NULL,
   view_column = NULL,
   timesteps = NULL,
+  grid_meta = NULL,
   list = FALSE
 )
 }

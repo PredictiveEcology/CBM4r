@@ -122,6 +122,59 @@ or a `SQLResultsProcessor` object created with `[cbm4_results_processor](cbm4_re
 
 `data.table`
 
+# `cbm4_results_grid`: CBM4 results grid
+
+## Description
+
+Recreate a study area grid from a CBM4 spatial parquet dataset.
+
+## Usage
+
+```r
+cbm4_results_grid(cbm4_results, dataset_name = "simulation")
+```
+
+## Arguments
+
+* `cbm4_results`: character or `SQLResultsProcessor`.
+Path to CBM4 spatial datasets directory
+or a `SQLResultsProcessor` object created with `[cbm4_results_processor](cbm4_results_processor)`.
+* `dataset_name`: character.
+Name of the CBM4 spatial parquet dataset.
+
+## Value
+
+`SpatRaster`
+
+# `cbm4_results_grid_key`: CBM4 results grid key
+
+## Description
+
+Retrieve a study area grid key for a CBM4 spatial parquet dataset.
+
+## Usage
+
+```r
+cbm4_results_grid_key(
+  cbm4_results,
+  dataset_name = "simulation",
+  coords = FALSE
+)
+```
+
+## Arguments
+
+* `cbm4_results`: character or `SQLResultsProcessor`.
+Path to CBM4 spatial datasets directory
+or a `SQLResultsProcessor` object created with `[cbm4_results_processor](cbm4_results_processor)`.
+* `dataset_name`: character.
+Name of the CBM4 spatial parquet dataset.
+* `coords`: logical. Return pixel coordinates.
+
+## Value
+
+`data.table` with columns `pixel_index`, `chunk_index`, `raster_index`.
+
 # `cbm4_results_processor`: CBM4 results processor
 
 ## Description
@@ -186,6 +239,7 @@ cbm4_results_raster(
   view_name = NULL,
   view_column = NULL,
   timesteps = NULL,
+  grid_meta = NULL,
   list = FALSE
 )
 ```
@@ -252,6 +306,8 @@ Format `grid_meta` table by reference.
 cbm4_set_grid_meta(
   grid_meta,
   grid_rast = NULL,
+  chunk_size = NULL,
+  chunk_meta = NULL,
   def_afforestation_pre_type = "None",
   def_historic_disturbance_type = "Wildfire",
   def_last_pass_disturbance_type = "Wildfire",
@@ -270,6 +326,9 @@ Required columns: `pixel_index`,
 Optional columns: `chunk_index`, `raster_index`,
 `afforestation_pre_type`, `historic_disturbance_type`, `last_pass_disturbance_type`.
 * `grid_rast`: terra `SpatRaster`. Grid defining the study area.
+* `chunk_size`: integer. Size of parallel processing chunks.
+* `chunk_meta`: data.table. Table to use to group pixels by shared characteristics.
+Required columns: `pixel_index` and at least one other column.
 * `def_afforestation_pre_type`: character. Land use before forestation.
 Defined in CBM defaults database tables 'afforestation_pre_type'
 * `def_historic_disturbance_type`: character. Historic disturbance type.
@@ -420,10 +479,10 @@ Write disturbances to a CBM4 spatial parquet dataset.
 ```r
 cbm4_write_disturbance(
   cbm4_data = NULL,
-  grid_meta,
   dist_meta = NULL,
   dist_events = NULL,
   classifiers = NULL,
+  grid_meta = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "disturbance",
@@ -437,11 +496,11 @@ cbm4_write_disturbance(
 * `cbm4_data`: character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.
-* `grid_meta`: data.table. Grid metadata set with `cbm4_set_grid_meta`.
 * `dist_meta`: data.table. Disturbance metadata.
 * `dist_events`: data.table. Disturbance events.
 * `classifiers`: character.
 Column names of cohort inventory identifiers.
+* `grid_meta`: data.table. Grid metadata set with `cbm4_set_grid_meta`.
 * `template_name`: character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.
 * `template_path`: character.

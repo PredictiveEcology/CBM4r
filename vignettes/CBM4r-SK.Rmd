@@ -10,7 +10,10 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment  = "#>",
+  message  = FALSE, 
+  results  = "hide", 
+  fig.show = "hide"
 )
 ```
 
@@ -42,7 +45,7 @@ dist_events <- data.table::fread(file.path(testdata, "dist_events.csv"))
 
 ## Set up Python virtual environment
 
-```{r virtualeenv, message = FALSE}
+```{r virtualeenv}
 # Create CBM4 virtual environment
 cbm4_virtualenv_create("r-CBM4")
 
@@ -118,7 +121,6 @@ cbm4_write_step_parameters(
 # Write disturbances to CBM4 data directory
 cbm4_write_disturbance(
   cbm4_data,
-  grid_meta   = grid_meta,
   dist_meta   = dist_meta,
   dist_events = dist_events
 )
@@ -132,12 +134,29 @@ cbm4_step(cbm4_data, timestep = 2)
 
 ## Read results
 
+All results functions can accept `cbm4_data` or `cbm4_results` as input. 
+Most functions will read `cbm4_data` into a `SQLResultsProcessor` object as the first step,
+so calling `cbm4_results_processor` directly is more efficient when reading more than one result.
+
 ```{r results_processor}
 # Get CBM4 SQLResultsProcessor
 cbm4_results <- cbm4_results_processor(cbm4_data)
 ```
 
-```{r results_totals, results = "hide"}
+### Study area grid
+
+```{r results_grid}
+# Get study area grid
+cbm4_results_grid(cbm4_results)
+
+# Get study area chunk processing key
+cbm4_results_grid_key(cbm4_results)
+```
+
+
+### Results by timestep
+
+```{r results_totals}
 # Read pools totals by timestep
 cbm4_results_totals(
   cbm4_results,
@@ -166,7 +185,9 @@ cbm4_results_totals(
 totalOpts <- cbm4_results_totals(cbm4_results, list = TRUE)
 ```
 
-```{r results_raster, results = "hide", fig.show = "hide"}
+### Results by pixel
+
+```{r results_raster}
 # Read Net Primary Productivity (NPP) raster
 rastNPP <- cbm4_results_raster(
   cbm4_results, 

@@ -14,11 +14,11 @@
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_disturbance <- function(
-    cbm4_data = NULL,
-    grid_meta,
-    dist_meta     = NULL,
-    dist_events   = NULL,
-    classifiers   = NULL,
+    cbm4_data   = NULL,
+    dist_meta   = NULL,
+    dist_events = NULL,
+    classifiers = NULL,
+    grid_meta   = NULL,
     template_name = "inventory",
     template_path = file.path(cbm4_data, template_name),
     dataset_name  = "disturbance",
@@ -28,26 +28,29 @@ cbm4_write_disturbance <- function(
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
-    if (!is.null(template_name)){
-      arrow_space_dataset_copy_geo(
-        dataset_name  = dataset_name,
-        dataset_path  = dataset_path,
-        template_name = template_name,
-        template_path = template_path,
-        partitions    = list("disturbance_order" = "int64", "timestep" = "int64", "chunk_index" = "int64"),
-        tags          = if (length(classifiers) > 0) list(classifier = paste0("classifiers.", classifiers))
-      )
-    }else stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
+
+    if (is.null(template_name)) stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
+
+    arrow_space_dataset_copy_geo(
+      dataset_name  = dataset_name,
+      dataset_path  = dataset_path,
+      template_name = template_name,
+      template_path = template_path,
+      partitions    = list("disturbance_order" = "int64", "timestep" = "int64", "chunk_index" = "int64"),
+      tags          = if (length(classifiers) > 0) list(classifier = paste0("classifiers.", classifiers))
+    )
+
+    if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_data, dataset_name = template_name)
   }
 
   if (!is.null(dist_events) && nrow(dist_events) > 0){
 
     # Format disturbances
     dist <- cbm4_format_disturbance(
-      grid_meta = grid_meta,
-      dist_meta,
-      dist_events,
-      classifiers,
+      grid_meta   = grid_meta,
+      dist_meta   = dist_meta,
+      dist_events = dist_events,
+      classifiers = classifiers,
       ...)
 
     # Write disturbances
@@ -113,11 +116,11 @@ cbm4_format_disturbance <- function(
   check_table_columns_all("dist_events", dist_events, c("pixel_index", "disturbance_id", "timestep"))
 
   gridCols <- c("pixel_index", "chunk_index", "raster_index")
-  check_table_columns_all("grid_meta",  grid_meta,  gridCols)
+  check_table_columns_all("grid_meta", grid_meta, gridCols)
 
   # Cast to data.table
   if (!data.table::is.data.table(dist_events)) dist_events <- data.table::as.data.table(dist_events)
-  if (!data.table::is.data.table(grid_meta))  grid_meta  <- data.table::as.data.table(grid_meta)
+  if (!data.table::is.data.table(grid_meta))   grid_meta   <- data.table::as.data.table(grid_meta)
 
   # Join with pixel table
   dataFull <- merge(dist_events, grid_meta[, .SD, .SDcols = gridCols], by = "pixel_index")

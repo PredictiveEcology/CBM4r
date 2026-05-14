@@ -103,7 +103,6 @@ cbm4_write_step_parameters(
 # Write disturbances to CBM4 data directory
 cbm4_write_disturbance(
   cbm4_data,
-  grid_meta   = grid_meta,
   dist_meta   = dist_meta,
   dist_events = dist_events
 )
@@ -117,10 +116,27 @@ cbm4_step(cbm4_data, timestep = 2)
 
 ## Read results
 
+All results functions can accept `cbm4_data` or `cbm4_results` as input.
+Most functions will read `cbm4_data` into a `SQLResultsProcessor` object
+as the first step, so calling `cbm4_results_processor` directly is more
+efficient when reading more than one result.
+
 ``` r
 # Get CBM4 SQLResultsProcessor
 cbm4_results <- cbm4_results_processor(cbm4_data)
 ```
+
+### Study area grid
+
+``` r
+# Get study area grid
+cbm4_results_grid(cbm4_results)
+
+# Get study area chunk processing key
+cbm4_results_grid_key(cbm4_results)
+```
+
+### Results by timestep
 
 ``` r
 # Read pools totals by timestep
@@ -150,6 +166,8 @@ cbm4_results_totals(
 # View a list of results that can be read into a summary table
 totalOpts <- cbm4_results_totals(cbm4_results, list = TRUE)
 ```
+
+### Results by pixel
 
 ``` r
 # Read Net Primary Productivity (NPP) raster

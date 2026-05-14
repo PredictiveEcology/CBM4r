@@ -106,7 +106,6 @@ for (project in projects) test_that(paste("cbm4_write_disturbance:", project$tes
 
   cbm4_write_disturbance(
     cbm4_data,
-    grid_meta   = project$grid_meta,
     dist_meta   = project$dist_meta,
     dist_events = project$dist_events
   )
@@ -212,6 +211,35 @@ for (project in projects) test_that(paste("cbm4_results_processor:", project$tes
 
   expect_s3_class(project$cbm4_results, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")
 
+})
+
+for (project in projects) test_that(paste("cbm4_results_grid:", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  testthat::skip_if(is.null(cbm4_results))
+
+  expect_true(terra::compareGeom(cbm4_results_grid(cbm4_data),    project$grid_rast))
+  expect_true(terra::compareGeom(cbm4_results_grid(cbm4_results), project$grid_rast))
+
+})
+
+for (project in projects) test_that(paste("cbm4_results_grid_key:", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  testthat::skip_if(is.null(cbm4_results))
+
+  grid_key <- cbm4_results_grid_key(cbm4_results)
+
+  expect_equal(names(grid_key), c("pixel_index", "chunk_index", "raster_index"))
+  expect_equal(grid_key$pixel_index,  unique(project$cohorts$pixel_index))
+  expect_equal(grid_key$raster_index, unique(project$cohorts$pixel_index) - 1)
+
+  expect_equal(grid_key, cbm4_results_grid_key(cbm4_data))
+
+  grid_key_crds <- cbm4_results_grid_key(cbm4_results, coords = TRUE)
+  expect_equal(names(grid_key_crds), c("pixel_index", "chunk_index", "raster_index", "x", "y"))
 })
 
 for (project in projects) test_that(paste("cbm4_results_raster:", project$test), {

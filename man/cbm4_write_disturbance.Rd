@@ -6,10 +6,10 @@
 \usage{
 cbm4_write_disturbance(
   cbm4_data = NULL,
-  grid_meta,
   dist_meta = NULL,
   dist_events = NULL,
   classifiers = NULL,
+  grid_meta = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "disturbance",
@@ -22,14 +22,14 @@ cbm4_write_disturbance(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
 
-\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
-
 \item{dist_meta}{data.table. Disturbance metadata.}
 
 \item{dist_events}{data.table. Disturbance events.}
 
 \item{classifiers}{character.
 Column names of cohort inventory identifiers.}
+
+\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 
 \item{template_name}{character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}
