@@ -9,6 +9,10 @@ cbm4_grid_meta(
   admin_boundary = NULL,
   eco_boundary = NULL,
   eco_boundary_id = NULL,
+  def_afforestation_pre_type = "None",
+  def_historic_disturbance_type = "Wildfire",
+  def_last_pass_disturbance_type = "Wildfire",
+  cbm_defaults_db = getOption("CBM4r.db.path"),
   ...
 )
 }
@@ -21,7 +25,19 @@ cbm4_grid_meta(
 
 \item{eco_boundary_id}{integer. Canada ecozone ID. Provide this or \code{eco_boundary}.}
 
-\item{...}{arguments to \code{\link{cbm4_set_grid_meta}}}
+\item{def_afforestation_pre_type}{character. Land use before forestation.
+Defined in CBM defaults database tables 'afforestation_pre_type'}
+
+\item{def_historic_disturbance_type}{character. Historic disturbance type.
+Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
+
+\item{def_last_pass_disturbance_type}{character. Last pass disturbance.
+Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.}
+
+\item{cbm_defaults_db}{character.
+Path to CBM defaults SQLite database.}
+
+\item{...}{unused}
 }
 \description{
 Create a study area grid metadata table.
