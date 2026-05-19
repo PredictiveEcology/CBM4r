@@ -1,34 +1,34 @@
 # DESCRIPTION
 
 ```
-Package: CBM4r
-Title: CBM4 in R
-Version: 1.0.0
-Authors@R: 
-    person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
-Description: R interface to CBM4 Python applications. 
-License: GPL-3
-Depends: R (>= 4.1.0)
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-Imports:
-  arrow,
-  data.table (>= 1.18.0),
-  dplyr,
-  reticulate,
-  RSQLite,
-  terra
-Suggests:
-  covr,
-  devtools,
-  gert,
-  knitr,
-  rmarkdown,
-  testthat (>= 3.0.0),
-  withr
-Config/testthat/edition: 3
-VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+Package: CBM4r
+Title: CBM4 in R
+Version: 1.0.0
+Authors@R: 
+    person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
+Description: R interface to CBM4 Python applications. 
+License: GPL-3
+Depends: R (>= 4.1.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports:
+  arrow,
+  data.table (>= 1.18.0),
+  dplyr,
+  reticulate,
+  RSQLite,
+  terra
+Suggests:
+  covr,
+  devtools,
+  gert,
+  knitr,
+  rmarkdown,
+  testthat (>= 3.0.0),
+  withr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
 RoxygenNote: 8.0.0
 ```
 
@@ -83,9 +83,11 @@ Create a study area grid metadata table.
 ```r
 cbm4_grid_meta(
   grid_rast,
-  admin_boundary = NULL,
+  admin_boundary,
   eco_boundary = NULL,
   eco_boundary_id = NULL,
+  chunk_size = NULL,
+  chunk_meta = NULL,
   def_afforestation_pre_type = "None",
   def_historic_disturbance_type = "Wildfire",
   def_last_pass_disturbance_type = "Wildfire",
@@ -100,6 +102,9 @@ cbm4_grid_meta(
 * `admin_boundary`: character. Canada province or territory name.
 * `eco_boundary`: character. Canada ecozone name.
 * `eco_boundary_id`: integer. Canada ecozone ID. Provide this or `eco_boundary`.
+* `chunk_size`: integer. Number of pixels or `chunk_meta` groups in each processing chunk.
+* `chunk_meta`: data.table. Table to use to group pixels by shared characteristics.
+Required columns: `pixel_index` and at least one other column.
 * `def_afforestation_pre_type`: character. Land use before forestation.
 Defined in CBM defaults database tables 'afforestation_pre_type'
 * `def_historic_disturbance_type`: character. Historic disturbance type.
@@ -311,6 +316,24 @@ The vector can have names to use as column aliases.
 
 `data.table`
 
+# `cbm4_set_db_path`: CBM4 set database path
+
+## Description
+
+Set custom parameters by using a modified version of the CBM defaults RSQLite database.
+This path can instead be passed directly to functions that use it.
+
+## Usage
+
+```r
+cbm4_set_db_path(cbm_defaults_db)
+```
+
+## Arguments
+
+* `cbm_defaults_db`: character.
+Path to CBM defaults SQLite database.
+
 # `cbm4_set_grid_meta`: CBM4 set grid metadata
 
 ## Description
@@ -343,7 +366,7 @@ Required columns: `pixel_index`,
 Optional columns: `chunk_index`, `raster_index`,
 `afforestation_pre_type`, `historic_disturbance_type`, `last_pass_disturbance_type`.
 * `grid_rast`: terra `SpatRaster`. Grid defining the study area.
-* `chunk_size`: integer. Size of parallel processing chunks.
+* `chunk_size`: integer. Number of pixels or `chunk_meta` groups in each processing chunk.
 * `chunk_meta`: data.table. Table to use to group pixels by shared characteristics.
 Required columns: `pixel_index` and at least one other column.
 * `def_afforestation_pre_type`: character. Land use before forestation.

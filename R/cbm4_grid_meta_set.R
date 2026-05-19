@@ -11,7 +11,7 @@
 #' Optional columns: `chunk_index`, `raster_index`,
 #' `afforestation_pre_type`, `historic_disturbance_type`, `last_pass_disturbance_type`.
 #' @template grid_rast
-#' @param chunk_size integer. Size of parallel processing chunks.
+#' @param chunk_size integer. Number of pixels or `chunk_meta` groups in each processing chunk.
 #' @param chunk_meta data.table. Table to use to group pixels by shared characteristics.
 #' Required columns: `pixel_index` and at least one other column.
 #' @template cbm_defaults_db

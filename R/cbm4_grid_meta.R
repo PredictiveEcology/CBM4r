@@ -11,9 +11,11 @@
 #' @export
 cbm4_grid_meta <- function(
     grid_rast,
-    admin_boundary  = NULL,
+    admin_boundary,
     eco_boundary    = NULL,
     eco_boundary_id = NULL,
+    chunk_size      = NULL,
+    chunk_meta      = NULL,
     def_afforestation_pre_type     = "None",
     def_historic_disturbance_type  = "Wildfire",
     def_last_pass_disturbance_type = "Wildfire",
@@ -28,8 +30,10 @@ cbm4_grid_meta <- function(
   )
 
   cbm4_set_grid_meta(
-    grid_meta = grid_meta,
-    grid_rast = grid_rast,
+    grid_meta  = grid_meta,
+    grid_rast  = grid_rast,
+    chunk_size = chunk_size,
+    chunk_meta = chunk_meta,
     def_afforestation_pre_type     = def_afforestation_pre_type,
     def_historic_disturbance_type  = def_historic_disturbance_type,
     def_last_pass_disturbance_type = def_last_pass_disturbance_type,
