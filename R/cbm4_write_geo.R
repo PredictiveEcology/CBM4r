@@ -25,7 +25,7 @@ cbm4_write_geo <- function(
     dataset_name = dataset_name,
     dataset_path = dataset_path,
     grid_rast    = grid_rast,
-    grid_chunks  = length(na.omit(unique(grid_meta$chunk_index))),
+    grid_chunks  = sum(!is.na(unique(grid_meta$chunk_index))),
     ...
   )
 }

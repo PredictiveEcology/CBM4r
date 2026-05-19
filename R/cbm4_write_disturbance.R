@@ -10,6 +10,7 @@
 #' @template dataset_path
 #' @template template_name
 #' @template template_path
+#' @template grid_meta_optional
 #'
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
@@ -18,11 +19,11 @@ cbm4_write_disturbance <- function(
     dist_meta   = NULL,
     dist_events = NULL,
     classifiers = NULL,
-    grid_meta   = NULL,
     template_name = "inventory",
     template_path = file.path(cbm4_data, template_name),
     dataset_name  = "disturbance",
     dataset_path  = file.path(cbm4_data, dataset_name),
+    grid_meta    = NULL,
     ...
 ){
 
@@ -40,12 +41,14 @@ cbm4_write_disturbance <- function(
       tags          = if (length(classifiers) > 0) list(classifier = paste0("classifiers.", classifiers))
     )
 
-    if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_data, dataset_name = template_name)
+    if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_data, template_name)
   }
 
   if (!is.null(dist_events) && nrow(dist_events) > 0){
 
     # Format disturbances
+    if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_data, dataset_name)
+
     dist <- cbm4_format_disturbance(
       grid_meta   = grid_meta,
       dist_meta   = dist_meta,

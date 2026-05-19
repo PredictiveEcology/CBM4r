@@ -5,7 +5,7 @@
 #'
 #' @template cbm4_results
 #' @template timestep
-#' @template grid_meta
+#' @template grid_meta_optional
 #'
 #' @return `data.table`
 #' @export

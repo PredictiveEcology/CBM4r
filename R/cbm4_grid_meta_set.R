@@ -45,8 +45,10 @@ cbm4_set_grid_meta <- function(
     if (!is.null(chunk_meta)){
 
       check_table_columns_all("chunk_meta", chunk_meta, "pixel_index")
-      chunk_groups <- data.table::as.data.table(chunk_meta)
-      chunk_groups[, chunk_index := ceiling(.GRP / chunk_size) - 1, by = setdiff(names(chunk_meta), "pixel_index")]
+      chunk_groups <- data.table::as.data.table(chunk_meta)[
+        , chunk_index := ceiling(.GRP / chunk_size) - 1, by = setdiff(names(chunk_meta), "pixel_index")]
+
+      if ("chunk_index" %in% names(grid_meta)) grid_meta[, chunk_index := NULL]
       grid_meta[chunk_groups, chunk_index := chunk_index, on = "pixel_index"]
       rm(chunk_groups)
 
@@ -73,7 +75,7 @@ cbm4_set_grid_meta <- function(
   }
 
   # Set spatial units
-  set_table_spatial_units(grid_meta, cbm_defaults_db)
+  set_table_spatial_units("grid_meta", grid_meta, cbm_defaults_db)
 
   # Set defaults
   set_table_defaults(grid_meta)
@@ -90,7 +92,7 @@ cbm4_set_grid_meta <- function(
 }
 
 
-set_table_spatial_units <- function(table, cbm_defaults_db = getOption("CBM4r.db.path"), naOK = FALSE){
+set_table_spatial_units <- function(tableName, table, cbm_defaults_db = getOption("CBM4r.db.path"), naOK = FALSE){
 
   if (nrow(table) == 0){
     if (!"admin_boundary" %in% names(table)) table[, admin_boundary := character(0)]

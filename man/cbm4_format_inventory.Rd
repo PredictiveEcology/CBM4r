@@ -16,7 +16,8 @@ cbm4_format_inventory(
 )
 }
 \arguments{
-\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
+\item{grid_meta}{data.table. Grid metadata.
+This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
 \item{cohorts}{data.table. Cohort inventory.}
 

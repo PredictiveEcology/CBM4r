@@ -29,7 +29,9 @@ May be omitted if full paths to datasets are provided.}
 \item{classifiers}{character.
 Column names of cohort inventory identifiers.}
 
-\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
+\item{grid_meta}{data.table. Grid metadata.
+May not be required but can be provided for efficiency.
+This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
 \item{template_name}{character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}

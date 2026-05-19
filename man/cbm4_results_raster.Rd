@@ -25,6 +25,10 @@ If NULL the function will return an empty study area grid.}
 
 \item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
 
+\item{grid_meta}{data.table. Grid metadata.
+May not be required but can be provided for efficiency.
+This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
+
 \item{list}{logical. Return a table of options.}
 }
 \value{

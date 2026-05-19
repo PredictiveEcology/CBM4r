@@ -13,7 +13,9 @@ or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_pro
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 
-\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
+\item{grid_meta}{data.table. Grid metadata.
+May not be required but can be provided for efficiency.
+This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 }
 \value{
 \code{data.table}

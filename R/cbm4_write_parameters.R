@@ -41,8 +41,8 @@ cbm4_write_spinup_parameters <- function(
   # Format increments
   incTable <- cbm4_format_increments(
     cbm_defaults_db = cbm_defaults_db,
-    gc_meta          = gc_meta,
-    gc_incr          = gc_incr,
+    gc_meta         = gc_meta,
+    gc_incr         = gc_incr,
     classifiers     = classifiers,
     long            = FALSE
   )
@@ -192,7 +192,7 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
   if (!"spatial_unit" %in% names(gc_meta)){
     if (any(c("admin_boundary_id", "admin_boundary", "admin_abbrev",
               "eco_boundary_id", "eco_boundary") %in% names(gc_meta))){
-      set_table_spatial_units(gc_meta, cbm_defaults_db, naOK = TRUE)
+      set_table_spatial_units("gc_meta", gc_meta, cbm_defaults_db, naOK = TRUE)
       gc_meta[is.na(spatial_unit), spatial_unit := "?"]
     }else{
       gc_meta[, spatial_unit := "?"]

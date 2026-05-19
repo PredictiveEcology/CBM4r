@@ -28,7 +28,9 @@ cbm4_format_simulation_inventory(
 \item{classifiers}{character.
 Column names of cohort inventory identifiers.}
 
-\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
+\item{grid_meta}{data.table. Grid metadata.
+May not be required but can be provided for efficiency.
+This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
 \item{col_ignore}{character. Names of \code{cohorts} columns to exclude}
 

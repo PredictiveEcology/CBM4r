@@ -82,10 +82,10 @@ cbm4_write_simulation_inventory <- function(
 
 #' CBM4 format simulation inventory
 #'
-#' @template grid_meta
 #' @param cohorts data.table. Cohort inventory.
 #' @template timestep
 #' @template classifiers
+#' @template grid_meta_optional
 #' @param col_ignore character. Names of `cohorts` columns to exclude
 #' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
 #' @param def_cohort_proportion integer. A value between 0-1.

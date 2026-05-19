@@ -7,6 +7,7 @@
 #' @param view_name character. `SQLResultsProcessor` view name.
 #' If NULL the function will return an empty study area grid.
 #' @param view_column character. `SQLResultsProcessor` view column name.
+#' @template grid_meta_optional
 #' @template timesteps
 #' @param list logical. Return a table of options.
 #'
