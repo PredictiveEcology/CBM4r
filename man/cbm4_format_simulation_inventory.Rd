@@ -5,10 +5,10 @@
 \title{CBM4 format simulation inventory}
 \usage{
 cbm4_format_simulation_inventory(
-  grid_meta,
   cohorts,
   timestep,
   classifiers = NULL,
+  grid_meta = NULL,
   col_ignore = NULL,
   area_unit_conversion = 1e-04,
   def_cohort_proportion = 1L,
@@ -21,14 +21,14 @@ cbm4_format_simulation_inventory(
 )
 }
 \arguments{
-\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
-
 \item{cohorts}{data.table. Cohort inventory.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 
 \item{classifiers}{character.
 Column names of cohort inventory identifiers.}
+
+\item{grid_meta}{data.table. Grid metadata set with \code{cbm4_set_grid_meta}.}
 
 \item{col_ignore}{character. Names of \code{cohorts} columns to exclude}
 

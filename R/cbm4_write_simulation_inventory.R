@@ -15,10 +15,10 @@
 #' @export
 cbm4_write_simulation_inventory <- function(
     cbm4_data = NULL,
-    grid_meta,
     cohorts,
     timestep,
     classifiers   = NULL,
+    grid_meta     = NULL,
     template_name = "inventory",
     template_path = file.path(cbm4_data, template_name),
     dataset_name  = "simulation",
@@ -28,19 +28,22 @@ cbm4_write_simulation_inventory <- function(
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
-    if (!is.null(template_name)){
-      arrow_space_dataset_copy_geo(
-        dataset_name  = dataset_name,
-        dataset_path  = dataset_path,
-        template_name = template_name,
-        template_path = template_path,
-        partitions    = list("timestep" = "int32", "cohort_index" = "int64", "chunk_index" = "int64"),
-        tags          = list(classifier = paste0("classifiers.", classifiers))
-      )
-    }else stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name`")
+
+    if (is.null(template_name)) stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name`")
+
+    arrow_space_dataset_copy_geo(
+      dataset_name  = dataset_name,
+      dataset_path  = dataset_path,
+      template_name = template_name,
+      template_path = template_path,
+      partitions    = list("timestep" = "int32", "cohort_index" = "int64", "chunk_index" = "int64"),
+      tags          = list(classifier = paste0("classifiers.", classifiers))
+    )
   }
 
   # Format inventory
+  if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_data, dataset_name)
+
   inv <- cbm4_format_simulation_inventory(
     grid_meta   = grid_meta,
     cohorts     = cohorts,
@@ -98,10 +101,10 @@ cbm4_write_simulation_inventory <- function(
 #' **index**: `arrow_space` raster indexed `data.table`;
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_simulation_inventory <- function(
-    grid_meta,
     cohorts,
     timestep,
     classifiers = NULL,
+    grid_meta   = NULL,
     col_ignore  = NULL,
     area_unit_conversion = 0.0001,
     def_cohort_proportion        = 1L,
@@ -114,6 +117,8 @@ cbm4_format_simulation_inventory <- function(
 ){
 
   # Set required columns
+  keyCols <- c("chunk_index", "raster_index")
+
   cohortCols <- list(
     classifiers = classifiers,
     inventory = c("area", "admin_boundary", "eco_boundary", "spatial_unit"),
@@ -134,31 +139,36 @@ cbm4_format_simulation_inventory <- function(
   )
   if (is.null(classifiers)){
     cohortCols$classifiers <- setdiff(names(cohorts), c(
-      "pixel_index", "index", "cohort_index", "chunk_index", "cohort_proportion", "timestep",
+      "pixel_index", keyCols, "cohort_index", "cohort_proportion", "timestep",
       do.call(c, lapply(names(cohortCols), function(colType) paste0(colType, ".", cohortCols[[colType]]))),
       do.call(c, cohortCols)
     ))
   }
 
-  # Check columns
-  check_table_columns_all("cohorts", cohorts, "pixel_index")
-
-  gridCols <- c(
-    "pixel_index", "chunk_index", "raster_index",
-    "area", "admin_boundary", "eco_boundary", "spatial_unit"
-  )
-  check_table_columns_all("grid_meta", grid_meta, gridCols)
-
   # Cast to data.table
-  if (!data.table::is.data.table(grid_meta)) grid_meta <- data.table::as.data.table(grid_meta)
-  if (!data.table::is.data.table(cohorts))   cohorts   <- data.table::as.data.table(cohorts)
+  dataFull <- data.table::as.data.table(cohorts)
 
   # Join with pixel table
-  dataFull <- merge(
-    cohorts,
-    grid_meta[, .SD, .SDcols = c("pixel_index", "raster_index", "chunk_index", cohortCols$inventory)],
-    by = "pixel_index", all.x = TRUE)
-  dataFull[, pixel_index := NULL]
+  gridCols <- c(keyCols, cohortCols$inventory)
+  if (any(!gridCols %in% names(dataFull))){
+
+    if (is.null(grid_meta)) stop(
+      "grid_meta required to set attributes: ",
+      paste(shQuote(setdiff(gridCols, names(dataFull))), collapse = ", "))
+
+    # Cast to data.table
+    if (!data.table::is.data.table(grid_meta)) grid_meta <- data.table::as.data.table(grid_meta)
+
+    # Check columns
+    check_table_columns_all("cohorts",   dataFull,  "pixel_index")
+    check_table_columns_all("grid_meta", grid_meta, c("pixel_index", gridCols))
+
+    # Join with pixel table
+    dataFull <- merge(
+      dataFull,
+      grid_meta[, .SD, .SDcols = c("pixel_index", setdiff(gridCols, names(dataFull)))],
+      by = "pixel_index", all.x = TRUE)
+  }
 
   # Rename and check cohort columns
   for (colType in names(cohortCols)){
@@ -167,7 +177,7 @@ cbm4_format_simulation_inventory <- function(
   }
 
   # Drop columns
-  col_ignore <- intersect(col_ignore, names(cohorts))
+  col_ignore <- intersect(c("pixel_index", col_ignore), names(cohorts))
   if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
   # Set index

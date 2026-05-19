@@ -183,8 +183,28 @@ for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_
 
   cbm4_write_simulation_inventory(
     cbm4_data,
-    grid_meta = project$grid_meta,
     cohorts   = cohorts,
+    grid_meta = project$grid_meta,
+    timestep  = 1
+  )
+
+  cbm4_step(cbm4_data, timestep = 2)
+
+  expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=2")))
+
+  # Expect error: stand attributes required
+  expect_error(
+    cbm4_write_simulation_inventory(
+      cbm4_data,
+      cohorts   = cohorts,
+      timestep  = 1
+    )
+  )
+
+  # Pass stand attributes with the cohorts table
+  cbm4_write_simulation_inventory(
+    cbm4_data,
+    cohorts   = merge(cohorts, project$grid_meta, by = c("pixel_index", "raster_index", "chunk_index")),
     timestep  = 1
   )
 
