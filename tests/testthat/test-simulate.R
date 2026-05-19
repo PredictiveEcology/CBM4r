@@ -178,7 +178,6 @@ for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_
 
   cohorts <- cbm4_read_simulation_inventory(
     cbm4_data,
-    grid_meta = project$grid_meta,
     timestep  = 1
   )
 
