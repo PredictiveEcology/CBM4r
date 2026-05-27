@@ -110,8 +110,6 @@ cbm4_format_disturbance <- function(
     ...
 ){
 
-  if (length(classifiers) > 0) stop("Disturbances do not yet support classifiers.")
-
   # Check table columns
   check_table_columns_all("dist_meta", dist_meta, c("disturbance_id"))
   check_table_columns_any("dist_meta", dist_meta, c("disturbance_type", "disturbance_type_id"))
@@ -120,6 +118,10 @@ cbm4_format_disturbance <- function(
 
   gridCols <- c("pixel_index", "chunk_index", "raster_index")
   check_table_columns_all("grid_meta", grid_meta, gridCols)
+
+  # Check classifiers
+  classifiers <- intersect(classifiers, names(dist_meta))
+  if (length(classifiers) > 0) stop("Disturbances do not yet support classifiers.")
 
   # Cast to data.table
   if (!data.table::is.data.table(dist_events)) dist_events <- data.table::as.data.table(dist_events)

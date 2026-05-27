@@ -7,6 +7,7 @@
 cbm4_format_inventory(
   grid_meta,
   cohorts,
+  classifiers,
   def_delay = 0L,
   def_land_class = "UNFCCC_FL_R_FL",
   def_cohort_proportion = 1L,
@@ -20,6 +21,9 @@ cbm4_format_inventory(
 This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
 \item{cohorts}{data.table. Cohort inventory.}
+
+\item{classifiers}{character.
+Column names of cohort inventory identifiers.}
 
 \item{def_delay}{integer. Regeneration delay.}
 

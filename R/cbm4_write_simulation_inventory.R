@@ -203,6 +203,9 @@ cbm4_format_simulation_inventory <- function(
   # Set defaults
   set_table_defaults(dataFull)
 
+  # Format classifiers
+  set_table_classifiers(dataFull, classifiers)
+
   # Return
   data.table::setcolorder(dataFull, unique(c(
     data.table::key(dataFull),

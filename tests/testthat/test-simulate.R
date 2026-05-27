@@ -4,16 +4,20 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 ## SET UP ----
 
 projects <- list(
-  SK_w_disturbances  = readTestInputs("SK", disturbances = TRUE),
-  SK_wo_disturbances = readTestInputs("SK", disturbances = FALSE)
+  SK_w_dist  = readTestInputs("SK", disturbances = TRUE),
+  SK_wo_dist = readTestInputs("SK", disturbances = FALSE),
+  SK_wo_dist_gc_class_contains_NA  = {
+    project <- readTestInputs("SK", disturbances = FALSE)
+    project$gc_meta[species == "species1", prodClass := NA]
+    project
+  }
 )
-
 for (test in names(projects)){
-
   projects[[test]]$test      <- test
-  projects[[test]]$cbm4_data <- file.path(testDirs$temp$outputs, test)
+  projects[[test]]$cbm4_data <- file.path(testDirs$temp$outputs, "simulate", test)
   unlink(projects[[test]]$cbm4_data, recursive = TRUE)
-
+}
+for (test in names(projects)){
   projects[[test]]$grid_area <- terra::cellSize(projects[[test]]$grid_rast, unit = "m")[1, 1][[1]]
 }
 
@@ -170,6 +174,9 @@ for (project in projects) test_that(paste("cbm4_step:", project$test), {
   expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=1")))
 
 })
+
+## Continue tests with only first 2 projects
+projects <- projects[1:2]
 
 for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_write_simulation_inventory:", project$test), {
 
