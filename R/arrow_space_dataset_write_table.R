@@ -38,7 +38,7 @@ arrow_space_dataset_write_table <- function(
     arrow::write_dataset(table_data, table_path, existing_data_behavior = existing_data_behavior, ...)
 
   }else{
-    dir.create(table_path, recursive = TRUE)
+    dir.create(table_path, recursive = TRUE, showWarnings = FALSE)
   }
 }
 

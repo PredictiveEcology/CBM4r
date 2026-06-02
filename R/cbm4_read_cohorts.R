@@ -1,7 +1,7 @@
 
-#' CBM4 read simulation inventory
+#' CBM4 read cohorts
 #'
-#' Read inventory from a simulation CBM4 spatial parquet dataset.
+#' Read cohorts from a simulation CBM4 spatial parquet dataset.
 #'
 #' @template cbm4_results
 #' @template timestep
@@ -9,7 +9,7 @@
 #'
 #' @return `data.table`
 #' @export
-cbm4_read_simulation_inventory <- function(cbm4_results, timestep, grid_meta = NULL){
+cbm4_read_cohorts <- function(cbm4_results, timestep, grid_meta = NULL){
 
   if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_results)
 
