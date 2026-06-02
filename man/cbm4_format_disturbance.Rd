@@ -12,7 +12,6 @@ cbm4_format_disturbance(
   def_proportion = 1L,
   def_enable_merge = 0L,
   def_sort_id = 0L,
-  def_filter_id = 0L,
   def_undisturbed_transition_id = 0L,
   def_disturbed_transition_id = 0L,
   cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -35,8 +34,6 @@ Column names of cohort inventory identifiers.}
 \item{def_enable_merge}{integer. TODO}
 
 \item{def_sort_id}{integer. TODO}
-
-\item{def_filter_id}{integer. TODO}
 
 \item{def_undisturbed_transition_id}{integer. Set to 0 to indicate no transitions.}
 

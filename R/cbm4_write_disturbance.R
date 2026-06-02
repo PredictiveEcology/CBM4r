@@ -71,6 +71,15 @@ cbm4_write_disturbance <- function(
       table_data   = dist$index,
       partitioning = c("disturbance_order", "timestep", "chunk_index")
     )
+
+    if (!is.null(dist$cohort_filter)){
+      arrow_space_dataset_write_table(
+        dataset_name = dataset_name,
+        dataset_path = dataset_path,
+        table_name   = "table-cohort_filter",
+        table_data   = dist$cohort_filter
+      )
+    }
   }
 
   return(invisible())
@@ -87,7 +96,6 @@ cbm4_write_disturbance <- function(
 #' @param def_proportion integer. TODO
 #' @param def_enable_merge integer. TODO
 #' @param def_sort_id integer. TODO
-#' @param def_filter_id integer. TODO
 #' @param def_undisturbed_transition_id integer. Set to 0 to indicate no transitions.
 #' @param def_disturbed_transition_id integer. Set to 0 to indicate no transitions.
 #' @param ... unused
@@ -103,14 +111,11 @@ cbm4_format_disturbance <- function(
     def_proportion                = 1L,
     def_enable_merge              = 0L,
     def_sort_id                   = 0L,
-    def_filter_id                 = 0L,
     def_undisturbed_transition_id = 0L,
     def_disturbed_transition_id   = 0L,
     cbm_defaults_db = getOption("CBM4r.db.path"),
     ...
 ){
-
-  if (length(classifiers) > 0) stop("Disturbances do not yet support classifiers.")
 
   # Check table columns
   check_table_columns_all("dist_meta", dist_meta, c("disturbance_id"))
@@ -172,13 +177,54 @@ cbm4_format_disturbance <- function(
   data.table::setnames(dataFull, "disturbance_type_id", "default_disturbance_type_id")
 
   # Set defaults
+  dataFull[, filter_id := 0L]
   set_table_defaults(dataFull)
 
-  # Return
-  list(
+  # Set tables to return
+  ret <-  list(
     index = dataIndex,
     flat  = dataFull
   )
+
+  # Set filters
+  classifiers <- intersect(classifiers, names(dist_meta))
+  if (length(classifiers) > 0){
+
+    cohort_filter <- dataFull[, .SD, .SDcols = classifiers]
+    cohort_filter[, filter := rowSums(!is.na(cohort_filter)) > 0]
+    cohort_filter[, row_id := .I]
+    cohort_filter <- cohort_filter[filter == TRUE]
+    cohort_filter[, id := as.integer(.GRP), by = classifiers]
+
+    ret$flat[, (classifiers) := NULL]
+    ret$flat$filter_id[cohort_filter$row_id] <- cohort_filter$id
+
+    cohort_filter[, filter := NULL]
+    cohort_filter[, row_id := NULL]
+
+    cohort_filter <- unique(cohort_filter)
+    data.table::setkey(cohort_filter, id)
+    data.table::setcolorder(cohort_filter)
+
+    isChar <- names(!sapply(cohort_filter, is.numeric))
+    cohort_filter[, value := apply(cohort_filter, 1, function(r){
+
+      filt <- r[classifiers]
+      filt <- filt[!sapply(filt, is.na)]
+      filt[names(filt) %in% isChar] <- shQuote(filt[names(filt) %in% isChar])
+
+      paste0("[[", paste(
+        sprintf("[\"classifiers.%s\", \"==\", %s]", names(filt), filt),
+        collapse = ", "), "]]")
+    })]
+
+    cohort_filter[, (classifiers) := NULL]
+
+    ret$cohort_filter <- rbind(data.table::data.table(id = 0L, value = "[]"), cohort_filter)
+  }
+
+  # Return
+  ret
 }
 
 

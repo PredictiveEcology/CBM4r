@@ -24,7 +24,7 @@
 
 
 # data.table package common variables
-utils::globalVariables(c(".", ":=", ".BY", ".N", ".SD", ".GRP"))
+utils::globalVariables(c(".", ":=", ".SD", ".I", ".N", ".BY", ".GRP"))
 
 # CBM defaults database columns
 utils::globalVariables(c(
