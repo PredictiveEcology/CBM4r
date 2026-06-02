@@ -9,7 +9,7 @@
 #' @param template_path character. Path to `arrow_space` dataset to copy table from.
 #' Defaults to `file.path(dataset_dir, template_name)`
 #' @param table_names character. TODO
-#' @param overwrite logical. TODO
+#' @template overwrite
 #' @param skip_missing logical. TODO
 #' @keywords internal
 arrow_space_dataset_copy <- function(

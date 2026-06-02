@@ -27,7 +27,7 @@ Optional columns: \code{chunk_index}, \code{raster_index},
 
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
 
-\item{chunk_size}{integer. Size of parallel processing chunks.}
+\item{chunk_size}{integer. Number of pixels or \code{chunk_meta} groups in each processing chunk.}
 
 \item{chunk_meta}{data.table. Table to use to group pixels by shared characteristics.
 Required columns: \code{pixel_index} and at least one other column.}

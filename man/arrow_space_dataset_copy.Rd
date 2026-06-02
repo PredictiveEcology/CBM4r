@@ -24,7 +24,7 @@ arrow_space_dataset_copy(
 
 \item{table_names}{character. TODO}
 
-\item{overwrite}{logical. TODO}
+\item{overwrite}{logical. Overwrite existing files.}
 
 \item{skip_missing}{logical. TODO}
 

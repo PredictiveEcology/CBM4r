@@ -7,7 +7,7 @@
 cbm4_step(
   cbm4_data = NULL,
   timestep,
-  area_unit_conversion = 1e-04,
+  area_unit_conversion = 0.0001,
   write_parameters = FALSE,
   max_workers = NULL,
   cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -26,8 +26,7 @@ May be omitted if full paths to datasets are provided.}
 
 \item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
 
-\item{write_parameters}{logical. Write step parameters to file.
-This will have 1 row for every cohort and timestep (just the increments at the current age).}
+\item{write_parameters}{logical. Write cohort step parameters to file.}
 
 \item{max_workers}{integer.
 Number of parallel processes to use.

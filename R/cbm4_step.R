@@ -7,8 +7,7 @@
 #' @template cbm_defaults_db
 #' @template timestep
 #' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
-#' @param write_parameters logical. Write step parameters to file.
-#' This will have 1 row for every cohort and timestep (just the increments at the current age).
+#' @param write_parameters logical. Write cohort step parameters to file.
 #' @template max_workers
 #' @template step_parameters_dataset
 #' @template inventory_dataset
