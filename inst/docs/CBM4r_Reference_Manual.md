@@ -32,7 +32,39 @@ Config/roxygen2/version: 8.0.0
 RoxygenNote: 8.0.0
 ```
 
-# `cbm4_copy_dataset`: CBM4 copy dataset
+# `cbm4_data_copy`: CBM4 data copy
+
+## Description
+
+Copy a CBM4 spatial parquet datasets directory.
+
+## Usage
+
+```r
+cbm4_data_copy(
+  template_data,
+  cbm4_data,
+  dataset_names = NULL,
+  overwrite = FALSE
+)
+```
+
+## Arguments
+
+* `template_data`: character.
+Path to template CBM4 spatial parquet datasets directory.
+May be omitted if full paths to template datasets are provided.
+* `cbm4_data`: character.
+Path to CBM4 spatial parquet datasets directory.
+May be omitted if full paths to datasets are provided.
+* `dataset_names`: character. Names of CBM4 spatial parquet datasets to copy.
+* `overwrite`: logical. Overwrite existing files.
+
+## Value
+
+`NULL`. Data directory will be copied.
+
+# `cbm4_data_copy_dataset`: CBM4 data copy dataset
 
 ## Description
 
@@ -41,12 +73,13 @@ Copy a CBM4 spatial parquet dataset.
 ## Usage
 
 ```r
-cbm4_copy_dataset(
+cbm4_data_copy_dataset(
   cbm4_data = NULL,
-  dataset_name,
-  template_name = dataset_name,
+  dataset_name = NULL,
   dataset_path = file.path(cbm4_data, dataset_name),
-  template_path = file.path(cbm4_data, template_name),
+  template_data = cbm4_data,
+  template_name = dataset_name,
+  template_path = file.path(template_data, template_name),
   ...
 )
 ```
@@ -58,11 +91,14 @@ Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.
 * `dataset_name`: character.
 Name of the CBM4 spatial parquet dataset.
-* `template_name`: character.
-Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.
 * `dataset_path`: character.
 Path to the CBM4 spatial parquet dataset.
 Defaults to `file.path(cbm4_data, dataset_name)`
+* `template_data`: character.
+Path to template CBM4 spatial parquet datasets directory.
+May be omitted if full paths to template datasets are provided.
+* `template_name`: character.
+Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.
 * `template_path`: character.
 Path to CBM4 spatial parquet dataset to use as a template for the new dataset.
 Defaults to `file.path(cbm4_data, template_name)`

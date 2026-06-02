@@ -39,11 +39,16 @@ reticulate::use_virtualenv("r-CBM4")
 
 ## Simulate with CBM4
 
-### Set output path
+### Set paths
 
 ``` r
 # Set CBM4 output data directory path
 cbm4_data <- "cbm4_data"
+
+#' Optional: Set custom parameters by using a modified version of the CBM defaults RSQLite database.
+#' This path can instead be passed directly to functions that use it.
+#' Here the path is set again to the default.
+cbm4_set_db_path(getOption("CBM4r.db.path"))
 ```
 
 ### Set study area metadata
