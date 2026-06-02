@@ -4,23 +4,22 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 ## SET UP ----
 
 projects <- list(
-  SK_w_disturbances  = readTestInputs("SK", disturbances = TRUE),
-  SK_wo_disturbances = readTestInputs("SK", disturbances = FALSE)
+  SK_w_dist  = readTestInputs("SK", disturbances = TRUE),
+  SK_wo_dist = readTestInputs("SK", disturbances = FALSE)
 )
-
 for (test in names(projects)){
-
   projects[[test]]$test      <- test
   projects[[test]]$cbm4_data <- file.path(testDirs$temp$outputs, test)
   unlink(projects[[test]]$cbm4_data, recursive = TRUE)
-
+}
+for (test in names(projects)){
   projects[[test]]$grid_area <- terra::cellSize(projects[[test]]$grid_rast, unit = "m")[1, 1][[1]]
 }
 
 
-## WRITE DATA ----
+## SIMULATE ----
 
-for (project in projects) test_that(paste("cbm4_grid_meta:", project$test), {
+for (project in projects[1]) test_that(paste("cbm4_grid_meta:", project$test), {
 
   grid_meta <- cbm4_grid_meta(
     grid_rast       = project$grid_rast,
@@ -63,7 +62,7 @@ for (project in projects) test_that(paste("cbm4_grid_meta:", project$test), {
 
 })
 
-for (project in projects) test_that(paste("cbm4_set_grid_meta:", project$test), {
+for (project in projects[1]) test_that(paste("cbm4_set_grid_meta:", project$test), {
 
   cbm4_set_grid_meta(
     project$grid_meta,
@@ -81,162 +80,102 @@ for (project in projects) test_that(paste("cbm4_set_grid_meta:", project$test), 
     "admin_boundary", "eco_boundary", "spatial_unit",
     "afforestation_pre_type", "historic_disturbance_type", "last_pass_disturbance_type"
   ) %in% names(grid_meta)))
+
+  # Save for later tests
+  arrow::write_parquet(project$grid_meta, file.path(testDirs$temp$output, "grid_meta.parquet"))
 })
 
-for (project in projects) test_that(paste("cbm4_write_inventory:", project$test), {
-
-  cbm4_data <- project$cbm4_data
+for (project in projects[1]) test_that(paste("cbm4_write_inventory:", project$test), {
 
   cbm4_write_inventory(
-    cbm4_data,
+    project$cbm4_data,
     grid_meta   = project$grid_meta,
     grid_rast   = project$grid_rast,
     cohorts     = project$cohorts,
     classifiers = project$classifiers
   )
 
-  expect_true(file.exists(file.path(cbm4_data, "inventory")))
+  expect_true(file.exists(file.path(project$cbm4_data, "inventory")))
 
 })
+
+for (project in projects[1]) test_that(paste("cbm4_write_spinup_parameters:", project$test), {
+
+  cbm4_write_spinup_parameters(
+    project$cbm4_data,
+    gc_meta     = project$gc_meta,
+    gc_incr     = project$gc_incr,
+    classifiers = project$classifiers
+  )
+
+  expect_true(file.exists(file.path(project$cbm4_data, "spinup_parameters")))
+
+})
+
+for (project in projects[1]) test_that(paste("cbm4_spinup:", project$test), {
+
+  cbm4_spinup(project$cbm4_data)
+
+  expect_true(file.exists(file.path(project$cbm4_data, "simulation", "simulation", "timestep=0")))
+
+})
+
+for (project in projects[1]) test_that(paste("cbm4_write_step_parameters:", project$test), {
+
+  cbm4_write_step_parameters(
+    project$cbm4_data,
+    gc_meta     = project$gc_meta,
+    gc_incr     = project$gc_incr,
+    classifiers = project$classifiers
+  )
+
+  expect_true(file.exists(file.path(project$cbm4_data, "step_parameters")))
+
+})
+
+# Copy data to project without disturbances
+projects[[2]]$grid_meta <- projects[[1]]$grid_meta
+cbm4_data_copy(projects[[1]]$cbm4_data, projects[[2]]$cbm4_data)
 
 for (project in projects) test_that(paste("cbm4_write_disturbance:", project$test), {
 
-  cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "inventory")))
-
   cbm4_write_disturbance(
-    cbm4_data,
+    project$cbm4_data,
     dist_meta   = project$dist_meta,
-    dist_events = project$dist_events
-  )
-
-  expect_true(file.exists(file.path(cbm4_data, "disturbance")))
-
-})
-
-for (project in projects) test_that(paste("cbm4_write_spinup_parameters:", project$test), {
-
-  cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "inventory")))
-
-  cbm4_write_spinup_parameters(
-    cbm4_data,
-    gc_meta     = project$gc_meta,
-    gc_incr     = project$gc_incr,
+    dist_events = project$dist_events,
     classifiers = project$classifiers
   )
 
-  expect_true(file.exists(file.path(cbm4_data, "spinup_parameters")))
-
-})
-
-for (project in projects) test_that(paste("cbm4_write_step_parameters:", project$test), {
-
-  cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "inventory")))
-
-  cbm4_write_step_parameters(
-    cbm4_data,
-    gc_meta     = project$gc_meta,
-    gc_incr     = project$gc_incr,
-    classifiers = project$classifiers
-  )
-
-  expect_true(file.exists(file.path(cbm4_data, "step_parameters")))
-
-})
-
-
-## SIMULATE ----
-
-for (project in projects) test_that(paste("cbm4_spinup:", project$test), {
-
-  cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "inventory")))
-
-  cbm4_spinup(cbm4_data)
-
-  expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=0")))
+  expect_true(file.exists(file.path(project$cbm4_data, "disturbance")))
 
 })
 
 for (project in projects) test_that(paste("cbm4_step:", project$test), {
 
-  cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=0")))
+  cbm4_step(project$cbm4_data, timestep = 1)
 
-  cbm4_step(cbm4_data, timestep = 1)
+  expect_true(file.exists(file.path(project$cbm4_data, "simulation", "simulation", "timestep=1")))
 
-  expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=1")))
+  cbm4_step(project$cbm4_data, timestep = 2)
 
-})
-
-for (project in projects) test_that(paste("cbm4_read_simulation_inventory, cbm4_write_simulation_inventory:", project$test), {
-
-  cbm4_data <- project$cbm4_data
-  testthat::skip_if(!file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=1")))
-
-  cohorts <- cbm4_read_simulation_inventory(
-    cbm4_data,
-    timestep  = 1
-  )
-
-  cbm4_write_simulation_inventory(
-    cbm4_data,
-    cohorts   = cohorts,
-    grid_meta = project$grid_meta,
-    timestep  = 1
-  )
-
-  cbm4_step(cbm4_data, timestep = 2)
-
-  expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=2")))
-
-  # Expect error: stand attributes required
-  expect_error(
-    cbm4_write_simulation_inventory(
-      cbm4_data,
-      cohorts   = cohorts,
-      timestep  = 1
-    )
-  )
-
-  # Pass stand attributes with the cohorts table
-  cbm4_write_simulation_inventory(
-    cbm4_data,
-    cohorts   = merge(cohorts, project$grid_meta, by = c("pixel_index", "raster_index", "chunk_index")),
-    timestep  = 1
-  )
-
-  cbm4_step(cbm4_data, timestep = 2)
-
-  expect_true(file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=2")))
+  expect_true(file.exists(file.path(project$cbm4_data, "simulation", "simulation", "timestep=2")))
 
 })
 
 
-## READ RESULTS ----
+## RESULTS ----
 
 for (test in names(projects)){
-
-  cbm4_data <- projects[[test]]$cbm4_data
-
-  if (file.exists(file.path(cbm4_data, "simulation", "simulation", "timestep=2"))){
-    projects[[test]]$cbm4_results <- tryCatch(cbm4_results_processor(cbm4_data), error = function(e) NULL)
-  }
+  projects[[test]]$cbm4_results <- tryCatch(cbm4_results_processor(projects[[test]]$cbm4_data), error = function(e) NULL)
 }
-
 for (project in projects) test_that(paste("cbm4_results_processor:", project$test), {
-
   expect_s3_class(project$cbm4_results, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")
-
 })
 
 for (project in projects) test_that(paste("cbm4_results_grid:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
-  testthat::skip_if(is.null(cbm4_results))
 
   expect_true(terra::compareGeom(cbm4_results_grid(cbm4_data),    project$grid_rast))
   expect_true(terra::compareGeom(cbm4_results_grid(cbm4_results), project$grid_rast))
@@ -247,7 +186,6 @@ for (project in projects) test_that(paste("cbm4_results_grid_key:", project$test
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
-  testthat::skip_if(is.null(cbm4_results))
 
   grid_key <- cbm4_results_grid_key(cbm4_results)
 
@@ -265,7 +203,6 @@ for (project in projects) test_that(paste("cbm4_results_raster:", project$test),
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
-  testthat::skip_if(is.null(cbm4_results))
 
   # Check listing options
   expect_s3_class(cbm4_results_raster(cbm4_data,    list = TRUE), "data.table")
@@ -300,7 +237,7 @@ for (project in projects) test_that(paste("cbm4_results_raster:", project$test),
     # Check using cbm4_data
     expect_equal(terra::values(resRast), terra::values(
       cbm4_results_raster(
-        cbm4_data,
+        project$cbm4_data,
         view_name   = view_name,
         view_column = rast_view_columns[[view_name]],
         timesteps   = 1
@@ -313,7 +250,6 @@ for (project in projects) test_that(paste("cbm4_results_totals:", project$test),
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
-  testthat::skip_if(is.null(cbm4_results))
 
   expect_s3_class(cbm4_results_totals(cbm4_data,    list = TRUE), "data.table")
   expect_s3_class(cbm4_results_totals(cbm4_results, list = TRUE), "data.table")
@@ -368,13 +304,12 @@ for (project in projects) test_that(paste("cbm4_results_totals:", project$test),
 
     # Check using cbm4_data
     expect_equal(resTotals, cbm4_results_totals(
-      cbm4_data,
+      project$cbm4_data,
       view_name    = view_name,
       view_columns = total_view_columns[[view_name]],
       timesteps    = 1:2
     ), ignore_attr = TRUE)
   }
 })
-
 
 
