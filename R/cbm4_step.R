@@ -69,20 +69,22 @@ cbm4_step <- function(
       "cbm_defaults_path" = cbm_defaults_db
     ))
 
-  stepIn <- list(
+  runIn <- list(
     "cbmspec_model_config" = cbmspec_config,
     "timestep"             = timestep,
     "parameter_dataset"    = cbm4_datasets$step_parameters,
     "inventory_dataset"    = cbm4_datasets$inventory,
     "disturbance_dataset"  = cbm4_datasets$disturbance,
-    "simulation_dataset"   = cbm4_datasets$simulation,
+    "simulation_dataset"   = cbm4_datasets$simulation
+  )
+  runOpts <- list(
     "area_unit_conversion" = area_unit_conversion,
     "write_parameters"     = write_parameters,
     "max_workers"          = max_workers
   )
-  if (is.null(max_workers) || is.na(max_workers)) stepIn[["max_workers"]] <- NULL
+  runIn <- c(runIn, runOpts[!sapply(runOpts, function(x) is.null(x) || is.na(x))])
 
-  spatial_cbm4_app$step_all(reticulate::dict(stepIn))
+  spatial_cbm4_app$step_all(reticulate::dict(runIn))
 
   return(invisible())
 }

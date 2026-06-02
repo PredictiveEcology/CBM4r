@@ -62,16 +62,18 @@ cbm4_spinup <- function(
     "out_simulation_dataset" = cbm4_datasets$simulation
   ))
 
-  spinupIn <- list(
+  runIn <- list(
     "cbmspec_model_config" = cbmspec_config,
     "parameter_dataset"    = cbm4_datasets$spinup_parameters,
     "inventory_dataset"    = cbm4_datasets$inventory,
-    "simulation_dataset"   = cbm4_datasets$simulation,
-    "max_workers"          = max_workers
+    "simulation_dataset"   = cbm4_datasets$simulation
   )
-  if (is.null(max_workers) || is.na(max_workers)) spinupIn[["max_workers"]] <- NULL
+  runOpts <- list(
+    "max_workers" = max_workers
+  )
+  runIn <- c(runIn, runOpts[!sapply(runOpts, function(x) is.null(x) || is.na(x))])
 
-  spatial_cbm4_app$spinup_all(reticulate::dict(spinupIn))
+  spatial_cbm4_app$spinup_all(reticulate::dict(runIn))
 
   return(invisible())
 }
