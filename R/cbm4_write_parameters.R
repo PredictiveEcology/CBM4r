@@ -27,15 +27,16 @@ cbm4_write_spinup_parameters <- function(
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
-    if (!is.null(template_name)){
-      arrow_space_dataset_copy_geo(
-        dataset_name  = dataset_name,
-        dataset_path  = dataset_path,
-        template_name = template_name,
-        template_path = template_path,
-        partitions    = list("chunk_index" = "int64")
-      )
-    }else stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
+
+    if (is.null(template_name)) stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
+
+    arrow_space_dataset_copy_geo(
+      dataset_name  = dataset_name,
+      dataset_path  = dataset_path,
+      template_name = template_name,
+      template_path = template_path,
+      partitions    = list("chunk_index" = "int64")
+    )
   }
 
   # Format increments
@@ -113,22 +114,23 @@ cbm4_write_step_parameters <- function(
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
-    if (!is.null(template_name)){
-      arrow_space_dataset_copy_geo(
-        dataset_name  = dataset_name,
-        dataset_path  = dataset_path,
-        template_name = template_name,
-        template_path = template_path,
-        partitions    = list("chunk_index" = "int64")
-      )
-    }else stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
+
+    if (is.null(template_name)) stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
+
+    arrow_space_dataset_copy_geo(
+      dataset_name  = dataset_name,
+      dataset_path  = dataset_path,
+      template_name = template_name,
+      template_path = template_path,
+      partitions    = list("chunk_index" = "int64")
+    )
   }
 
   # Format increments
   incTable <- cbm4_format_increments(
     cbm_defaults_db = cbm_defaults_db,
-    gc_meta          = gc_meta,
-    gc_incr          = gc_incr,
+    gc_meta         = gc_meta,
+    gc_incr         = gc_incr,
     classifiers     = classifiers,
     long            = TRUE
   )
@@ -200,20 +202,19 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
   }
 
   # Check table columns
-  check_table_columns_all("gc_meta", gc_meta, c("gc_id", "spatial_unit", classifiers, "sw"))
+  check_table_columns_all("gc_meta", gc_meta, c("gc_id", "spatial_unit", "sw"))
   check_table_columns_all("gc_incr", gc_incr, c("gc_id", "age", "merch_inc", "foliage_inc", "other_inc"))
 
   # Check classifiers
-  if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
-  if (!all(sapply(gc_meta, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
-    "classifiers must be integer, character, or factor")
-
-  if (any(is.na(gc_incr[, .(merch_inc, foliage_inc, other_inc)]))) stop("Increments contain NA values")
+  classifiers <- intersect(classifiers, names(gc_meta))
+  if (length(classifiers) == 0) stop(">=1 classifiers are required.")
 
   # Format increments
   data.table::setnames(gc_incr, "age", "state.age")
 
   gc_incr[gc_meta, sw := sw, on = "gc_id"]
+
+  if (any(is.na(gc_incr[, .(merch_inc, foliage_inc, other_inc)]))) stop("Increments contain NA values")
 
   gc_incr[sw==TRUE,  increment.SoftwoodMerch   := merch_inc]
   gc_incr[sw==TRUE,  increment.SoftwoodFoliage := foliage_inc]
@@ -234,24 +235,8 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
   gc_incr[, foliage_inc := NULL]
   gc_incr[, other_inc   := NULL]
 
-  # Format metadata
-  gc_meta <- gc_meta[, .SD, .SDcols = c("gc_id", classifiers, "spatial_unit")]
-  data.table::setattr(gc_meta, "names", c("gc_id", paste0("classifiers.", classifiers), "inventory.spatial_unit"))
+  if (!long){
 
-  if (long){
-
-    gc_incr <- merge(gc_meta, gc_incr, by = "gc_id")
-    gc_incr[, eval("gc_id") := NULL]
-
-    # Add row for increments above greatest age
-    gcIncrWC <- gc_incr[state.age == max(state.age), .SD, by = c(paste0("classifiers.", classifiers), "inventory.spatial_unit")]
-    gcIncrWC[["state.age"]] <- "?"
-    gc_incr <- rbind(gc_incr, gcIncrWC)
-    data.table::setkeyv(gc_incr, c(paste0("classifiers.", classifiers), "inventory.spatial_unit"))
-
-  }else{
-
-    # Format increments wide
     incCols <- paste0(
       "increment.", c(
         paste0("Softwood", c("Merch", "Foliage", "Other")),
@@ -264,9 +249,30 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
         incWide
       }),
       on = "gc_id", how = "left")
+  }
 
+  # Format metadata
+  gc_meta <- gc_meta[, .SD, .SDcols = unique(c("gc_id", classifiers, "spatial_unit"))]
+  data.table::setnames(gc_meta, "spatial_unit", "inventory.spatial_unit")
+  data.table::setnames(gc_meta, classifiers, paste0("classifiers.", classifiers))
+
+  # Format classifiers
+  set_table_classifiers(gc_meta, classifiers)
+
+  # Merge metadata and increments
+  if (!"gc_id" %in% classifiers){
     gc_incr <- merge(gc_meta, gc_incr, by = "gc_id")
     gc_incr[, gc_id := NULL]
+  }else{
+    gc_incr <- merge(gc_meta, gc_incr, by.x = "classifiers.gc_id", by.y = "gc_id")
+  }
+
+  # Add row for increments above greatest age
+  if (long){
+    gcIncrWC <- gc_incr[state.age == max(state.age), .SD, by = c(paste0("classifiers.", classifiers), "inventory.spatial_unit")]
+    gcIncrWC[["state.age"]] <- "?"
+    gc_incr <- rbind(gc_incr, gcIncrWC)
+    data.table::setkeyv(gc_incr, c(paste0("classifiers.", classifiers), "inventory.spatial_unit"))
   }
 
   return(gc_incr)

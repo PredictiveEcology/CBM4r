@@ -5,7 +5,6 @@
 #'
 #' @template cbm4_data
 #' @template cbm_defaults_db
-#' @template classifiers
 #' @inheritParams cbm4_write_geo
 #' @inheritParams cbm4_format_inventory
 #' @param ... arguments to \code{\link{cbm4_format_inventory}}
@@ -24,11 +23,6 @@ cbm4_write_inventory <- function(
     ...
 ){
 
-  if (length(classifiers) == 0) stop(">=1 'classifiers' are required.")
-  if (!all(classifiers %in% names(cohorts))) stop("cohorts requires all classifiers")
-  if (!all(sapply(cohorts, function(c) is.integer(c) | is.character(c) | is.factor(c))[classifiers])) stop(
-    "classifiers must be integer, character, or factor")
-
   # Initiate dataset
   cbm4_write_geo(
     cbm4_data,
@@ -44,8 +38,9 @@ cbm4_write_inventory <- function(
 
   # Format inventory
   inv <- cbm4_format_inventory(
-    grid_meta = grid_meta,
-    cohorts   = cohorts,
+    grid_meta   = grid_meta,
+    cohorts     = cohorts,
+    classifiers = classifiers,
     ...)
 
   # Write inventory
@@ -81,6 +76,7 @@ cbm4_write_inventory <- function(
 #'
 #' @template grid_meta
 #' @param cohorts data.table. Cohort inventory.
+#' @template classifiers
 #' @param def_delay integer. Regeneration delay.
 #' @param def_land_class character. Land class code.
 #' Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.
@@ -96,6 +92,7 @@ cbm4_write_inventory <- function(
 cbm4_format_inventory <- function(
     grid_meta,
     cohorts,
+    classifiers,
     def_delay             = 0L,
     def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
     def_cohort_proportion = 1L,
@@ -104,8 +101,11 @@ cbm4_format_inventory <- function(
     ...
 ){
 
+  # Check classifiers
+  if (length(classifiers) == 0) stop(">=1 classifiers are required.")
+
   # Check table columns
-  check_table_columns_all("cohorts", cohorts, c("pixel_index", "age"))
+  check_table_columns_all("cohorts", cohorts, c("pixel_index", "age", classifiers))
 
   gridCols <- c(
     "pixel_index", "chunk_index", "raster_index",
@@ -146,6 +146,9 @@ cbm4_format_inventory <- function(
 
   # Set defaults
   set_table_defaults(dataFull)
+
+  # Format classifiers
+  set_table_classifiers(dataFull, classifiers)
 
   # Return
   list(
