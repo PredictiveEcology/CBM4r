@@ -1,34 +1,34 @@
 # DESCRIPTION
 
 ```
-Package: CBM4r
-Title: CBM4 in R
-Version: 1.0.0
-Authors@R: 
-    person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
-Description: R interface to CBM4 Python applications. 
-License: GPL-3
-Depends: R (>= 4.1.0)
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-Imports:
-  arrow,
-  data.table (>= 1.18.0),
-  dplyr,
-  reticulate,
-  RSQLite,
-  terra
-Suggests:
-  covr,
-  devtools,
-  gert,
-  knitr,
-  rmarkdown,
-  testthat (>= 3.0.0),
-  withr
-Config/testthat/edition: 3
-VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+Package: CBM4r
+Title: CBM4 in R
+Version: 1.0.0
+Authors@R: 
+    person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
+Description: R interface to CBM4 Python applications. 
+License: GPL-3
+Depends: R (>= 4.1.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports:
+  arrow,
+  data.table (>= 1.18.0),
+  dplyr,
+  reticulate,
+  RSQLite,
+  terra
+Suggests:
+  covr,
+  devtools,
+  gert,
+  knitr,
+  rmarkdown,
+  testthat (>= 3.0.0),
+  withr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
 RoxygenNote: 8.0.0
 ```
 
@@ -83,9 +83,15 @@ Create a study area grid metadata table.
 ```r
 cbm4_grid_meta(
   grid_rast,
-  admin_boundary = NULL,
+  admin_boundary,
   eco_boundary = NULL,
   eco_boundary_id = NULL,
+  chunk_size = NULL,
+  chunk_meta = NULL,
+  def_afforestation_pre_type = "None",
+  def_historic_disturbance_type = "Wildfire",
+  def_last_pass_disturbance_type = "Wildfire",
+  cbm_defaults_db = getOption("CBM4r.db.path"),
   ...
 )
 ```
@@ -96,7 +102,18 @@ cbm4_grid_meta(
 * `admin_boundary`: character. Canada province or territory name.
 * `eco_boundary`: character. Canada ecozone name.
 * `eco_boundary_id`: integer. Canada ecozone ID. Provide this or `eco_boundary`.
-* `...`: arguments to `[cbm4_set_grid_meta](cbm4_set_grid_meta)`
+* `chunk_size`: integer. Number of pixels or `chunk_meta` groups in each processing chunk.
+* `chunk_meta`: data.table. Table to use to group pixels by shared characteristics.
+Required columns: `pixel_index` and at least one other column.
+* `def_afforestation_pre_type`: character. Land use before forestation.
+Defined in CBM defaults database tables 'afforestation_pre_type'
+* `def_historic_disturbance_type`: character. Historic disturbance type.
+Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.
+* `def_last_pass_disturbance_type`: character. Last pass disturbance.
+Defined in CBM defaults database tables 'disturbance_type' and 'disturbance_type_tr'.
+* `cbm_defaults_db`: character.
+Path to CBM defaults SQLite database.
+* `...`: unused
 
 # `cbm4_read_simulation_inventory`: CBM4 read simulation inventory
 
@@ -331,7 +348,7 @@ Required columns: `pixel_index`,
 Optional columns: `chunk_index`, `raster_index`,
 `afforestation_pre_type`, `historic_disturbance_type`, `last_pass_disturbance_type`.
 * `grid_rast`: terra `SpatRaster`. Grid defining the study area.
-* `chunk_size`: integer. Size of parallel processing chunks.
+* `chunk_size`: integer. Number of pixels or `chunk_meta` groups in each processing chunk.
 * `chunk_meta`: data.table. Table to use to group pixels by shared characteristics.
 Required columns: `pixel_index` and at least one other column.
 * `def_afforestation_pre_type`: character. Land use before forestation.
@@ -404,7 +421,7 @@ Run an annual step on CBM4 spatial parquet datasets.
 cbm4_step(
   cbm4_data = NULL,
   timestep,
-  area_unit_conversion = 1e-04,
+  area_unit_conversion = 0.0001,
   write_parameters = FALSE,
   max_workers = NULL,
   cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -422,8 +439,7 @@ Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.
 * `timestep`: integer. Simulation timestep with 1 representing the first year.
 * `area_unit_conversion`: numeric. Conversion factor of area to hectares (ha).
-* `write_parameters`: logical. Write step parameters to file.
-This will have 1 row for every cohort and timestep (just the increments at the current age).
+* `write_parameters`: logical. Write cohort step parameters to file.
 * `max_workers`: integer.
 Number of parallel processes to use.
 NULL or NA will bypass this and and cap processing at the system's available resources.

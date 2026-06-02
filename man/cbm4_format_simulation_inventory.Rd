@@ -10,7 +10,7 @@ cbm4_format_simulation_inventory(
   classifiers = NULL,
   grid_meta = NULL,
   col_ignore = NULL,
-  area_unit_conversion = 1e-04,
+  area_unit_conversion = 0.0001,
   def_cohort_proportion = 1L,
   def_state.enabled = 1L,
   def_state.growth_enabled = 1L,

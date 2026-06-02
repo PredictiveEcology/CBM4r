@@ -10,7 +10,7 @@ cbm4_format_inventory(
   def_delay = 0L,
   def_land_class = "UNFCCC_FL_R_FL",
   def_cohort_proportion = 1L,
-  area_unit_conversion = 1e-04,
+  area_unit_conversion = 0.0001,
   col_ignore = NULL,
   ...
 )
