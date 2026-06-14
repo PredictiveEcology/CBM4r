@@ -15,6 +15,7 @@ cbm4_format_simulation_cohorts(
   def_growth_multiplier = 1L,
   def_regeneration_delay = 0L,
   def_land_class = "UNFCCC_FL_R_FL",
+  def_Input = 1L,
   area_unit_conversion = 0.0001
 )
 }
@@ -43,6 +44,8 @@ Percentage of the pixel's area that is attributed to the cohort.}
 
 \item{def_land_class}{character. Land class code.
 Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.}
+
+\item{def_Input}{integer. pools.Input}
 
 \item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
 }
