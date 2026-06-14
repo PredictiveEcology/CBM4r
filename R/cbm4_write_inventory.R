@@ -50,7 +50,11 @@ cbm4_write_inventory <- function(
     table_name   = NULL,
     table_data   = inv$flat,
     partitioning = c("cohort_index", "chunk_index"),
-    schema       = list(age = arrow::float32(), area = arrow::float32())
+    schema       = list(
+      age  = arrow::float32(),
+      area = arrow::float32(),
+      cohort_proportion = arrow::float32()
+    )
   )
   arrow_space_dataset_write_table(
     dataset_name = dataset_name,
