@@ -11,7 +11,7 @@ cbm4_schema <- function(columns = NULL, schema = NULL){
     timestep          = "int16",
     disturbance_order = "int8",
 
-    cohort_proportion = "float16",
+    cohort_proportion = "float32",
 
     age       = "float32",
     state.age = "float32",
