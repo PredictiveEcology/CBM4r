@@ -31,7 +31,7 @@ cbm4_write_inventory <- function(
     grid_meta       = grid_meta,
     grid_rast       = grid_rast,
     cbm_defaults_db = cbm_defaults_db,
-    partitions      = list("cohort_index" = "int64", "chunk_index" = "int64"),
+    partitions      = cbm4_schema(c("cohort_index", "chunk_index")),
     tags            = list(classifier = classifiers),
     write_pixels    = TRUE
   )
@@ -49,14 +49,15 @@ cbm4_write_inventory <- function(
     dataset_path = dataset_path,
     table_name   = NULL,
     table_data   = inv$flat,
-    partitioning = c("cohort_index", "chunk_index"),
-    schema       = list(age = arrow::float32(), area = arrow::float32())
+    schema       = cbm4_schema(inv$flat),
+    partitioning = c("cohort_index", "chunk_index")
   )
   arrow_space_dataset_write_table(
     dataset_name = dataset_name,
     dataset_path = dataset_path,
     table_name   = "raster_index",
     table_data   = inv$index,
+    schema       = cbm4_schema(inv$index),
     partitioning = c("cohort_index", "chunk_index")
   )
 

@@ -37,7 +37,7 @@ cbm4_write_disturbance <- function(
       dataset_path  = dataset_path,
       template_name = template_name,
       template_path = template_path,
-      partitions    = list("disturbance_order" = "int64", "timestep" = "int64", "chunk_index" = "int64"),
+      partitions    = cbm4_schema(c("disturbance_order", "timestep", "chunk_index")),
       tags          = if (length(classifiers) > 0) list(classifier = paste0("classifiers.", classifiers))
     )
 
@@ -62,6 +62,7 @@ cbm4_write_disturbance <- function(
       dataset_path = dataset_path,
       table_name   = NULL,
       table_data   = dist$flat,
+      schema       = cbm4_schema(dist$flat),
       partitioning = c("disturbance_order", "timestep", "chunk_index")
     )
     arrow_space_dataset_write_table(
@@ -69,6 +70,7 @@ cbm4_write_disturbance <- function(
       dataset_path = dataset_path,
       table_name   = "raster_index",
       table_data   = dist$index,
+      schema       = cbm4_schema(dist$index),
       partitioning = c("disturbance_order", "timestep", "chunk_index")
     )
 
@@ -77,7 +79,8 @@ cbm4_write_disturbance <- function(
         dataset_name = dataset_name,
         dataset_path = dataset_path,
         table_name   = "table-cohort_filter",
-        table_data   = dist$cohort_filter
+        table_data   = dist$cohort_filter,
+        schema       = cbm4_schema(dist$cohort_filter)
       )
     }
   }

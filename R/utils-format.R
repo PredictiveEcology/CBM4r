@@ -1,4 +1,32 @@
 
+# Default schema
+cbm4_schema <- function(columns = NULL, schema = NULL){
+
+  schema_default <- list(
+
+    index             = "int32",
+    chunk_index       = "int16",
+    raster_index      = "int32",
+    cohort_index      = "int16",
+    timestep          = "int16",
+    disturbance_order = "int8",
+
+    age       = "float32",
+    state.age = "float32",
+
+    area           = "float32",
+    inventory.area = "float32"
+
+  )
+
+  for (column in names(schema)) schema_default[[column]] <- schema[[column]]
+  if (!is.null(columns)){
+    if (is.data.frame(columns)) columns <- names(columns)
+    schema_default <- schema_default[intersect(columns, names(schema_default))]
+  }
+  if (length(schema_default) > 0) return(schema_default)
+}
+
 # Format classifier columns
 set_table_classifiers <- function(table, classifiers){
 

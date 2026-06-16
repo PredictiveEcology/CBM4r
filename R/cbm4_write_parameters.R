@@ -35,7 +35,7 @@ cbm4_write_spinup_parameters <- function(
       dataset_path  = dataset_path,
       template_name = template_name,
       template_path = template_path,
-      partitions    = list("chunk_index" = "int64")
+      partitions    = cbm4_schema("chunk_index"),
     )
   }
 
@@ -54,7 +54,7 @@ cbm4_write_spinup_parameters <- function(
     dataset_path = dataset_path,
     table_name   = "table-parameters_increments_wide",
     table_data   = incTable,
-    schema       = list(inventory.spatial_unit = arrow::string())
+    schema       = cbm4_schema(incTable, list(inventory.spatial_unit = arrow::string()))
   )
 
   # Write ecological parameters
@@ -70,7 +70,8 @@ cbm4_write_spinup_parameters <- function(
       dataset_name = dataset_name,
       dataset_path = dataset_path,
       table_name   = paste0("table-", table_name),
-      table_data   = eco_params[[table_name]]
+      table_data   = eco_params[[table_name]],
+      schema       = cbm4_schema(eco_params[[table_name]])
     )
   }
 
@@ -122,7 +123,7 @@ cbm4_write_step_parameters <- function(
       dataset_path  = dataset_path,
       template_name = template_name,
       template_path = template_path,
-      partitions    = list("chunk_index" = "int64")
+      partitions    = cbm4_schema("chunk_index"),
     )
   }
 
@@ -141,7 +142,10 @@ cbm4_write_step_parameters <- function(
     dataset_path = dataset_path,
     table_name   = "table-parameters_increments",
     table_data   = incTable,
-    schema       = list(inventory.spatial_unit = arrow::string())
+    schema       = cbm4_schema(incTable, list(
+      state.age              = arrow::string(),
+      inventory.spatial_unit = arrow::string()
+    ))
   )
 
   # Write ecological parameters
@@ -157,7 +161,8 @@ cbm4_write_step_parameters <- function(
       dataset_name = dataset_name,
       dataset_path = dataset_path,
       table_name   = paste0("table-", table_name),
-      table_data   = eco_params[[table_name]]
+      table_data   = eco_params[[table_name]],
+      schema       = cbm4_schema(eco_params[[table_name]])
     )
   }
 

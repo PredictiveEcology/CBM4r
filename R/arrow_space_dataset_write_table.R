@@ -3,11 +3,11 @@ arrow_space_dataset_write_table <- function(
     dataset_dir = NULL,
     dataset_name,
     table_data,
-    table_name = NULL,
-    schema = NULL,
-    dataset_path = file.path(dataset_dir, dataset_name),
+    table_name   = NULL,
+    schema       = NULL,
+    no_factors   = TRUE,
     existing_data_behavior = "delete_matching",
-    no_factors = TRUE,
+    dataset_path = file.path(dataset_dir, dataset_name),
     ...
 ){
 
@@ -27,7 +27,13 @@ arrow_space_dataset_write_table <- function(
       table_data   <- arrow::arrow_table(table_data)
       table_schema <- arrow::schema(table_data)
 
-      for (col in names(schema)) table_schema[[col]] <- schema[[col]]
+      for (col in names(schema)){
+        if (is.character(schema[[col]])){
+          table_schema[[col]] <- do.call(get(schema[[col]], asNamespace("arrow")), list())
+        }else{
+          table_schema[[col]] <- schema[[col]]
+        }
+      }
 
       if (!identical(
         lapply(arrow::schema(table_data), function(x) x$type$ToString()),

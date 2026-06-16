@@ -69,11 +69,12 @@ for (project in projects) test_that(paste("cbm4_step_with_cohorts: no change in 
 
 for (project in projects[2]) test_that(paste("cbm4_step_with_cohorts: 1/2 biomass:", project$test), {
 
-  template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, project$test))
-  template_pools   <- cbm4_results_totals(template_results, "pool_indicators", timesteps = timestep)
-
   # Set timestep
   timestep <- 2
+
+  # Read template results
+  template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, project$test))
+  template_pools   <- cbm4_results_totals(template_results, "pool_indicators", timesteps = timestep)
 
   # Read cohort data from previous timestep
   cohorts <- cbm4_read_cohorts(
