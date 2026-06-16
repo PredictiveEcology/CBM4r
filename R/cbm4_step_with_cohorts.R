@@ -20,7 +20,7 @@ cbm4_step_with_cohorts <- function(
     def_growth_enabled     = 1L,
     def_growth_multiplier  = 1L,
     def_regeneration_delay = 0L,
-    def_land_class         = "UNFCCC_FL_R_FL",  # "Forest Land remaining Forest Land"
+    def_land_class         = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
     simulation_dataset = file.path(cbm4_data, "simulation"),
     ...
 ){
@@ -142,6 +142,7 @@ cbm4_write_simulation_cohorts <- function(
 #' @param def_regeneration_delay integer. Regeneration delay.
 #' @param def_land_class character. Land class code.
 #' Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.
+#' @param def_Input integer. pools.Input
 #' @return list with items:
 #' **index**: `arrow_space` raster indexed `data.table`;
 #' **flat**: `arrow_space` flattened dataset `data.table`
@@ -156,7 +157,8 @@ cbm4_format_simulation_cohorts <- function(
     def_growth_enabled     = 1L,
     def_growth_multiplier  = 1L,
     def_regeneration_delay = 0L,
-    def_land_class         = "UNFCCC_FL_R_FL",  # "Forest Land remaining Forest Land"
+    def_land_class         = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
+    def_Input              = 1L,
     area_unit_conversion   = 0.0001
 ){
 

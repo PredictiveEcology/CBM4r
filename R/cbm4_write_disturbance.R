@@ -209,7 +209,8 @@ cbm4_format_disturbance <- function(
     data.table::setkey(cohort_filter, id)
     data.table::setcolorder(cohort_filter)
 
-    isChar <- names(!sapply(cohort_filter, is.numeric))
+    isChar <- !sapply(cohort_filter, is.numeric)
+    isChar <- names(isChar)[isChar]
     cohort_filter[, value := apply(cohort_filter, 1, function(r){
 
       filt <- r[classifiers]

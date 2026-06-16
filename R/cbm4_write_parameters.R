@@ -276,7 +276,7 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
   if (long){
     gcIncrWC <- gc_incr[state.age == max(state.age), .SD, by = c(paste0("classifiers.", classifiers), "inventory.spatial_unit")]
     gcIncrWC[["state.age"]] <- "?"
-    gc_incr <- rbind(gc_incr, gcIncrWC)
+    gc_incr <- unique(rbind(gc_incr, gcIncrWC))
     data.table::setkeyv(gc_incr, c(paste0("classifiers.", classifiers), "inventory.spatial_unit"))
   }
 

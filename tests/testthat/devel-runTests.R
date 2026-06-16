@@ -14,9 +14,3 @@ testthat::test_local(stop_on_failure = TRUE)
 testthat::test_local(filter = "simulate-1", stop_on_failure = TRUE)
 
 
-# Trying different reporters
-testthat::test_local(reporter = testthat::CompactProgressReporter) # Minimal: just the pass/fai/etc totals
-testthat::test_local(reporter = testthat::ProgressReporter) # The default
-testthat::test_local(reporter = testthat::SlowReporter) # Checks for slow stuff. Says which tests are done running
-testthat::test_local(reporter = testthat::ListReporter)
-testthat::test_local(reporter = testthat::StopReporter)
