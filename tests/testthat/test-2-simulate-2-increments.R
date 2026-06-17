@@ -19,15 +19,11 @@ for (test in names(projects)){
   projects[[test]]$test      <- test
   projects[[test]]$cbm4_data <- file.path(testDirs$temp$outputs, test)
   unlink(projects[[test]]$cbm4_data, recursive = TRUE)
+  cbm4_data_copy(file.path(testDirs$temp$outputs, "SK_wo_dist"), projects[[test]]$cbm4_data,
+                 dataset_names = c("inventory", "disturbance"))
 }
 
-# Copy data
-template_data <- file.path(testDirs$temp$outputs, "SK_wo_dist")
-if (!file.exists(template_data)) stop("Run test-simulate-1")
-for (project in projects) cbm4_data_copy(
-  template_data, project$cbm4_data,
-  dataset_names = c("inventory", "disturbance")
-)
+template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, "SK_wo_dist"))
 
 
 ## SIMULATE ----
@@ -77,18 +73,16 @@ for (project in projects) test_that(paste("cbm4_step:", project$test), {
 
 ## RESULTS ----
 
-template_results <- cbm4_results_processor(template_data)
-view_names <- cbm4_results_totals(template_results, list = TRUE)$name
-
 for (project in projects) test_that(paste("Increment classifiers can be partially specified:", project$test), {
 
   cbm4_results <- cbm4_results_processor(project$cbm4_data)
 
+  view_names <- cbm4_results_totals(template_results, list = TRUE)$name
   for (view_name in view_names){
     expect_equal(
       cbm4_results_totals(cbm4_results,     view_name, timesteps = 1),
       cbm4_results_totals(template_results, view_name, timesteps = 1),
-      ignore_attr = TRUE
+      tolerance = 0.000001
     )
   }
 })

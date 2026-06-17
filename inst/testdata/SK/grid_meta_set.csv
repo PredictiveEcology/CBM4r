@@ -1,0 +1,5 @@
+pixel_index,chunk_index,raster_index,area,spatial_unit,admin_boundary_id,admin_boundary,eco_boundary_id,eco_boundary,afforestation_pre_type,historic_disturbance_type,last_pass_disturbance_type
+1,0,0,1,27,9,Saskatchewan,6,Boreal Shield West,None,Wildfire,Wildfire
+2,0,1,1,27,9,Saskatchewan,6,Boreal Shield West,None,Wildfire,Wildfire
+3,0,2,1,27,9,Saskatchewan,6,Boreal Shield West,None,Wildfire,Wildfire
+4,0,3,1,27,9,Saskatchewan,6,Boreal Shield West,None,Wildfire,Wildfire

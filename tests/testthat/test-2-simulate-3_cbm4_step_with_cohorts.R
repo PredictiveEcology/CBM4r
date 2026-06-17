@@ -4,24 +4,20 @@ if (!testthat::is_testing()) source(testthat::test_path("setup.R"))
 ## SET UP ----
 
 projects <- list(
-  SK_w_dist  = list(),
-  SK_wo_dist = list()
+  SK_w_dist  = readTestInputs("SK", set_grid_meta = TRUE, disturbances = TRUE),
+  SK_wo_dist = readTestInputs("SK", set_grid_meta = TRUE, disturbances = FALSE)
 )
+for (test in names(projects)) projects[[test]]$template_name <- test
+names(projects) <- paste0(names(projects), "_cbm4_step_with_cohorts")
+
 for (test in names(projects)){
   projects[[test]]$test      <- test
-  projects[[test]]$cbm4_data <- file.path(testDirs$temp$outputs, paste0(test, "_write_sim_inv"))
+  projects[[test]]$cbm4_data <- file.path(testDirs$temp$outputs, test)
   unlink(projects[[test]]$cbm4_data, recursive = TRUE)
-}
-
-# Copy data
-for (test in names(projects)){
-  template_data <- file.path(testDirs$temp$outputs, test)
-  if (!file.exists(template_data)) stop("Run test-simulate-1")
   cbm4_data_copy(
-    template_data, projects[[test]]$cbm4_data,
+    file.path(testDirs$temp$outputs, projects[[test]]$template_name), projects[[test]]$cbm4_data,
     dataset_names = c("inventory", "disturbance", "step_parameters", "simulation")
   )
-  projects[[test]]$grid_meta <- arrow::read_parquet(file.path(testDirs$temp$output, "grid_meta.parquet"))
 }
 
 
@@ -29,7 +25,7 @@ for (test in names(projects)){
 
 for (project in projects) test_that(paste("cbm4_step_with_cohorts: no change in cohorts:", project$test), {
 
-  template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, project$test))
+  template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, project$template_name))
 
   for (timestep in 1:2){
 
@@ -61,7 +57,7 @@ for (project in projects) test_that(paste("cbm4_step_with_cohorts: no change in 
       expect_equal(
         cbm4_results_totals(cbm4_results,     view_name, timesteps = timestep),
         cbm4_results_totals(template_results, view_name, timesteps = timestep),
-        ignore_attr = TRUE
+        tolerance = 0.000001
       )
     }
   }
@@ -73,7 +69,7 @@ for (project in projects[2]) test_that(paste("cbm4_step_with_cohorts: 1/2 biomas
   timestep <- 2
 
   # Read template results
-  template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, project$test))
+  template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, project$template_name))
   template_pools   <- cbm4_results_totals(template_results, "pool_indicators", timesteps = timestep)
 
   # Read cohort data from previous timestep

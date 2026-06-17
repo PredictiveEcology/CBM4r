@@ -69,7 +69,7 @@ cbm4_results_grid_key <- function(
     )
 
     raster_index <- arrow::open_dataset(file.path(cbm4_results, dataset_name, paste0(dataset_name, "-raster_index")))
-    if ("timestep" %in% names(raster_index)) raster_index <- dplyr::filter(raster_index, timestep == 0)
+    if ("timestep" %in% names(raster_index)) raster_index <- dplyr::filter(raster_index, timestep < 2)
     grid_key <- raster_index |>
       dplyr::select(chunk_index, raster_index) |>
       dplyr::collect() |>

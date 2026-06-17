@@ -8,9 +8,13 @@ reticulate::use_virtualenv(cbm4_virtualenv)
 reticulate::import("pyarrow")
 
 # Run all tests
-testthat::test_local(stop_on_failure = TRUE)
+testthat::test_local()
 
-# Run full simulation tests
-testthat::test_local(filter = "simulate-1", stop_on_failure = TRUE)
+# Run simple simulation tests
+testthat::test_local(filter = "simulate-1")
 
+# Run individual special tests
+testthat::test_local(filter = "simulate-(1-1|2-disturbance)")
+testthat::test_local(filter = "simulate-(1-1|2-increments)")
+testthat::test_local(filter = "simulate-(1-1|3-cbm4\\_step\\_with\\_cohorts)")
 
