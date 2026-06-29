@@ -17,13 +17,22 @@ cbm4_write_spinup_parameters <- function(
     cbm4_data = NULL,
     gc_meta,
     gc_incr,
-    classifiers,
+    classifiers     = NULL,
     template_name   = "inventory",
     template_path   = file.path(cbm4_data, template_name),
     dataset_name    = "spinup_parameters",
     dataset_path    = file.path(cbm4_data, dataset_name),
     cbm_defaults_db = getOption("CBM4r.db.path")
 ){
+
+  # Set classifiers
+  if (is.null(classifiers) & !is.null(template_name)){
+    classifiers <- arrow_space_dataset_read_table(
+      dataset_name = template_name,
+      dataset_path = template_path,
+      table_name   = "tags"
+    )[tag == "classifier", layer_name]
+  }
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
@@ -35,7 +44,7 @@ cbm4_write_spinup_parameters <- function(
       dataset_path  = dataset_path,
       template_name = template_name,
       template_path = template_path,
-      partitions    = cbm4_schema("chunk_index"),
+      partitions    = cbm4_schema("chunk_index")
     )
   }
 
@@ -105,13 +114,22 @@ cbm4_write_step_parameters <- function(
     cbm4_data = NULL,
     gc_meta,
     gc_incr,
-    classifiers,
+    classifiers     = NULL,
     template_name   = "inventory",
     template_path   = file.path(cbm4_data, template_name),
     dataset_name    = "step_parameters",
     dataset_path    = file.path(cbm4_data, dataset_name),
     cbm_defaults_db = getOption("CBM4r.db.path")
 ){
+
+  # Set classifiers
+  if (is.null(classifiers) & !is.null(template_name)){
+    classifiers <- arrow_space_dataset_read_table(
+      dataset_name = template_name,
+      dataset_path = template_path,
+      table_name   = "tags"
+    )[tag == "classifier", layer_name]
+  }
 
   # Initiate dataset from template
   if (!file.exists(dataset_path)){
@@ -123,7 +141,7 @@ cbm4_write_step_parameters <- function(
       dataset_path  = dataset_path,
       template_name = template_name,
       template_path = template_path,
-      partitions    = cbm4_schema("chunk_index"),
+      partitions    = cbm4_schema("chunk_index")
     )
   }
 

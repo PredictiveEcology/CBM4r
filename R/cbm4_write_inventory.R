@@ -12,11 +12,11 @@
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_inventory <- function(
-    cbm4_data = NULL,
-    grid_meta,
-    grid_rast,
-    cohorts,
-    classifiers,
+    cbm4_data       = NULL,
+    cohorts         = NULL,
+    classifiers     = NULL,
+    grid_meta       = NULL,
+    grid_rast       = NULL,
     dataset_name    = "inventory",
     dataset_path    = file.path(cbm4_data, dataset_name),
     cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -24,50 +24,66 @@ cbm4_write_inventory <- function(
 ){
 
   # Initiate dataset
-  cbm4_write_geo(
-    cbm4_data,
-    dataset_name    = dataset_name,
-    dataset_path    = dataset_path,
-    grid_meta       = grid_meta,
-    grid_rast       = grid_rast,
-    cbm_defaults_db = cbm_defaults_db,
-    partitions      = cbm4_schema(c("cohort_index", "chunk_index")),
-    tags            = list(classifier = classifiers),
-    write_pixels    = TRUE
-  )
+  if (!file.exists(dataset_path)){
 
-  # Format inventory
-  inv <- cbm4_format_inventory(
-    grid_meta   = grid_meta,
-    cohorts     = cohorts,
-    classifiers = classifiers,
-    ...)
+    if (length(classifiers) == 0) stop(">=1 classifiers are required.")
 
-  # Write inventory
-  arrow_space_dataset_write_table(
-    dataset_name = dataset_name,
-    dataset_path = dataset_path,
-    table_name   = NULL,
-    table_data   = inv$flat,
-    schema       = cbm4_schema(inv$flat),
-    partitioning = c("cohort_index", "chunk_index")
-  )
-  arrow_space_dataset_write_table(
-    dataset_name = dataset_name,
-    dataset_path = dataset_path,
-    table_name   = "raster_index",
-    table_data   = inv$index,
-    schema       = cbm4_schema(inv$index),
-    partitioning = c("cohort_index", "chunk_index")
-  )
+    cbm4_write_geo(
+      cbm4_data,
+      dataset_name    = dataset_name,
+      dataset_path    = dataset_path,
+      grid_meta       = grid_meta,
+      grid_rast       = grid_rast,
+      cbm_defaults_db = cbm_defaults_db,
+      partitions      = cbm4_schema(c("cohort_index", "chunk_index")),
+      tags            = list(classifier = classifiers),
+      write_pixels    = TRUE
+    )
 
-  # Write CBM defaults database to file
-  arrow_space_dataset_write_file_or_dir(
-    dataset_name = dataset_name,
-    dataset_path = dataset_path,
-    file_name    = "cbm_defaults",
-    file_path    = cbm_defaults_db
-  )
+    # Write CBM defaults database to file
+    arrow_space_dataset_write_file_or_dir(
+      dataset_name = dataset_name,
+      dataset_path = dataset_path,
+      file_name    = "cbm_defaults",
+      file_path    = cbm_defaults_db
+    )
+  }
+
+  if (!is.null(cohorts)){
+
+    # Format inventory
+    if (is.null(classifiers)){
+      classifiers <- arrow_space_dataset_read_table(
+        dataset_name = dataset_name,
+        dataset_path = dataset_path,
+        table_name   = "tags"
+      )[tag == "classifier", layer_name]
+    }
+
+    inv <- cbm4_format_inventory(
+      grid_meta   = grid_meta,
+      cohorts     = cohorts,
+      classifiers = classifiers,
+      ...)
+
+    # Write inventory
+    arrow_space_dataset_write_table(
+      dataset_name = dataset_name,
+      dataset_path = dataset_path,
+      table_name   = NULL,
+      table_data   = inv$flat,
+      schema       = cbm4_schema(inv$flat),
+      partitioning = c("cohort_index", "chunk_index")
+    )
+    arrow_space_dataset_write_table(
+      dataset_name = dataset_name,
+      dataset_path = dataset_path,
+      table_name   = "raster_index",
+      table_data   = inv$index,
+      schema       = cbm4_schema(inv$index),
+      partitioning = c("cohort_index", "chunk_index")
+    )
+  }
 
   return(invisible())
 }
@@ -95,8 +111,8 @@ cbm4_format_inventory <- function(
     cohorts,
     classifiers,
     def_delay             = 0L,
-    def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
     def_cohort_proportion = 1L,
+    def_land_class        = "UNFCCC_FL_R_FL", # "Forest Land remaining Forest Land"
     area_unit_conversion  = 0.0001,
     col_ignore            = NULL,
     ...

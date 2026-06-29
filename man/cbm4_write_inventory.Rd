@@ -6,10 +6,10 @@
 \usage{
 cbm4_write_inventory(
   cbm4_data = NULL,
-  grid_meta,
-  grid_rast,
-  cohorts,
-  classifiers,
+  cohorts = NULL,
+  classifiers = NULL,
+  grid_meta = NULL,
+  grid_rast = NULL,
   dataset_name = "inventory",
   dataset_path = file.path(cbm4_data, dataset_name),
   cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -21,15 +21,15 @@ cbm4_write_inventory(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
 
-\item{grid_meta}{data.table. Grid metadata.
-This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
-
-\item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
-
 \item{cohorts}{data.table. Cohort inventory.}
 
 \item{classifiers}{character.
 Column names of cohort inventory identifiers.}
+
+\item{grid_meta}{data.table. Grid metadata.
+This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
+
+\item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
 
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}

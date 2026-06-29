@@ -15,15 +15,15 @@
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_disturbance <- function(
-    cbm4_data   = NULL,
-    dist_meta   = NULL,
-    dist_events = NULL,
-    classifiers = NULL,
+    cbm4_data     = NULL,
+    dist_meta     = NULL,
+    dist_events   = NULL,
+    classifiers   = NULL,
+    grid_meta     = NULL,
     template_name = "inventory",
     template_path = file.path(cbm4_data, template_name),
     dataset_name  = "disturbance",
     dataset_path  = file.path(cbm4_data, dataset_name),
-    grid_meta    = NULL,
     ...
 ){
 
@@ -31,6 +31,14 @@ cbm4_write_disturbance <- function(
   if (!file.exists(dataset_path)){
 
     if (is.null(template_name)) stop("Use `cbm4_write_geo` to initiate a new dataset or copy dataset attributes by setting `template_name.")
+
+    if (is.null(classifiers)){
+      classifiers <- arrow_space_dataset_read_table(
+        dataset_name = template_name,
+        dataset_path = template_path,
+        table_name   = "tags"
+      )[tag == "classifier", layer_name]
+    }
 
     arrow_space_dataset_copy_geo(
       dataset_name  = dataset_name,
@@ -40,14 +48,25 @@ cbm4_write_disturbance <- function(
       partitions    = cbm4_schema(c("disturbance_order", "timestep", "chunk_index")),
       tags          = if (length(classifiers) > 0) list(classifier = paste0("classifiers.", classifiers))
     )
-
-    if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_data, template_name)
   }
 
   if (!is.null(dist_events) && nrow(dist_events) > 0){
 
     # Format disturbances
-    if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_data, dataset_name)
+    if (is.null(classifiers)){
+      classifiers <- gsub("^classifiers\\.", "", arrow_space_dataset_read_table(
+        dataset_name = dataset_name,
+        dataset_path = dataset_path,
+        table_name   = "tags"
+      )[tag == "classifier", layer_name])
+    }
+
+    if (is.null(grid_meta) & !is.null(template_name)) grid_meta <- tryCatch(
+      cbm4_results_grid_key(cbm4_data, template_name),
+      error = function(e) NULL)
+    if (is.null(grid_meta)) grid_meta <- tryCatch(
+      cbm4_results_grid_key(cbm4_data, dataset_name),
+      error = function(e) stop("grid_meta argument required"))
 
     dist <- cbm4_format_disturbance(
       grid_meta   = grid_meta,

@@ -8,7 +8,7 @@ cbm4_write_step_parameters(
   cbm4_data = NULL,
   gc_meta,
   gc_incr,
-  classifiers,
+  classifiers = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "step_parameters",

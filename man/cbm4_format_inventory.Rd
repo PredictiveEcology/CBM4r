@@ -9,8 +9,8 @@ cbm4_format_inventory(
   cohorts,
   classifiers,
   def_delay = 0L,
-  def_land_class = "UNFCCC_FL_R_FL",
   def_cohort_proportion = 1L,
+  def_land_class = "UNFCCC_FL_R_FL",
   area_unit_conversion = 0.0001,
   col_ignore = NULL,
   ...
@@ -27,11 +27,11 @@ Column names of cohort inventory identifiers.}
 
 \item{def_delay}{integer. Regeneration delay.}
 
-\item{def_land_class}{character. Land class code.
-Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.}
-
 \item{def_cohort_proportion}{integer. A value between 0-1.
 Percentage of the pixel's area that is attributed to the cohort.}
+
+\item{def_land_class}{character. Land class code.
+Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.}
 
 \item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
 

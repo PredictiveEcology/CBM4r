@@ -593,11 +593,11 @@ cbm4_write_disturbance(
   dist_meta = NULL,
   dist_events = NULL,
   classifiers = NULL,
+  grid_meta = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "disturbance",
   dataset_path = file.path(cbm4_data, dataset_name),
-  grid_meta = NULL,
   ...
 )
 ```
@@ -611,6 +611,9 @@ May be omitted if full paths to datasets are provided.
 * `dist_events`: data.table. Disturbance events.
 * `classifiers`: character.
 Column names of cohort inventory identifiers.
+* `grid_meta`: data.table. Grid metadata.
+May not be required but can be provided for efficiency.
+This table can be created with `cbm4_grid_meta` or `cbm4_set_grid_meta`.
 * `template_name`: character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.
 * `template_path`: character.
@@ -621,9 +624,6 @@ Name of the CBM4 spatial parquet dataset.
 * `dataset_path`: character.
 Path to the CBM4 spatial parquet dataset.
 Defaults to `file.path(cbm4_data, dataset_name)`
-* `grid_meta`: data.table. Grid metadata.
-May not be required but can be provided for efficiency.
-This table can be created with `cbm4_grid_meta` or `cbm4_set_grid_meta`.
 * `...`: arguments to `[cbm4_format_disturbance](cbm4_format_disturbance)`
 
 ## Value
@@ -679,10 +679,10 @@ Write inventory to a CBM4 spatial parquet dataset.
 ```r
 cbm4_write_inventory(
   cbm4_data = NULL,
-  grid_meta,
-  grid_rast,
-  cohorts,
-  classifiers,
+  cohorts = NULL,
+  classifiers = NULL,
+  grid_meta = NULL,
+  grid_rast = NULL,
   dataset_name = "inventory",
   dataset_path = file.path(cbm4_data, dataset_name),
   cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -695,12 +695,12 @@ cbm4_write_inventory(
 * `cbm4_data`: character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.
-* `grid_meta`: data.table. Grid metadata.
-This table can be created with `cbm4_grid_meta` or `cbm4_set_grid_meta`.
-* `grid_rast`: terra `SpatRaster`. Grid defining the study area.
 * `cohorts`: data.table. Cohort inventory.
 * `classifiers`: character.
 Column names of cohort inventory identifiers.
+* `grid_meta`: data.table. Grid metadata.
+This table can be created with `cbm4_grid_meta` or `cbm4_set_grid_meta`.
+* `grid_rast`: terra `SpatRaster`. Grid defining the study area.
 * `dataset_name`: character.
 Name of the CBM4 spatial parquet dataset.
 * `dataset_path`: character.
@@ -727,7 +727,7 @@ cbm4_write_spinup_parameters(
   cbm4_data = NULL,
   gc_meta,
   gc_incr,
-  classifiers,
+  classifiers = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "spinup_parameters",
@@ -775,7 +775,7 @@ cbm4_write_step_parameters(
   cbm4_data = NULL,
   gc_meta,
   gc_incr,
-  classifiers,
+  classifiers = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "step_parameters",
