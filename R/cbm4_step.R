@@ -13,6 +13,7 @@
 #' @template inventory_dataset
 #' @template disturbance_dataset
 #' @template simulation_dataset
+#' @param ... unused
 #'
 #' @return `NULL`. Updates will be made to CBM4 spatial parquet datasets.
 #' @export
@@ -26,7 +27,8 @@ cbm4_step <- function(
     step_parameters_dataset = file.path(cbm4_data, "step_parameters"),
     inventory_dataset       = file.path(cbm4_data, "inventory"),
     disturbance_dataset     = file.path(cbm4_data, "disturbance"),
-    simulation_dataset      = file.path(cbm4_data, "simulation")
+    simulation_dataset      = file.path(cbm4_data, "simulation"),
+    ...
 ){
 
   spatial_cbm4_app <- reticulate::import("cbm4.app.spatial.spatial_cbm4.spatial_cbm4_app")
@@ -69,6 +71,14 @@ cbm4_step <- function(
       "cbm_defaults_path" = cbm_defaults_db
     ))
 
+  if (!file.exists(cbm4_datasets$simulation$path_or_uri)){
+    spatial_cbm4_app$create_simulation_dataset(reticulate::dict(
+      "cbmspec_model_config"   = cbmspec_config,
+      "inventory_dataset"      = cbm4_datasets$inventory,
+      "out_simulation_dataset" = cbm4_datasets$simulation
+    ))
+  }
+
   runIn <- list(
     "cbmspec_model_config" = cbmspec_config,
     "timestep"             = timestep,
@@ -88,4 +98,69 @@ cbm4_step <- function(
 
   return(invisible())
 }
+
+
+cbm4_create_simulation_dataset <- function(
+    cbm4_data = NULL,
+    inventory_dataset  = file.path(cbm4_data, "inventory"),
+    simulation_dataset = file.path(cbm4_data, "simulation"),
+    cbm_defaults_db    = getOption("CBM4r.db.path")
+){
+
+  spatial_cbm4_app <- reticulate::import("cbm4.app.spatial.spatial_cbm4.spatial_cbm4_app")
+
+  cbm4_datasets <- list(
+    inventory = list(
+      dataset_name = "inventory",
+      storage_type = "local_storage",
+      path_or_uri  = inventory_dataset
+    ),
+    simulation = list(
+      dataset_name = "simulation",
+      storage_type = "local_storage",
+      path_or_uri  = simulation_dataset
+    )
+  )
+
+  for (dataset in cbm4_datasets){
+    if (length(dataset$path_or_uri) == 0) stop(
+      "CBM4 ", shQuote(dataset$dataset_name), " dataset path invalid")
+    if (dataset$dataset_name != "simulation" && !file.exists(dataset$path_or_uri)) stop(
+      "CBM4 ", shQuote(dataset$dataset_name), " dataset not found: ", dataset$path_or_uri)
+    dataset$path_or_uri <- normalizePath(dataset$path_or_uri, winslash = "/", mustWork = FALSE)
+  }
+
+  cbmspec_config <- reticulate::dict(
+    "package_name"       = "cbmspec_cbm3",
+    "factory_function"   = "cbmspec_cbm3.models.cbmspec_cbm3_single_matrix.model_create",
+    "factory_parameters" = reticulate::dict(
+      "cbm_defaults_path" = cbm_defaults_db
+    ))
+
+  spatial_cbm4_app$create_simulation_dataset(reticulate::dict(
+    "cbmspec_model_config"   = cbmspec_config,
+    "inventory_dataset"      = cbm4_datasets$inventory,
+    "out_simulation_dataset" = cbm4_datasets$simulation
+  ))
+
+  # Write tags
+  classifiers <- arrow_space_dataset_read_table(
+    dataset_name = cbm4_datasets$inventory$dataset_name,
+    dataset_path = cbm4_datasets$inventory$path_or_uri,
+    table_name   = "tags"
+  )[tag == "classifier", layer_name]
+
+  arrow_space_dataset_write_table(
+    dataset_name = cbm4_datasets$simulation$dataset_name,
+    dataset_path = cbm4_datasets$simulation$path_or_uri,
+    table_name   = "tags",
+    table_data   = data.table::data.table(
+      layer_name = paste0("classifiers.", classifiers),
+      tag = "classifier"
+    )
+  )
+
+  return(invisible())
+}
+
 

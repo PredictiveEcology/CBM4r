@@ -13,12 +13,15 @@ cbm4_schema <- function(columns = NULL, schema = NULL){
 
     cohort_proportion = "float32",
 
-    age       = "float32",
-    state.age = "float32",
+    age           = "int16",
+    state.age     = "int16",
+    inventory.age = "int16",
 
     area           = "float32",
-    inventory.area = "float32"
+    inventory.area = "float32",
 
+    state.enabled = "int8",
+    state.growth_enabled = "int8"
   )
 
   for (column in names(schema)) schema_default[[column]] <- schema[[column]]

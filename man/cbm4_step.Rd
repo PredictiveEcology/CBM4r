@@ -14,7 +14,8 @@ cbm4_step(
   step_parameters_dataset = file.path(cbm4_data, "step_parameters"),
   inventory_dataset = file.path(cbm4_data, "inventory"),
   disturbance_dataset = file.path(cbm4_data, "disturbance"),
-  simulation_dataset = file.path(cbm4_data, "simulation")
+  simulation_dataset = file.path(cbm4_data, "simulation"),
+  ...
 )
 }
 \arguments{
@@ -51,6 +52,8 @@ Defaults to \code{file.path(cbm4_data, "disturbance")}}
 \item{simulation_dataset}{character.
 Path to simulation CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, "simulation")}}
+
+\item{...}{unused}
 }
 \value{
 \code{NULL}. Updates will be made to CBM4 spatial parquet datasets.

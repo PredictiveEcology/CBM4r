@@ -416,7 +416,8 @@ cbm4_spinup(
   cbm_defaults_db = getOption("CBM4r.db.path"),
   spinup_parameters_dataset = file.path(cbm4_data, "spinup_parameters"),
   inventory_dataset = file.path(cbm4_data, "inventory"),
-  simulation_dataset = file.path(cbm4_data, "simulation")
+  simulation_dataset = file.path(cbm4_data, "simulation"),
+  ...
 )
 ```
 
@@ -440,6 +441,7 @@ Defaults to `file.path(cbm4_data, "inventory")`
 * `simulation_dataset`: character.
 Path to simulation CBM4 spatial parquet dataset.
 Defaults to `file.path(cbm4_data, "simulation")`
+* `...`: unused
 
 ## Value
 
@@ -464,7 +466,8 @@ cbm4_step(
   step_parameters_dataset = file.path(cbm4_data, "step_parameters"),
   inventory_dataset = file.path(cbm4_data, "inventory"),
   disturbance_dataset = file.path(cbm4_data, "disturbance"),
-  simulation_dataset = file.path(cbm4_data, "simulation")
+  simulation_dataset = file.path(cbm4_data, "simulation"),
+  ...
 )
 ```
 
@@ -494,6 +497,7 @@ Defaults to `file.path(cbm4_data, "disturbance")`
 * `simulation_dataset`: character.
 Path to simulation CBM4 spatial parquet dataset.
 Defaults to `file.path(cbm4_data, "simulation")`
+* `...`: unused
 
 ## Value
 
@@ -511,15 +515,6 @@ Run an annual step on CBM4 spatial parquet datasets with an alternate set of coh
 cbm4_step_with_cohorts(
   cbm4_data = NULL,
   timestep,
-  cohorts = NULL,
-  grid_meta = NULL,
-  area_unit_conversion = 0.0001,
-  def_cohort_proportion = 1L,
-  def_enabled = 1L,
-  def_growth_enabled = 1L,
-  def_growth_multiplier = 1L,
-  def_regeneration_delay = 0L,
-  def_land_class = "UNFCCC_FL_R_FL",
   simulation_dataset = file.path(cbm4_data, "simulation"),
   ...
 )
@@ -531,23 +526,10 @@ cbm4_step_with_cohorts(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.
 * `timestep`: integer. Simulation timestep with 1 representing the first year.
-* `cohorts`: data.table. Cohort inventory.
-* `grid_meta`: data.table. Grid metadata.
-May not be required but can be provided for efficiency.
-This table can be created with `cbm4_grid_meta` or `cbm4_set_grid_meta`.
-* `area_unit_conversion`: numeric. Conversion factor of area to hectares (ha).
-* `def_cohort_proportion`: integer. A value between 0-1.
-Percentage of the pixel's area that is attributed to the cohort.
-* `def_enabled`: integer. TODO
-* `def_growth_enabled`: integer. TODO
-* `def_growth_multiplier`: integer. TODO
-* `def_regeneration_delay`: integer. Regeneration delay.
-* `def_land_class`: character. Land class code.
-Defined in CBM defaults database tables 'land_class' and 'land_class_tr'.
 * `simulation_dataset`: character.
 Path to simulation CBM4 spatial parquet dataset.
 Defaults to `file.path(cbm4_data, "simulation")`
-* `...`: arguments to `[cbm4_step](cbm4_step)`
+* `...`: arguments to `[cbm4_write_simulation](cbm4_write_simulation)` or `[cbm4_step](cbm4_step)`
 
 ## Value
 
@@ -709,6 +691,64 @@ Defaults to `file.path(cbm4_data, dataset_name)`
 * `cbm_defaults_db`: character.
 Path to CBM defaults SQLite database.
 * `...`: arguments to `[cbm4_format_inventory](cbm4_format_inventory)`
+
+## Value
+
+`NULL`. Data will be written to the CBM4 spatial parquet dataset.
+
+# `cbm4_write_simulation`: CBM4 write simulation
+
+## Description
+
+Write inventory and associated carbon pools
+directly to a simulation CBM4 spatial parquet dataset.
+
+## Usage
+
+```r
+cbm4_write_simulation(
+  cbm4_data = NULL,
+  timestep = 0,
+  cohorts = NULL,
+  classifiers = NULL,
+  grid_meta = NULL,
+  grid_rast = NULL,
+  template_name = "inventory",
+  template_path = file.path(cbm4_data, template_name),
+  dataset_name = "simulation",
+  dataset_path = file.path(cbm4_data, dataset_name),
+  cbm_defaults_db = getOption("CBM4r.db.path"),
+  schema = NULL,
+  ...
+)
+```
+
+## Arguments
+
+* `cbm4_data`: character.
+Path to CBM4 spatial parquet datasets directory.
+May be omitted if full paths to datasets are provided.
+* `timestep`: integer. Simulation timestep with 1 representing the first year.
+* `cohorts`: data.table. Cohort inventory.
+* `classifiers`: character.
+Column names of cohort inventory identifiers.
+* `grid_meta`: data.table. Grid metadata.
+This table can be created with `cbm4_grid_meta` or `cbm4_set_grid_meta`.
+* `grid_rast`: terra `SpatRaster`. Grid defining the study area.
+* `template_name`: character.
+Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.
+* `template_path`: character.
+Path to CBM4 spatial parquet dataset to use as a template for the new dataset.
+Defaults to `file.path(cbm4_data, template_name)`
+* `dataset_name`: character.
+Name of the CBM4 spatial parquet dataset.
+* `dataset_path`: character.
+Path to the CBM4 spatial parquet dataset.
+Defaults to `file.path(cbm4_data, dataset_name)`
+* `cbm_defaults_db`: character.
+Path to CBM defaults SQLite database.
+* `schema`: internal
+* `...`: arguments to `[cbm4_format_simulation](cbm4_format_simulation)`
 
 ## Value
 

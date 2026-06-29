@@ -17,4 +17,5 @@ testthat::test_local(filter = "simulate-1")
 testthat::test_local(filter = "simulate-(1-1|2-disturbance)")
 testthat::test_local(filter = "simulate-(1-1|2-increments)")
 testthat::test_local(filter = "simulate-(1-1|3-cbm4\\_step\\_with\\_cohorts)")
+testthat::test_local(filter = "simulate-(1-1|3-cbm4\\_write\\_simulation)")
 

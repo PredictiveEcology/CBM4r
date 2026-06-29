@@ -10,7 +10,8 @@ cbm4_spinup(
   cbm_defaults_db = getOption("CBM4r.db.path"),
   spinup_parameters_dataset = file.path(cbm4_data, "spinup_parameters"),
   inventory_dataset = file.path(cbm4_data, "inventory"),
-  simulation_dataset = file.path(cbm4_data, "simulation")
+  simulation_dataset = file.path(cbm4_data, "simulation"),
+  ...
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ Defaults to \code{file.path(cbm4_data, "inventory")}}
 \item{simulation_dataset}{character.
 Path to simulation CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, "simulation")}}
+
+\item{...}{unused}
 }
 \value{
 \code{NULL}. Updates will be made to CBM4 spatial parquet datasets.

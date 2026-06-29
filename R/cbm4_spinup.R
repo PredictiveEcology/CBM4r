@@ -9,6 +9,7 @@
 #' @template spinup_parameters_dataset
 #' @template inventory_dataset
 #' @template simulation_dataset
+#' @param ... unused
 #'
 #' @return `NULL`. Updates will be made to CBM4 spatial parquet datasets.
 #' @export
@@ -18,7 +19,8 @@ cbm4_spinup <- function(
     cbm_defaults_db = getOption("CBM4r.db.path"),
     spinup_parameters_dataset = file.path(cbm4_data, "spinup_parameters"),
     inventory_dataset         = file.path(cbm4_data, "inventory"),
-    simulation_dataset        = file.path(cbm4_data, "simulation")
+    simulation_dataset        = file.path(cbm4_data, "simulation"),
+    ...
   ){
 
   spatial_cbm4_app <- reticulate::import("cbm4.app.spatial.spatial_cbm4.spatial_cbm4_app")
