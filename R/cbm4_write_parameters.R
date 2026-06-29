@@ -304,11 +304,11 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
 
 parameters_decay <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 
-  params <- cbm_defaults_db_table("decay_parameter", cbm_defaults_db)
+  params <- cbm_defaults_readTable("decay_parameter", cbm_defaults_db)
 
   domPools <- merge(
-    cbm_defaults_db_table("dom_pool", cbm_defaults_db),
-    cbm_defaults_db_table("pool",     cbm_defaults_db),
+    cbm_defaults_readTable("dom_pool", cbm_defaults_db),
+    cbm_defaults_readTable("pool",     cbm_defaults_db),
     by.x = "pool_id", by.y = "id")
 
   decayRemap <- list(
@@ -334,10 +334,10 @@ parameters_turnover <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 
   params <- merge(
     merge(
-      cbm_defaults_db_table("spatial_unit", cbm_defaults_db)[, .(inventory.spatial_unit = id, id = eco_boundary_id)],
-      cbm_defaults_db_table("eco_boundary", cbm_defaults_db),
+      cbm_defaults_readTable("spatial_unit", cbm_defaults_db)[, .(inventory.spatial_unit = id, id = eco_boundary_id)],
+      cbm_defaults_readTable("eco_boundary", cbm_defaults_db),
       by = "id")[, .(inventory.spatial_unit, id = turnover_parameter_id)],
-    cbm_defaults_db_table("turnover_parameter", cbm_defaults_db)[, .(
+    cbm_defaults_readTable("turnover_parameter", cbm_defaults_db)[, .(
       id,
       turnover.sw_merch                      = stem_turnover,     # merch = stem; same for SW or HW
       turnover.sw_foliage                    = sw_foliage,
@@ -364,7 +364,7 @@ parameters_turnover <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 
   data.table::setkey(params, inventory.spatial_unit)
   params[, id := NULL]
-  params[, turnover.slow_mixing_rate := cbm_defaults_db_table("slow_mixing_rate", cbm_defaults_db)$rate]
+  params[, turnover.slow_mixing_rate := cbm_defaults_readTable("slow_mixing_rate", cbm_defaults_db)$rate]
 
   return(params)
 }
@@ -372,7 +372,7 @@ parameters_turnover <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 parameters_root <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 
   params <- cbind(
-    cbm_defaults_db_table("root_parameter", cbm_defaults_db)[, .(
+    cbm_defaults_readTable("root_parameter", cbm_defaults_db)[, .(
       root.hw_a  = hw_a,
       root.sw_a  = sw_a,
       root.hw_b  = hw_b,
@@ -380,7 +380,7 @@ parameters_root <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
       root.frp_b = frp_b,
       root.frp_c = frp_c
     )],
-    cbm_defaults_db_table("biomass_to_carbon_rate", cbm_defaults_db)[, .(
+    cbm_defaults_readTable("biomass_to_carbon_rate", cbm_defaults_db)[, .(
       root.biomass_to_carbon_rate = rate
     )]
   )
@@ -391,9 +391,9 @@ parameters_root <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 parameters_spinup <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 
   params <- merge(
-    cbm_defaults_db_table("spatial_unit", cbm_defaults_db)[, .(
+    cbm_defaults_readTable("spatial_unit", cbm_defaults_db)[, .(
       inventory.spatial_unit = id, id = spinup_parameter_id, mean_annual_temperature)],
-    cbm_defaults_db_table("spinup_parameter", cbm_defaults_db),
+    cbm_defaults_readTable("spinup_parameter", cbm_defaults_db),
     by = "id", all.x = TRUE)
 
   data.table::setkey(params, inventory.spatial_unit)
@@ -408,7 +408,7 @@ parameters_spinup <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 
 parameters_mean_annual_temp <- function(cbm_defaults_db = getOption("CBM4r.db.path")){
 
-  params <- cbm_defaults_db_table("spatial_unit", cbm_defaults_db)[, .(
+  params <- cbm_defaults_readTable("spatial_unit", cbm_defaults_db)[, .(
     inventory.spatial_unit = id,
     mean_annual_temperature
   )]

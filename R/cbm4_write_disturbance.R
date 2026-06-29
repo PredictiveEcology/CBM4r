@@ -175,7 +175,7 @@ cbm4_format_disturbance <- function(
   # Set disturbance_type_id
   if (!"disturbance_type_id" %in% names(dataFull)){
 
-    disturbance_type_tr <- cbm_defaults_db_table("disturbance_type_tr", cbm_defaults_db)
+    disturbance_type_tr <- cbm_defaults_readTable("disturbance_type_tr", cbm_defaults_db)
 
     dataFull[, disturbance_type_id := disturbance_type_tr$disturbance_type_id[
       match(disturbance_type, disturbance_type_tr$name)]]
@@ -188,7 +188,7 @@ cbm4_format_disturbance <- function(
   # Set disturbance_type
   if (!"disturbance_type" %in% names(dataFull)){
 
-    disturbance_type_tr <- cbm_defaults_db_table("disturbance_type_tr", cbm_defaults_db)
+    disturbance_type_tr <- cbm_defaults_readTable("disturbance_type_tr", cbm_defaults_db)
 
     dataFull[, disturbance_type := factor(
       disturbance_type_tr$name[match(disturbance_type_id, disturbance_type_tr$disturbance_type_id)],

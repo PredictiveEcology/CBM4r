@@ -32,6 +32,50 @@ Config/roxygen2/version: 8.0.0
 RoxygenNote: 8.0.0
 ```
 
+# `cbm_defaults_listTables`: CBM defaults: list tables
+
+## Description
+
+List tables in a CBM defaults SQLite database.
+
+## Usage
+
+```r
+cbm_defaults_listTables(cbm_defaults_db = getOption("CBM4r.db.path"))
+```
+
+## Arguments
+
+* `cbm_defaults_db`: character.
+Path to CBM defaults SQLite database.
+* `...`: arguments to `RSQLite::dbListTables`
+
+# `cbm_defaults_readTable`: CBM defaults: read table
+
+## Description
+
+Read a table from a CBM defaults SQLite database.
+
+## Usage
+
+```r
+cbm_defaults_readTable(
+  tableName,
+  cbm_defaults_db = getOption("CBM4r.db.path"),
+  localeID = getOption("CBM4r.db.localeID"),
+  ...
+)
+```
+
+## Arguments
+
+* `tableName`: character. Table name.
+Use `cbm_defaults_listTables` to select a table.
+* `cbm_defaults_db`: character.
+Path to CBM defaults SQLite database.
+* `localeID`: integer. Locale ID.
+* `...`: arguments to `RSQLite::dbReadTable`
+
 # `cbm4_data_copy`: CBM4 data copy
 
 ## Description

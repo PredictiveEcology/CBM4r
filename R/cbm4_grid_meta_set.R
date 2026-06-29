@@ -143,10 +143,10 @@ set_table_spatial_units <- function(tableName, table, cbm_defaults_db = getOptio
 
   if (!all(c("admin_boundary", "eco_boundary", "spatial_unit") %in% names(table))){
 
-    admin_tr <- cbm_defaults_db_table("admin_boundary_tr", cbm_defaults_db)[, .(admin_boundary_id, admin_boundary = name)]
+    admin_tr <- cbm_defaults_readTable("admin_boundary_tr", cbm_defaults_db)[, .(admin_boundary_id, admin_boundary = name)]
     if (naOK) admin_tr <- rbind(admin_tr, data.frame(admin_boundary_id = 0, admin_boundary = "?"))
 
-    eco_tr <- cbm_defaults_db_table("eco_boundary_tr", cbm_defaults_db)[, .(eco_boundary_id, eco_boundary = name)]
+    eco_tr <- cbm_defaults_readTable("eco_boundary_tr", cbm_defaults_db)[, .(eco_boundary_id, eco_boundary = name)]
     if (naOK) eco_tr <- rbind(eco_tr, data.frame(eco_boundary_id = 0, eco_boundary = "?"))
 
     if (!"admin_boundary" %in% names(table)){
@@ -163,7 +163,7 @@ set_table_spatial_units <- function(tableName, table, cbm_defaults_db = getOptio
 
     if (!"spatial_unit" %in% names(table)){
 
-      spatial_unit <- cbm_defaults_db_table("spatial_unit", cbm_defaults_db)[, .(id, admin_boundary_id, eco_boundary_id)]
+      spatial_unit <- cbm_defaults_readTable("spatial_unit", cbm_defaults_db)[, .(id, admin_boundary_id, eco_boundary_id)]
       if (naOK) spatial_unit <- rbind(spatial_unit, data.frame(id = 0, admin_boundary_id = 0, eco_boundary_id = 0))
 
       if (!"admin_boundary_id" %in% names(table)){
