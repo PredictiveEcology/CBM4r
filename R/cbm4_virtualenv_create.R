@@ -21,38 +21,48 @@ cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade =
   # Get version requirements
   vers <- cbm4_versions(version)
 
-  # Initiate virtual environment with GDAL
+  # Initiate virtual environment
   if (!reticulate::virtualenv_exists(envname)){
-
     reticulate::virtualenv_create(envname, version = vers$python, ...)
+  }
 
-    if (identical(.Platform$OS.type, "windows")){
+  # Install Python packages
+  if (length(vers$packages) > 0){
+    reticulate::virtualenv_install(
+      envname,
+      packages = vers$packages,
+      pip_options = c("--upgrade"[upgrade], "-q"[quiet])
+    )
+  }
 
-      reticulate::virtualenv_install(
-        envname,
-        packages = vers$gdal_win,
-        pip_options = c("--upgrade"[upgrade], "-q"[quiet])
-      )
+  # Install GDAL
+  if (identical(.Platform$OS.type, "windows")){
 
-    }else{
+    reticulate::virtualenv_install(
+      envname,
+      packages = vers$gdal_win,
+      pip_options = c("--upgrade"[upgrade], "-q"[quiet])
+    )
 
-      gdalVers <- system("gdal-config --version", intern = TRUE)
+  }else{
 
-      if (!is.null(vers[["gdal"]]) && (
-        utils::compareVersion(gdalVers, vers[["gdal"]][["min"]]) == -1 |
-        utils::compareVersion(gdalVers, vers[["gdal"]][["max"]]) ==  1
-      )) stop("gdal >=", vers[["gdal"]][["min"]], ",<=", vers[["gdal"]][["max"]], " not found")
+    gdalVers <- system("gdal-config --version", intern = TRUE)
 
-      reticulate::virtualenv_install(
-        envname,
-        packages = paste0("gdal[numpy]==", gdalVers),
-        pip_options = c("--no-cache-dir", "--no-build-isolation", "--upgrade"[upgrade], "-q"[quiet])
-      )
-    }
+    if (!is.null(vers[["gdal"]]) && (
+      utils::compareVersion(gdalVers, vers[["gdal"]][["min"]]) == -1 |
+      utils::compareVersion(gdalVers, vers[["gdal"]][["max"]]) ==  1
+    )) stop("gdal >=", vers[["gdal"]][["min"]], ",<=", vers[["gdal"]][["max"]], " not found")
+
+    reticulate::virtualenv_install(
+      envname,
+      packages = paste0("gdal[numpy]==", gdalVers),
+      pip_options = c("--no-cache-dir", "--no-build-isolation", "--upgrade"[upgrade], "-q"[quiet])
+    )
   }
 
   # Install CBM4 packages
   packages <- c(
+    "libcbm"       = "https://github.com/cat-cfs/libcbm_py",
     "arrow_space"  = "https://github.com/cat-cfs/arrow_space.git",
     "cbm4"         = "https://github.com/cat-cfs/cbm4.git",
     "cbmspec_cbm3" = "https://github.com/cat-cfs/cbmspec.cbm3.python.git"
@@ -72,15 +82,18 @@ cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade =
     refID <- gert::git_commit_info(repo = pkg_path)$id
 
     if (package %in% names(vers)){
-      gert::git_pull(repo = pkg_path, verbose = FALSE)
-      gert::git_reset_hard(vers[[package]], repo = pkg_path)
+      if (!identical(refID, vers[[package]])){
+        gert::git_pull(repo = pkg_path, verbose = FALSE)
+        gert::git_reset_hard(vers[[package]], repo = pkg_path)
+      }
     }else{
       gert::git_reset_hard(repo = pkg_path)
       gert::git_pull(repo = pkg_path, verbose = FALSE)
     }
 
+    refID_new <- gert::git_commit_info(repo = pkg_path)$id
     install <- !any(c(package, sub("_", "-", package)) %in% envPackages) ||
-      clone || upgrade || !identical(refID, gert::git_commit_info(repo = pkg_path)$id)
+      clone || upgrade || !identical(refID, refID_new)
 
     if (install){
       reticulate::virtualenv_install(
@@ -97,16 +110,30 @@ cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade =
 cbm4_versions <- function(version = NULL){
 
   vers <- list(
+
+    # Issue with formatting of view table from SQL results processor
+    # "2.24.3" = list(
+    #   python       = ">=3.12",
+    #   gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
+    #   cbm4         = "063034f1b9d90e9609e5f80d37d44a3f1ff3194c", # 2026-06-25
+    #   arrow_space  = "8744e4c80daa327fdf7aeda604d8e755f96aa509", # 2026-06-24
+    #   cbmspec_cbm3 = "c13bc70a2f14e9aab614996324855701c6947913"  # 2026-06-24
+    # ),
+
     "2.17.10" = list(
-      cbm4     = "2.17.10",
-      python   = ">=3.12",
-      gdal_win = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl"
+      python       = ">=3.12",
+      gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
+      packages     = "pandas==2.3.3",
+      cbm4         = "b8f0991bcd723661fd74aec52dd0e314c7d26dbb", # 2026-03-27
+      arrow_space  = "7715ba811ef34a62ffd859d73e02c8659c4bf311", # 2026-03-27
+      cbmspec_cbm3 = "da8c70a47c9ea7163a2e99dd6703bafef9b12a4e", # 2026-03-31
+      libcbm       = "fee02dfa839fe4cee2252208d9e1e452a5e7adf3"  # 2026-01-21
     ),
     "2.17.9" = list(
-      cbm4     = "2.17.9",
       python   = ">=3.12,<3.13",
       gdal_win = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.7.4/gdal-3.11.1-cp312-cp312-win_amd64.whl",
-      gdal     = c(min = "0", max = "3.11.3")
+      gdal     = c(min = "0", max = "3.11.3"),
+      cbm4     = "2.17.9"
     )
   )
 
