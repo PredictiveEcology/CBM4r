@@ -234,7 +234,7 @@ cbm4_format_disturbance <- function(
 
       filt <- r[classifiers]
       filt <- filt[!sapply(filt, is.na)]
-      filt[names(filt) %in% isChar] <- shQuote(filt[names(filt) %in% isChar])
+      filt[names(filt) %in% isChar] <- paste0("\"", filt[names(filt) %in% isChar], "\"")
 
       paste0("[[", paste(
         sprintf("[\"classifiers.%s\", \"==\", %s]", names(filt), filt),
