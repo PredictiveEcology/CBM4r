@@ -27,6 +27,8 @@ cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade =
   }
 
   # Install Python packages
+  arrow::install_pyarrow(envname)
+
   if (length(vers$packages) > 0){
     reticulate::virtualenv_install(
       envname,
