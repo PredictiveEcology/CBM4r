@@ -9,7 +9,8 @@ Depends: R (>= 4.1.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports:
-  arrow,
+  arrow  (>= 23.0.0),
+  arrow  (< 24.0.0),
   data.table (>= 1.18.0),
   dplyr,
   reticulate,

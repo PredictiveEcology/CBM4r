@@ -27,7 +27,7 @@ cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade =
   }
 
   # Install Python packages
-  arrow::install_pyarrow(envname)
+  # arrow::install_pyarrow(envname)
 
   if (length(vers$packages) > 0){
     reticulate::virtualenv_install(
@@ -40,11 +40,13 @@ cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade =
   # Install GDAL
   if (identical(.Platform$OS.type, "windows")){
 
-    reticulate::virtualenv_install(
-      envname,
-      packages = vers$gdal_win,
-      pip_options = c("--upgrade"[upgrade], "-q"[quiet])
-    )
+    if (!"gdal" %in% trimws(reticulate::py_list_packages(envname)$package)){
+      reticulate::virtualenv_install(
+        envname,
+        packages = vers$gdal_win,
+        pip_options = c("--upgrade"[upgrade], "-q"[quiet])
+      )
+    }
 
   }else{
 
@@ -125,7 +127,7 @@ cbm4_versions <- function(version = NULL){
     "2.17.10" = list(
       python       = ">=3.12",
       gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
-      packages     = "pandas==2.3.3",
+      packages     = c("pandas==2.3.3", "pyarrow>=23.0.0,<24.0.0"),
       cbm4         = "b8f0991bcd723661fd74aec52dd0e314c7d26dbb", # 2026-03-27
       arrow_space  = "7715ba811ef34a62ffd859d73e02c8659c4bf311", # 2026-03-27
       cbmspec_cbm3 = "da8c70a47c9ea7163a2e99dd6703bafef9b12a4e", # 2026-03-31

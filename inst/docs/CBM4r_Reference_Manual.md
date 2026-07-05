@@ -1,34 +1,35 @@
 # DESCRIPTION
 
 ```
-Package: CBM4r
-Title: CBM4 in R
-Version: 1.0.0
-Authors@R: 
-    person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
-Description: R interface to CBM4 Python applications. 
-License: GPL-3
-Depends: R (>= 4.1.0)
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-Imports:
-  arrow,
-  data.table (>= 1.18.0),
-  dplyr,
-  reticulate,
-  RSQLite,
-  terra
-Suggests:
-  covr,
-  devtools,
-  gert,
-  knitr,
-  rmarkdown,
-  testthat (>= 3.0.0),
-  withr
-Config/testthat/edition: 3
-VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+Package: CBM4r
+Title: CBM4 in R
+Version: 1.0.0
+Authors@R: 
+    person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
+Description: R interface to CBM4 Python applications. 
+License: GPL-3
+Depends: R (>= 4.1.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports:
+  arrow  (>= 23.0.0),
+  arrow  (< 24.0.0),
+  data.table (>= 1.18.0),
+  dplyr,
+  reticulate,
+  RSQLite,
+  terra
+Suggests:
+  covr,
+  devtools,
+  gert,
+  knitr,
+  rmarkdown,
+  testthat (>= 3.0.0),
+  withr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
 RoxygenNote: 8.0.0
 ```
 
@@ -41,7 +42,7 @@ List tables in a CBM defaults SQLite database.
 ## Usage
 
 ```r
-cbm_defaults_listTables(cbm_defaults_db = getOption("CBM4r.db.path"))
+cbm_defaults_listTables(cbm_defaults_db = getOption("CBM4r.db.path"), ...)
 ```
 
 ## Arguments
