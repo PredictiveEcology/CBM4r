@@ -22,7 +22,10 @@ cbm4_results_processor <- function(
 
   reticulate::import(
     "cbm4.app.spatial.results.sql_results_processor"
-  )$SQLResultsProcessor$for_simulation(cbm4_data, max_workers = max_workers)
+  )$SQLResultsProcessor$for_simulation(
+    cbm4_data,
+    max_workers = if (!is.null(max_workers) && !is.na(max_workers)) max_workers
+  )
 }
 
 # If simulation data does not contain disturbances:
