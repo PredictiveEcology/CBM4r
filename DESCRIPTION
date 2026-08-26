@@ -9,11 +9,10 @@ Depends: R (>= 4.1.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports:
-  arrow  (>= 23.0.0),
-  arrow  (< 24.0.0),
+  arrow,
   data.table (>= 1.18.0),
   dplyr,
-  reticulate,
+  reticulate (> 1.46.0),
   RSQLite,
   terra
 Suggests:
@@ -24,6 +23,8 @@ Suggests:
   rmarkdown,
   testthat (>= 3.0.0),
   withr
+Remotes:
+  rstudio/reticulate
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0

@@ -31,7 +31,7 @@ cbm4_results_totals <- function(cbm4_results, view_name, view_columns = NULL, ti
   if (is.null(view_columns)){
     view_columns <- setdiff(
       cbm4_results$views[cbm4_results$views$name == view_name,]$column_names[[1]], c(
-        cbm4_results$views[cbm4_results$views$name == "age_indicators",]$column_names[[1]],
+        gsub("^(inventory|classifiers|state)\\.", "", cbm4_results$get_columns("simulation")),
         "disturbance_type_id", "disturbance_type"
       ))
   }
