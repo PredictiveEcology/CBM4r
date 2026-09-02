@@ -297,14 +297,6 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
     gc_incr <- merge(gc_meta, gc_incr, by.x = "classifiers.gc_id", by.y = "gc_id")
   }
 
-  # Add row for increments above greatest age
-  if (long){
-    gcIncrWC <- gc_incr[state.age == max(state.age), .SD, by = c(paste0("classifiers.", classifiers), "inventory.spatial_unit")]
-    gcIncrWC[["state.age"]] <- "?"
-    gc_incr <- unique(rbind(gc_incr, gcIncrWC))
-    data.table::setkeyv(gc_incr, c(paste0("classifiers.", classifiers), "inventory.spatial_unit"))
-  }
-
   return(gc_incr)
 }
 
