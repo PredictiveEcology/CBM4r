@@ -218,10 +218,17 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
     if (any(c("admin_boundary_id", "admin_boundary", "admin_abbrev",
               "eco_boundary_id", "eco_boundary") %in% names(gc_meta))){
       set_table_spatial_units("gc_meta", gc_meta, cbm_defaults_db, naOK = TRUE)
-      gc_meta[is.na(spatial_unit), spatial_unit := "?"]
+      if (anyNA(gc_meta$spatial_unit)){
+        gc_meta[, spatial_unit := as.character(spatial_unit)]
+        gc_meta[is.na(spatial_unit), spatial_unit := "?"]
+      }
     }else{
       gc_meta[, spatial_unit := "?"]
     }
+  }
+  if (anyNA(gc_incr$state.age)){
+    gc_incr[, state.age := as.character(state.age)]
+    gc_incr[is.na(state.age), state.age := "?"]
   }
 
   # Check table columns
