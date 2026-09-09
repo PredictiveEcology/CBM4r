@@ -176,14 +176,21 @@ cbm4_format_simulation <- function(
   col_ignore <- setdiff(names(dataFull), c(do.call(c, keyCols), do.call(c, cohortCols)))
   if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
-  # Set index
-  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("raster_index", "area"))]
-
   # Set timestep
   dataFull[, timestep := as.integer(timestep)]
 
+  # Set index
+  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c(
+    "raster_index", "cohort_index", "cohort_proportion", "area"))]
+
   # Set cohort_index
-  if (!"cohort_index" %in% names(dataFull)) dataFull[, cohort_index := 0L]
+  if (!"cohort_index" %in% names(dataFull)){
+    if (!anyDuplicated(dataFull$raster_index)){
+      dataFull[, cohort_index := 0L]
+    }else{
+      dataFull[, cohort_index := .GRP - 1L, by = c(classifiers, "age")]
+    }
+  }
 
   # Set area
   if (is.integer(dataFull$area)) dataFull[, area := as.numeric(area)]
