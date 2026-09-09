@@ -180,8 +180,7 @@ cbm4_format_simulation <- function(
   dataFull[, timestep := as.integer(timestep)]
 
   # Set index
-  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c(
-    "raster_index", "cohort_index", "cohort_proportion", "area"))]
+  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("raster_index", "area"))]
 
   # Set cohort_index
   if (!"cohort_index" %in% names(dataFull)){
