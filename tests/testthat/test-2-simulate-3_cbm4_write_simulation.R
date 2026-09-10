@@ -51,6 +51,7 @@ for (project in projects) test_that(paste("cbm4_write_simulation:", project$test
     )
   )
 
+  # Read pools from template project post spinup
   cbm4_write_simulation(
     project$cbm4_data,
     cohorts   = cbm4_read_cohorts(template_results, timestep = 0),
@@ -59,9 +60,11 @@ for (project in projects) test_that(paste("cbm4_write_simulation:", project$test
 
   expect_true(file.exists(file.path(project$cbm4_data, "simulation")))
 
+  # Complete 2 steps successfully
   cbm4_step(project$cbm4_data, timestep = 1)
   cbm4_step(project$cbm4_data, timestep = 2)
 
+  # Expect results to match template project exactly
   cbm4_results <- cbm4_results_processor(project$cbm4_data)
   for (view_name in c("pool_indicators", "flux_indicators", "disturbance_indicators")){
     template_view <- cbm4_results_totals(template_results, view_name)
