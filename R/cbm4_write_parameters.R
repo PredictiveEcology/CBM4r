@@ -226,9 +226,9 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
       gc_meta[, spatial_unit := "?"]
     }
   }
-  if (anyNA(gc_incr$state.age)){
-    gc_incr[, state.age := as.character(state.age)]
-    gc_incr[is.na(state.age), state.age := "?"]
+  if (anyNA(gc_incr$age)){
+    gc_incr[, age := as.character(age)]
+    gc_incr[is.na(age), age := "?"]
   }
 
   # Check table columns
@@ -244,34 +244,19 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
 
   gc_incr[gc_meta, sw := sw, on = "gc_id"]
 
-  if (any(is.na(gc_incr[, .(merch_inc, foliage_inc, other_inc)]))) stop("Increments contain NA values")
+  incCols <- paste0(
+    "increment.", c(
+      paste0("Softwood", c("Merch", "Foliage", "Other")),
+      paste0("Hardwood", c("Merch", "Foliage", "Other"))
+    ))
 
-  gc_incr[sw==TRUE,  increment.SoftwoodMerch   := merch_inc]
-  gc_incr[sw==TRUE,  increment.SoftwoodFoliage := foliage_inc]
-  gc_incr[sw==TRUE,  increment.SoftwoodOther   := other_inc]
-  gc_incr[sw==FALSE, increment.HardwoodMerch   := merch_inc]
-  gc_incr[sw==FALSE, increment.HardwoodFoliage := foliage_inc]
-  gc_incr[sw==FALSE, increment.HardwoodOther   := other_inc]
-
-  gc_incr[is.na(increment.SoftwoodMerch),   increment.SoftwoodMerch   := 0]
-  gc_incr[is.na(increment.SoftwoodFoliage), increment.SoftwoodFoliage := 0]
-  gc_incr[is.na(increment.SoftwoodOther),   increment.SoftwoodOther   := 0]
-  gc_incr[is.na(increment.HardwoodMerch),   increment.HardwoodMerch   := 0]
-  gc_incr[is.na(increment.HardwoodFoliage), increment.HardwoodFoliage := 0]
-  gc_incr[is.na(increment.HardwoodOther),   increment.HardwoodOther   := 0]
-
-  gc_incr[, sw          := NULL]
-  gc_incr[, merch_inc   := NULL]
-  gc_incr[, foliage_inc := NULL]
-  gc_incr[, other_inc   := NULL]
+  data.table::setnames(gc_incr, c("merch_inc", "foliage_inc", "other_inc"), incCols[1:3])
+  gc_incr[sw==FALSE, (incCols[4:6]) := .SD, .SDcols = incCols[1:3]]
+  gc_incr[sw==FALSE, (incCols[1:3]) := 0]
+  data.table::setnafill(gc_incr, type = "const", fill = 0, cols = incCols)
+  gc_incr[, sw := NULL]
 
   if (!long){
-
-    incCols <- paste0(
-      "increment.", c(
-        paste0("Softwood", c("Merch", "Foliage", "Other")),
-        paste0("Hardwood", c("Merch", "Foliage", "Other"))
-      ))
     gc_incr <- data.table::mergelist(
       lapply(incCols, function(incCol){
         incWide <- data.table::dcast(gc_incr, gc_id ~ state.age, value.var = incCol)
