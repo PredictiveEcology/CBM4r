@@ -184,7 +184,7 @@ cbm4_format_simulation <- function(
 
   # Set cohort_index
   if (!"cohort_index" %in% names(dataFull)){
-    if (!anyDuplicated(dataFull$raster_index)){
+    if (anyDuplicated(dataFull$raster_index) == 0){
       dataFull[, cohort_index := 0L]
     }else{
       dataFull[, cohort_index := .GRP - 1L, by = c(classifiers, "age")]
