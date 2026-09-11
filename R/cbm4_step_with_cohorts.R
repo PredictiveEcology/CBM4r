@@ -16,7 +16,9 @@ cbm4_step_with_cohorts <- function(
 ){
 
   # Set schema
-  schema <- arrow::schema(arrow::open_dataset(file.path(simulation_dataset, "simulation")))
+  schema <- if (file.exists(simulation_dataset)){
+    arrow::schema(arrow::open_dataset(file.path(simulation_dataset, "simulation")))
+  }
 
   # Temporarily move existing cohort data
   tempTables <- c("simulation", "simulation-raster_index")
