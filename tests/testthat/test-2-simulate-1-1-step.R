@@ -28,6 +28,19 @@ for (project in projects) test_that(paste("cbm4_write_disturbance:", project$tes
 
   expect_true(file.exists(file.path(project$cbm4_data, "disturbance")))
 
+  # Check that disturbances can be written without dist_meta
+  if (!is.null(project$dist_events)){
+    dist_events_merge <- merge(project$dist_meta, project$dist_events, by = "disturbance_id")
+    dist_events_merge[, disturbance_id := NULL]
+    dataset_path_merge <- file.path(project$cbm4_data, "disturbance_merge")
+    cbm4_write_disturbance(
+      project$cbm4_data,
+      dataset_path = file.path(project$cbm4_data, "disturbance_merge"),
+      dist_events  = dist_events_merge,
+      classifiers  = project$classifiers
+    )
+    expect_equal_dir(dataset_path_merge, file.path(project$cbm4_data, "disturbance"))
+  }
 })
 
 for (project in projects) test_that(paste("cbm4_write_step_parameters:", project$test), {
@@ -40,6 +53,19 @@ for (project in projects) test_that(paste("cbm4_write_step_parameters:", project
   )
 
   expect_true(file.exists(file.path(project$cbm4_data, "step_parameters")))
+
+  # Check that increments can be written without gc_meta
+  gc_incr_merge <- merge(project$gc_meta, project$gc_incr, by = "gc_id")
+  gc_incr_merge[, gc_id := NULL]
+  dataset_path_merge <- file.path(project$cbm4_data, "step_parameters_merge")
+  withr::defer(unlink(dataset_path_merge, recursive = TRUE))
+  cbm4_write_step_parameters(
+    project$cbm4_data,
+    dataset_path = file.path(project$cbm4_data, "step_parameters_merge"),
+    gc_incr      = gc_incr_merge,
+    classifiers  = project$classifiers
+  )
+  expect_equal_dir(dataset_path_merge, file.path(project$cbm4_data, "step_parameters"))
 
 })
 

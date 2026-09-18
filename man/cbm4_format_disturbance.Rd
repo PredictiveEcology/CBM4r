@@ -6,8 +6,8 @@
 \usage{
 cbm4_format_disturbance(
   grid_meta,
-  dist_meta,
   dist_events,
+  dist_meta = NULL,
   classifiers = NULL,
   def_proportion = 1L,
   def_enable_merge = 0L,
@@ -22,9 +22,11 @@ cbm4_format_disturbance(
 \item{grid_meta}{data.table. Grid metadata.
 This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
-\item{dist_meta}{data.table. Disturbance metadata.}
-
 \item{dist_events}{data.table. Disturbance events.}
+
+\item{dist_meta}{data.table. Disturbance metadata.
+Required if \code{dist_events} does not contain a \code{disturbance_type} or \code{disturbance_type_id}.
+If provided, \code{dist_events} and \code{dist_meta} must be linked by a \code{disturbance_id} column.}
 
 \item{classifiers}{character.
 Column names of cohort inventory identifiers.}

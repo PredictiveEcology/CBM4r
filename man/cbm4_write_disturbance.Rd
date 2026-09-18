@@ -22,7 +22,9 @@ cbm4_write_disturbance(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
 
-\item{dist_meta}{data.table. Disturbance metadata.}
+\item{dist_meta}{data.table. Disturbance metadata.
+Required if \code{dist_events} does not contain a \code{disturbance_type} or \code{disturbance_type_id}.
+If provided, \code{dist_events} and \code{dist_meta} must be linked by a \code{disturbance_id} column.}
 
 \item{dist_events}{data.table. Disturbance events.}
 

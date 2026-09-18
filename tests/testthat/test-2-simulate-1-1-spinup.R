@@ -39,6 +39,19 @@ for (project in projects) test_that(paste("cbm4_write_spinup_parameters:", proje
 
   expect_true(file.exists(file.path(project$cbm4_data, "spinup_parameters")))
 
+  # Check that increments can be written without gc_meta
+  gc_incr_merge <- merge(project$gc_meta, project$gc_incr, by = "gc_id")
+  gc_incr_merge[, gc_id := NULL]
+  dataset_path_merge <- file.path(project$cbm4_data, "spinup_parameters_merge")
+  withr::defer(unlink(dataset_path_merge, recursive = TRUE))
+  cbm4_write_spinup_parameters(
+    project$cbm4_data,
+    dataset_path = file.path(project$cbm4_data, "spinup_parameters_merge"),
+    gc_incr      = gc_incr_merge,
+    classifiers  = project$classifiers
+  )
+  expect_equal_dir(dataset_path_merge, file.path(project$cbm4_data, "spinup_parameters"))
+
 })
 
 for (project in projects) test_that(paste("cbm4_spinup:", project$test), {

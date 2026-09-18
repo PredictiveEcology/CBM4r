@@ -15,8 +15,8 @@
 #' @export
 cbm4_write_spinup_parameters <- function(
     cbm4_data = NULL,
-    gc_meta,
     gc_incr,
+    gc_meta         = NULL,
     classifiers     = NULL,
     template_name   = "inventory",
     template_path   = file.path(cbm4_data, template_name),
@@ -112,8 +112,8 @@ cbm4_write_spinup_parameters <- function(
 #' @export
 cbm4_write_step_parameters <- function(
     cbm4_data = NULL,
-    gc_meta,
     gc_incr,
+    gc_meta         = NULL,
     classifiers     = NULL,
     template_name   = "inventory",
     template_path   = file.path(cbm4_data, template_name),
@@ -198,51 +198,41 @@ cbm4_write_step_parameters <- function(
 
 #' CBM4 format increments
 #'
-#' @param gc_meta data.table. Growth curve metadata
-#' @param gc_incr data.table. Growth curve carbon increments
+#' @param gc_incr data.table. Growth curve carbon increments.
+#' @param gc_meta data.table. Growth curve metadata.
+#' Required if `gc_incr` does not contain a `sw` flag or other classifiers.
+#' If provided, `gc_events` and `gc_meta` must be linked by a `gc_id` column.
 #' @template classifiers
 #' @param long logical. Format table long or wide.
 #' @template cbm_defaults_db
 #'
 #' @return data.table
 #' @keywords internal
-cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
+cbm4_format_increments <- function(gc_incr, gc_meta = NULL, classifiers = NULL, long = TRUE,
                                    cbm_defaults_db = getOption("CBM4r.db.path")){
 
-  # Read tables
-  gc_meta <- data.table::as.data.table(gc_meta)
-  gc_incr <- data.table::as.data.table(gc_incr)
-
-  # Set columns
-  if (!"spatial_unit" %in% names(gc_meta)){
-    if (any(c("admin_boundary_id", "admin_boundary", "admin_abbrev",
-              "eco_boundary_id", "eco_boundary") %in% names(gc_meta))){
-      set_table_spatial_units("gc_meta", gc_meta, cbm_defaults_db, naOK = TRUE)
-      if (anyNA(gc_meta$spatial_unit)){
-        gc_meta[, spatial_unit := as.character(spatial_unit)]
-        gc_meta[is.na(spatial_unit), spatial_unit := "?"]
-      }
-    }else{
-      gc_meta[, spatial_unit := "?"]
-    }
-  }
-  if (anyNA(gc_incr$age)){
-    gc_incr[, age := as.character(age)]
-    gc_incr[is.na(age), age := "?"]
-  }
-
   # Check table columns
-  check_table_columns_all("gc_meta", gc_meta, c("gc_id", "spatial_unit", "sw"))
-  check_table_columns_all("gc_incr", gc_incr, c("gc_id", "age", "merch_inc", "foliage_inc", "other_inc"))
-
-  # Check classifiers
-  classifiers <- intersect(classifiers, names(gc_meta))
+  check_table_columns_all("gc_incr", gc_incr, c("age", "merch_inc", "foliage_inc", "other_inc"))
+  if (!is.null(gc_meta)){
+    check_table_columns_all("gc_incr", gc_incr, c("gc_id"))
+    check_table_columns_all("gc_meta", gc_meta, c("gc_id", "sw"))
+    classifiers <- intersect(classifiers, names(gc_meta))
+  }else{
+    check_table_columns_all("gc_incr", gc_incr, "sw")
+    classifiers <- intersect(classifiers, names(gc_incr))
+  }
   if (length(classifiers) == 0) stop(">=1 classifiers are required.")
 
   # Format increments
-  data.table::setnames(gc_incr, "age", "state.age")
+  gc_incr <- data.table::as.data.table(gc_incr)
 
-  gc_incr[gc_meta, sw := sw, on = "gc_id"]
+  data.table::setnames(gc_incr, "age", "state.age")
+  if (anyNA(gc_incr$state.age)){
+    gc_incr[, state.age := as.character(state.age)]
+    gc_incr[is.na(state.age), state.age := "?"]
+  }
+
+  if (!"sw" %in% names(gc_incr)) gc_incr[gc_meta, sw := sw, on = "gc_id"]
 
   incCols <- paste0(
     "increment.", c(
@@ -257,6 +247,12 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
   gc_incr[, sw := NULL]
 
   if (!long){
+
+    if (is.null(gc_meta) & !identical(classifiers, "gc_id")){
+      gc_incr[, gc_id := .GRP, by = classifiers]
+      gc_meta <- unique(gc_incr[, .SD, .SDcols = c("gc_id", classifiers)])
+    }
+
     gc_incr <- data.table::mergelist(
       lapply(incCols, function(incCol){
         incWide <- data.table::dcast(gc_incr, gc_id ~ state.age, value.var = incCol)
@@ -266,21 +262,37 @@ cbm4_format_increments <- function(gc_meta, gc_incr, classifiers, long = TRUE,
       on = "gc_id", how = "left")
   }
 
-  # Format metadata
-  gc_meta <- gc_meta[, .SD, .SDcols = unique(c("gc_id", classifiers, "spatial_unit"))]
-  data.table::setnames(gc_meta, "spatial_unit", "inventory.spatial_unit")
-  data.table::setnames(gc_meta, classifiers, paste0("classifiers.", classifiers))
+  # Merge metadata and increments
+  if (!is.null(gc_meta)){
+    gc_incr <- merge(gc_meta, gc_incr, by = "gc_id")
+    if (!"gc_id" %in% classifiers) gc_incr[, gc_id := NULL]
+  }
+
+  # Set spatial units
+  if (!"spatial_unit" %in% names(gc_incr)){
+    if (any(c("admin_boundary_id", "admin_boundary", "admin_abbrev",
+              "eco_boundary_id", "eco_boundary") %in% names(gc_incr))){
+      set_table_spatial_units("igc_ncr", gc_incr, cbm_defaults_db, naOK = TRUE)
+      if (anyNA(gc_incr$spatial_unit)){
+        gc_incr[, spatial_unit := as.character(spatial_unit)]
+        gc_incr[is.na(spatial_unit), spatial_unit := "?"]
+      }
+    }else{
+      gc_incr[, spatial_unit := "?"]
+    }
+  }
+
+  # Format table
+  gc_incr <- gc_incr[, .SD, .SDcols = c(
+    classifiers, "spatial_unit",
+    if (long) "state.age",
+    names(gc_incr)[grepl("increment", names(gc_incr))])]
+  data.table::setnames(gc_incr, "spatial_unit", "inventory.spatial_unit")
+  data.table::setnames(gc_incr, classifiers, paste0("classifiers.", classifiers))
+  data.table::setindex(gc_incr, NULL)
 
   # Format classifiers
-  set_table_classifiers(gc_meta, classifiers)
-
-  # Merge metadata and increments
-  if (!"gc_id" %in% classifiers){
-    gc_incr <- merge(gc_meta, gc_incr, by = "gc_id")
-    gc_incr[, gc_id := NULL]
-  }else{
-    gc_incr <- merge(gc_meta, gc_incr, by.x = "classifiers.gc_id", by.y = "gc_id")
-  }
+  set_table_classifiers(gc_incr, classifiers)
 
   return(gc_incr)
 }

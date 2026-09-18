@@ -6,8 +6,8 @@
 \usage{
 cbm4_write_spinup_parameters(
   cbm4_data = NULL,
-  gc_meta,
   gc_incr,
+  gc_meta = NULL,
   classifiers = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
@@ -21,9 +21,11 @@ cbm4_write_spinup_parameters(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.}
 
-\item{gc_meta}{data.table. Growth curve metadata}
+\item{gc_incr}{data.table. Growth curve carbon increments.}
 
-\item{gc_incr}{data.table. Growth curve carbon increments}
+\item{gc_meta}{data.table. Growth curve metadata.
+Required if \code{gc_incr} does not contain a \code{sw} flag or other classifiers.
+If provided, \code{gc_events} and \code{gc_meta} must be linked by a \code{gc_id} column.}
 
 \item{classifiers}{character.
 Column names of cohort inventory identifiers.}

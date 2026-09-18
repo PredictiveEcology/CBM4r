@@ -111,8 +111,10 @@ cbm4_write_disturbance <- function(
 #' CBM4 format disturbance
 #'
 #' @template grid_meta
-#' @param dist_meta data.table. Disturbance metadata.
 #' @param dist_events data.table. Disturbance events.
+#' @param dist_meta data.table. Disturbance metadata.
+#' Required if `dist_events` does not contain a `disturbance_type` or `disturbance_type_id`.
+#' If provided, `dist_events` and `dist_meta` must be linked by a `disturbance_id` column.
 #' @template classifiers
 #' @template cbm_defaults_db
 #' @param def_proportion integer. TODO
@@ -127,9 +129,9 @@ cbm4_write_disturbance <- function(
 #' **flat**: `arrow_space` flattened dataset `data.table`
 cbm4_format_disturbance <- function(
     grid_meta,
-    dist_meta,
     dist_events,
-    classifiers = NULL,
+    dist_meta                     = NULL,
+    classifiers                   = NULL,
     def_proportion                = 1L,
     def_enable_merge              = 0L,
     def_sort_id                   = 0L,
@@ -140,10 +142,16 @@ cbm4_format_disturbance <- function(
 ){
 
   # Check table columns
-  check_table_columns_all("dist_meta", dist_meta, c("disturbance_id"))
-  check_table_columns_any("dist_meta", dist_meta, c("disturbance_type", "disturbance_type_id"))
-
-  check_table_columns_all("dist_events", dist_events, c("pixel_index", "disturbance_id", "timestep"))
+  check_table_columns_all("dist_events", dist_events, c("pixel_index", "timestep"))
+  if (!is.null(dist_meta)){
+    check_table_columns_all("dist_events", dist_events, "disturbance_id")
+    check_table_columns_all("dist_meta",   dist_meta,   "disturbance_id")
+    check_table_columns_any("dist_meta",   dist_meta,   c("disturbance_type", "disturbance_type_id"))
+    classifiers <- intersect(classifiers, names(dist_meta))
+  }else{
+    check_table_columns_any("dist_events", dist_events, c("disturbance_type", "disturbance_type_id"))
+    classifiers <- intersect(classifiers, names(dist_events))
+  }
 
   gridCols <- c("pixel_index", "chunk_index", "raster_index")
   check_table_columns_all("grid_meta", grid_meta, gridCols)
@@ -155,6 +163,16 @@ cbm4_format_disturbance <- function(
   # Join with pixel table
   dataFull <- merge(dist_events, grid_meta[, .SD, .SDcols = gridCols], by = "pixel_index")
   dataFull[, pixel_index := NULL]
+
+  # Join with metadata
+  if (!is.null(dist_meta)){
+    dataFull <- merge(dataFull, dist_meta, by = "disturbance_id", all.x = TRUE)
+  }
+
+  # Set disturbance_id
+  if (!"disturbance_id" %in% names(dataFull)){
+    dataFull[, disturbance_id := .GRP, by = setdiff(names(dataFull), c("timestep", "raster_index"))]
+  }
 
   # Set disturbance_order
   ## This sets no order to the disturbances
@@ -168,9 +186,9 @@ cbm4_format_disturbance <- function(
   data.table::setkeyv(dataIndex, names(dataIndex))
 
   dataFull <- unique(dataFull[, .SD, .SDcols = setdiff(names(dataFull), "raster_index")])
-  dataFull <- merge(dataFull, dist_meta, by = "disturbance_id", all.x = TRUE)
   data.table::setkeyv(dataFull, setdiff(names(dataIndex), "raster_index"))
-  data.table::setcolorder(dataFull)
+  data.table::setcolorder(dataFull, c(data.table::key(dataFull), "disturbance_id"))
+  data.table::setindex(dataFull, NULL)
 
   # Set disturbance_type_id
   if (!"disturbance_type_id" %in% names(dataFull)){
@@ -209,7 +227,6 @@ cbm4_format_disturbance <- function(
   )
 
   # Set filters
-  classifiers <- intersect(classifiers, names(dist_meta))
   if (length(classifiers) > 0){
 
     cohort_filter <- dataFull[, .SD, .SDcols = classifiers]
