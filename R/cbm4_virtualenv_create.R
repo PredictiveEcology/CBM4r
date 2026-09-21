@@ -121,7 +121,8 @@ cbm4_versions <- function(version = NULL){
     "3.0.0" = list(
       python       = ">=3.12",
       gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
-      cbm4         = "3.0.0",
+      cbm4         = "3.0.0"
+      cbm4         = "3.0.0"
     ),
     "2.24.9" = list(
       python       = ">=3.12",
