@@ -97,4 +97,6 @@ writeLines(testInputs$classifiers, file.path(testdata, paste0("classifiers", ".t
 for (table in c("grid_meta", "grid_rast", "cohorts", "gc_meta", "gc_incr", "dist_meta", "dist_events")){
   data.table::fwrite(testInputs[[table]], file.path(testdata, paste0(table, ".csv")))
 }
-
+data.table::fwrite(
+  cbm4_set_grid_meta(testInputs[["grid_meta"]], grid_rast = do.call(terra::rast, testInputs[["grid_rast"]])),
+  file.path(testdata, paste0("grid_meta_set", ".csv")))
