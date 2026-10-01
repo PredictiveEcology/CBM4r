@@ -7,6 +7,7 @@
 #' @template cbm_defaults_db
 #' @template timestep
 #' @param area_unit_conversion numeric. Conversion factor of area to hectares (ha).
+#' @param area_validation logical. Validate proportional area totals.
 #' @param write_parameters logical. Write cohort step parameters to file.
 #' @template max_workers
 #' @template step_parameters_dataset
@@ -21,7 +22,8 @@ cbm4_step <- function(
     cbm4_data = NULL,
     timestep,
     area_unit_conversion    = 0.0001,
-    write_parameters        = FALSE,
+    area_validation         = NULL,
+    write_parameters        = NULL,
     max_workers             = NULL,
     cbm_defaults_db         = getOption("CBM4r.db.path"),
     step_parameters_dataset = file.path(cbm4_data, "step_parameters"),
@@ -89,6 +91,7 @@ cbm4_step <- function(
   )
   runOpts <- list(
     "area_unit_conversion" = area_unit_conversion,
+    "area_validation"      = area_validation,
     "write_parameters"     = write_parameters,
     "max_workers"          = max_workers
   )

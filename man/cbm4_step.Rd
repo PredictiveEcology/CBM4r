@@ -8,7 +8,8 @@ cbm4_step(
   cbm4_data = NULL,
   timestep,
   area_unit_conversion = 0.0001,
-  write_parameters = FALSE,
+  area_validation = NULL,
+  write_parameters = NULL,
   max_workers = NULL,
   cbm_defaults_db = getOption("CBM4r.db.path"),
   step_parameters_dataset = file.path(cbm4_data, "step_parameters"),
@@ -26,6 +27,8 @@ May be omitted if full paths to datasets are provided.}
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 
 \item{area_unit_conversion}{numeric. Conversion factor of area to hectares (ha).}
+
+\item{area_validation}{logical. Validate proportional area totals.}
 
 \item{write_parameters}{logical. Write cohort step parameters to file.}
 
