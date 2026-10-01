@@ -5,7 +5,6 @@
 #'
 #' @template cbm4_data
 #' @inheritParams cbm4_format_disturbance
-#' @param ... arguments to \code{\link{cbm4_format_disturbance}}
 #' @template dataset_name
 #' @template dataset_path
 #' @template template_name
@@ -15,15 +14,17 @@
 #' @return `NULL`. Data will be written to the CBM4 spatial parquet dataset.
 #' @export
 cbm4_write_disturbance <- function(
-    cbm4_data     = NULL,
-    dist_meta     = NULL,
-    dist_events   = NULL,
-    classifiers   = NULL,
-    grid_meta     = NULL,
-    template_name = "inventory",
-    template_path = file.path(cbm4_data, template_name),
-    dataset_name  = "disturbance",
-    dataset_path  = file.path(cbm4_data, dataset_name),
+    cbm4_data        = NULL,
+    dist_meta        = NULL,
+    dist_events      = NULL,
+    classifiers      = NULL,
+    grid_meta        = NULL,
+    def_enable_merge = TRUE,
+    def_proportion   = 1L,
+    template_name    = "inventory",
+    template_path    = file.path(cbm4_data, template_name),
+    dataset_name     = "disturbance",
+    dataset_path     = file.path(cbm4_data, dataset_name),
     ...
 ){
 
@@ -73,6 +74,8 @@ cbm4_write_disturbance <- function(
       dist_meta   = dist_meta,
       dist_events = dist_events,
       classifiers = classifiers,
+      def_enable_merge = def_enable_merge,
+      def_proportion   = def_proportion,
       ...)
 
     # Write disturbances
@@ -117,11 +120,8 @@ cbm4_write_disturbance <- function(
 #' If provided, `dist_events` and `dist_meta` must be linked by a `disturbance_id` column.
 #' @template classifiers
 #' @template cbm_defaults_db
-#' @param def_proportion integer. TODO
-#' @param def_enable_merge integer. TODO
-#' @param def_sort_id integer. TODO
-#' @param def_undisturbed_transition_id integer. Set to 0 to indicate no transitions.
-#' @param def_disturbed_transition_id integer. Set to 0 to indicate no transitions.
+#' @param def_enable_merge logical. Enable disturbance events to merge cohorts sharing the same new state.
+#' @param def_proportion integer. Proportion of the pixel to be affected by the disturbance event.
 #' @param ... unused
 #'
 #' @return list with items:
@@ -130,14 +130,11 @@ cbm4_write_disturbance <- function(
 cbm4_format_disturbance <- function(
     grid_meta,
     dist_events,
-    dist_meta                     = NULL,
-    classifiers                   = NULL,
-    def_proportion                = 1L,
-    def_enable_merge              = 0L,
-    def_sort_id                   = 0L,
-    def_undisturbed_transition_id = 0L,
-    def_disturbed_transition_id   = 0L,
-    cbm_defaults_db = getOption("CBM4r.db.path"),
+    dist_meta        = NULL,
+    classifiers      = NULL,
+    def_enable_merge = TRUE,
+    def_proportion   = 1L,
+    cbm_defaults_db  = getOption("CBM4r.db.path"),
     ...
 ){
 
@@ -217,7 +214,11 @@ cbm4_format_disturbance <- function(
   data.table::setnames(dataFull, "disturbance_type_id", "default_disturbance_type_id")
 
   # Set defaults
-  dataFull[, filter_id := 0L]
+  def_enable_merge              <- as.integer(def_enable_merge)
+  def_filter_id                 <- 0L
+  def_sort_id                   <- 0L
+  def_undisturbed_transition_id <- 0L # Set to 0 to indicate no transitions
+  def_disturbed_transition_id   <- 0L # Set to 0 to indicate no transitions
   set_table_defaults(dataFull)
 
   # Set tables to return

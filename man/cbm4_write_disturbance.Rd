@@ -10,6 +10,8 @@ cbm4_write_disturbance(
   dist_events = NULL,
   classifiers = NULL,
   grid_meta = NULL,
+  def_enable_merge = TRUE,
+  def_proportion = 1L,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "disturbance",
@@ -35,6 +37,10 @@ Column names of cohort inventory identifiers.}
 May not be required but can be provided for efficiency.
 This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
+\item{def_enable_merge}{logical. Enable disturbance events to merge cohorts sharing the same new state.}
+
+\item{def_proportion}{integer. Proportion of the pixel to be affected by the disturbance event.}
+
 \item{template_name}{character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.}
 
@@ -49,7 +55,7 @@ Name of the CBM4 spatial parquet dataset.}
 Path to the CBM4 spatial parquet dataset.
 Defaults to \code{file.path(cbm4_data, dataset_name)}}
 
-\item{...}{arguments to \code{\link{cbm4_format_disturbance}}}
+\item{...}{unused}
 }
 \value{
 \code{NULL}. Data will be written to the CBM4 spatial parquet dataset.

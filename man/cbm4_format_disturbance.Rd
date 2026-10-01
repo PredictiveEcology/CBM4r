@@ -9,11 +9,8 @@ cbm4_format_disturbance(
   dist_events,
   dist_meta = NULL,
   classifiers = NULL,
+  def_enable_merge = TRUE,
   def_proportion = 1L,
-  def_enable_merge = 0L,
-  def_sort_id = 0L,
-  def_undisturbed_transition_id = 0L,
-  def_disturbed_transition_id = 0L,
   cbm_defaults_db = getOption("CBM4r.db.path"),
   ...
 )
@@ -31,15 +28,9 @@ If provided, \code{dist_events} and \code{dist_meta} must be linked by a \code{d
 \item{classifiers}{character.
 Column names of cohort inventory identifiers.}
 
-\item{def_proportion}{integer. TODO}
+\item{def_enable_merge}{logical. Enable disturbance events to merge cohorts sharing the same new state.}
 
-\item{def_enable_merge}{integer. TODO}
-
-\item{def_sort_id}{integer. TODO}
-
-\item{def_undisturbed_transition_id}{integer. Set to 0 to indicate no transitions.}
-
-\item{def_disturbed_transition_id}{integer. Set to 0 to indicate no transitions.}
+\item{def_proportion}{integer. Proportion of the pixel to be affected by the disturbance event.}
 
 \item{cbm_defaults_db}{character.
 Path to CBM defaults SQLite database.}

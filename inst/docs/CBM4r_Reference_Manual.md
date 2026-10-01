@@ -3,7 +3,7 @@
 ```
 Package: CBM4r
 Title: CBM4 in R
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     person("Susan", "Murray", email = "murray.e.susan@gmail.com", role = c("aut", "cre"))
 Description: R interface to CBM4 Python applications. 
@@ -12,11 +12,10 @@ Depends: R (>= 4.1.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports:
-  arrow  (>= 23.0.0),
-  arrow  (< 24.0.0),
+  arrow,
   data.table (>= 1.18.0),
   dplyr,
-  reticulate,
+  reticulate (> 1.46.0),
   RSQLite,
   terra
 Suggests:
@@ -27,10 +26,11 @@ Suggests:
   rmarkdown,
   testthat (>= 3.0.0),
   withr
+Remotes:
+  rstudio/reticulate
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
-RoxygenNote: 8.0.0
+Config/roxygen2/version: 8.1.0
 ```
 
 # `cbm_defaults_listTables`: CBM defaults: list tables
@@ -621,6 +621,8 @@ cbm4_write_disturbance(
   dist_events = NULL,
   classifiers = NULL,
   grid_meta = NULL,
+  def_enable_merge = TRUE,
+  def_proportion = 1L,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
   dataset_name = "disturbance",
@@ -635,12 +637,16 @@ cbm4_write_disturbance(
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.
 * `dist_meta`: data.table. Disturbance metadata.
+Required if `dist_events` does not contain a `disturbance_type` or `disturbance_type_id`.
+If provided, `dist_events` and `dist_meta` must be linked by a `disturbance_id` column.
 * `dist_events`: data.table. Disturbance events.
 * `classifiers`: character.
 Column names of cohort inventory identifiers.
 * `grid_meta`: data.table. Grid metadata.
 May not be required but can be provided for efficiency.
 This table can be created with `cbm4_grid_meta` or `cbm4_set_grid_meta`.
+* `def_enable_merge`: logical. Enable disturbance events to merge cohorts sharing the same new state.
+* `def_proportion`: integer. Proportion of the pixel to be affected by the disturbance event.
 * `template_name`: character.
 Name of a CBM4 spatial parquet dataset to use as a template for the new dataset.
 * `template_path`: character.
@@ -651,7 +657,7 @@ Name of the CBM4 spatial parquet dataset.
 * `dataset_path`: character.
 Path to the CBM4 spatial parquet dataset.
 Defaults to `file.path(cbm4_data, dataset_name)`
-* `...`: arguments to `[cbm4_format_disturbance](cbm4_format_disturbance)`
+* `...`: unused
 
 ## Value
 
@@ -810,8 +816,8 @@ Write spinup parameters to a CBM4 spatial parquet dataset.
 ```r
 cbm4_write_spinup_parameters(
   cbm4_data = NULL,
-  gc_meta,
   gc_incr,
+  gc_meta = NULL,
   classifiers = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
@@ -826,8 +832,10 @@ cbm4_write_spinup_parameters(
 * `cbm4_data`: character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.
-* `gc_meta`: data.table. Growth curve metadata
-* `gc_incr`: data.table. Growth curve carbon increments
+* `gc_incr`: data.table. Growth curve carbon increments.
+* `gc_meta`: data.table. Growth curve metadata.
+Required if `gc_incr` does not contain a `sw` flag or other classifiers.
+If provided, `gc_events` and `gc_meta` must be linked by a `gc_id` column.
 * `classifiers`: character.
 Column names of cohort inventory identifiers.
 * `template_name`: character.
@@ -858,8 +866,8 @@ Write step parameters to a CBM4 spatial parquet dataset.
 ```r
 cbm4_write_step_parameters(
   cbm4_data = NULL,
-  gc_meta,
   gc_incr,
+  gc_meta = NULL,
   classifiers = NULL,
   template_name = "inventory",
   template_path = file.path(cbm4_data, template_name),
@@ -874,8 +882,10 @@ cbm4_write_step_parameters(
 * `cbm4_data`: character.
 Path to CBM4 spatial parquet datasets directory.
 May be omitted if full paths to datasets are provided.
-* `gc_meta`: data.table. Growth curve metadata
-* `gc_incr`: data.table. Growth curve carbon increments
+* `gc_incr`: data.table. Growth curve carbon increments.
+* `gc_meta`: data.table. Growth curve metadata.
+Required if `gc_incr` does not contain a `sw` flag or other classifiers.
+If provided, `gc_events` and `gc_meta` must be linked by a `gc_id` column.
 * `classifiers`: character.
 Column names of cohort inventory identifiers.
 * `template_name`: character.
