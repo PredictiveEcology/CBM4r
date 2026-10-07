@@ -80,5 +80,26 @@ for (project in projects) test_that(paste("cbm4_set_grid_meta:", project$test), 
   ) %in% names(grid_meta)))
 })
 
+test_that("cbm4_set_grid_meta with admin_abbrev", {
+
+  grid_meta <- data.table::data.table(
+    pixel_index   = 1,
+    admin_abbrev  = "BC",
+    eco_boundary  = "Pacific Maritime",
+    area          = 1
+  )
+  cbm4_set_grid_meta(grid_meta)
+  expect_equal(as.character(grid_meta$admin_boundary), "British Columbia")
+
+  # admin_boundary cannot be set with admin_abbrev = \"NL\"
+  grid_meta <- data.table::data.table(
+    pixel_index     = 1,
+    admin_abbrev    = "NL",
+    eco_boundary_id = 17,
+    area            = 1
+  )
+  expect_error(cbm4_set_grid_meta(grid_meta), "admin_abbrev")
+
+})
 
 

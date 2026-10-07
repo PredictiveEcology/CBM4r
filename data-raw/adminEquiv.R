@@ -1,7 +1,8 @@
 
 adminAbbrevs <- c(
-  "Newfoundland"          = "NL",
-  "Labrador"              = "NL",
+  # "NL" represents "Newfoundland and Labrador" but they are separate in CBM.
+  # "Newfoundland"          = "NL",
+  # "Labrador"              = "NL",
   "Nova Scotia"           = "NS",
   "Prince Edward Island"  = "PE",
   "New Brunswick"         = "NB",

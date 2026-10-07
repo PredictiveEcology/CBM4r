@@ -134,7 +134,7 @@ set_table_spatial_units <- function(tableName, table, cbm_defaults_db = getOptio
     data.table::set(table, j = "admin_abbrev", value = factor(
       as.character(table$admin_abbrev), levels = unique(adminEquiv$admin_abbrev)))
 
-    if (anyNA(table$admin_boundary)) stop(
+    if (anyNA(table$admin_abbrev)) stop(
       "admin_abbrev invalid; choose from: ", paste(shQuote(unique(
         adminEquiv$admin_abbrev)), collapse = ", "))
 
