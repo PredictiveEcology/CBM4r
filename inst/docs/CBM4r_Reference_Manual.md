@@ -592,7 +592,7 @@ Create a Python virtual environment to run CBM4.
 
 ```r
 cbm4_virtualenv_create(
-  envname = "r-CBM4",
+  envname,
   version = NULL,
   upgrade = FALSE,
   quiet = FALSE,

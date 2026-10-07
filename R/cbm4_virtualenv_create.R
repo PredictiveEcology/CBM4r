@@ -10,7 +10,7 @@
 #' @param ... arguments to \code{\link[reticulate]{virtualenv_create}}
 #'
 #' @export
-cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade = FALSE, quiet = FALSE, ...){
+cbm4_virtualenv_create <- function(envname, version = NULL, upgrade = FALSE, quiet = FALSE, ...){
 
   # Using gert to clone repos due to issues connecting with reticulate
   # This may be due to recent VPN connection issues to Github (2025-03)
@@ -117,6 +117,12 @@ cbm4_virtualenv_create <- function(envname = "r-CBM4", version = NULL, upgrade =
 cbm4_versions <- function(version = NULL){
 
   vers <- list(
+
+    "3.3.0" = list(
+      python       = ">=3.12",
+      gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
+      cbm4         = "3.3.0"
+    ),
 
     "3.0.0" = list(
       python       = ">=3.12",

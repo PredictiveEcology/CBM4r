@@ -5,7 +5,7 @@
 \title{cbm4_virtualenv_create}
 \usage{
 cbm4_virtualenv_create(
-  envname = "r-CBM4",
+  envname,
   version = NULL,
   upgrade = FALSE,
   quiet = FALSE,
