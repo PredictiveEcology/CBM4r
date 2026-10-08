@@ -61,7 +61,6 @@ cbm4_virtualenv_create <- function(envname, version = NULL, upgrade = FALSE, qui
   pkgInstall[["arrow"]] <- sprintf("pyarrow>=%s.0.0,<%s.0.0", vers$arrow, vers$arrow + 1)
 
   pkgGit <- c(
-    "libcbm"       = "https://github.com/cat-cfs/libcbm_py.git",
     "arrow_space"  = "https://github.com/cat-cfs/arrow_space.git",
     "cbm4"         = "https://github.com/cat-cfs/cbm4.git",
     "cbmspec_cbm3" = "https://github.com/cat-cfs/cbmspec.cbm3.python.git"
@@ -114,17 +113,19 @@ cbm4_versions <- function(version = NULL){
     "3.3.0" = list(
       python       = ">=3.12",
       gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
+      packages     = "libcbm",
       cbm4         = "3.3.0"
     ),
     "3.0.0" = list(
       python       = ">=3.12",
       gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
+      packages     = "libcbm",
       cbm4         = "3.0.0"
     ),
     "2.24.9" = list(
       python       = ">=3.12",
       gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
-      packages     = "pandas==2.3.3",
+      packages     = c("pandas==2.3.3", "libcbm"),
       cbm4         = "2.24.9"
     )
   )
