@@ -26,20 +26,6 @@ cbm4_virtualenv_create <- function(envname, version = NULL, upgrade = FALSE, qui
     reticulate::virtualenv_create(envname, version = vers$python, ...)
   }
 
-  # Install Python packages
-  vers$arrow <- packageVersion("arrow")$major
-  vers$packages <- c(
-    sprintf("pyarrow>=%s.0.0,<%s.0.0", vers$arrow, vers$arrow + 1),
-    vers$packages)
-
-  if (length(vers$packages) > 0){
-    reticulate::virtualenv_install(
-      envname,
-      packages = vers$packages,
-      pip_options = c("--upgrade"[upgrade], "-q"[quiet])
-    )
-  }
-
   # Install GDAL
   if (identical(.Platform$OS.type, "windows")){
 
@@ -67,23 +53,28 @@ cbm4_virtualenv_create <- function(envname, version = NULL, upgrade = FALSE, qui
     )
   }
 
-  # Install CBM4 packages
-  packages <- c(
-    "libcbm"       = "https://github.com/cat-cfs/libcbm_py",
+  # Install Python packages
+  pkgInstall <- vers$packages
+
+  ## pyarrow version must match arrow R package version
+  vers$arrow <- packageVersion("arrow")$major
+  pkgInstall[["arrow"]] <- sprintf("pyarrow>=%s.0.0,<%s.0.0", vers$arrow, vers$arrow + 1)
+
+  pkgGit <- c(
+    "libcbm"       = "https://github.com/cat-cfs/libcbm_py.git",
     "arrow_space"  = "https://github.com/cat-cfs/arrow_space.git",
     "cbm4"         = "https://github.com/cat-cfs/cbm4.git",
     "cbmspec_cbm3" = "https://github.com/cat-cfs/cbmspec.cbm3.python.git"
   )
 
-  envPackages <- trimws(reticulate::py_list_packages(envname)$package)
-
-  for (package in names(packages)){
+  pkgInstalled <- trimws(reticulate::py_list_packages(envname)$package)
+  for (package in names(pkgGit)){
 
     pkg_path <- file.path(tools::R_user_dir("CBM4r"), package)
 
     clone <- !file.exists(pkg_path)
     if (clone){
-      gert::git_clone(packages[[package]], path = pkg_path)
+      gert::git_clone(pkgGit[[package]], path = pkg_path)
     }
 
     refID <- gert::git_commit_info(repo = pkg_path)$id
@@ -99,16 +90,18 @@ cbm4_virtualenv_create <- function(envname, version = NULL, upgrade = FALSE, qui
     }
 
     refID_new <- gert::git_commit_info(repo = pkg_path)$id
-    install <- !any(c(package, sub("_", "-", package)) %in% envPackages) ||
+    install <- !any(c(package, sub("_", "-", package)) %in% pkgInstalled) ||
       clone || upgrade || !identical(refID, refID_new)
 
-    if (install){
-      reticulate::virtualenv_install(
-        envname,
-        packages = pkg_path,
-        pip_options = c("--upgrade"[upgrade], "-q"[quiet])
-      )
-    }
+    if (install) pkgInstall[[package]] <- pkg_path
+  }
+
+  if (length(pkgInstall) > 0){
+    reticulate::virtualenv_install(
+      envname,
+      packages = pkgInstall,
+      pip_options = c("--upgrade"[upgrade], "-q"[quiet])
+    )
   }
 }
 
@@ -123,7 +116,6 @@ cbm4_versions <- function(version = NULL){
       gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
       cbm4         = "3.3.0"
     ),
-
     "3.0.0" = list(
       python       = ">=3.12",
       gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
