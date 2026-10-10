@@ -10,7 +10,8 @@ cbm4_results_totals(
   view_columns = NULL,
   timesteps = NULL,
   units = "t",
-  list = FALSE
+  list = FALSE,
+  ...
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ The vector can have names to use as column aliases.}
 \item{units}{character. "t", "Mt", or "t/ha".}
 
 \item{list}{logical. Return a table of options.}
+
+\item{...}{arguments to \code{\link{cbm4_results_processor}}}
 }
 \value{
 \code{data.table}

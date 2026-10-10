@@ -10,7 +10,8 @@ cbm4_results_raster(
   view_column = NULL,
   timesteps = NULL,
   grid_meta = NULL,
-  list = FALSE
+  list = FALSE,
+  ...
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ May not be required but can be provided for efficiency.
 This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
 \item{list}{logical. Return a table of options.}
+
+\item{...}{arguments to \code{\link{cbm4_results_processor}}}
 }
 \value{
 \code{SpatRaster}

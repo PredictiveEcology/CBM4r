@@ -10,6 +10,7 @@
 #' @template grid_meta_optional
 #' @template timesteps
 #' @param list logical. Return a table of options.
+#' @param ... arguments to \code{\link{cbm4_results_processor}}
 #'
 #' @return `SpatRaster`
 #' @export
@@ -19,10 +20,11 @@ cbm4_results_raster <- function(
     view_column = NULL,
     timesteps   = NULL,
     grid_meta   = NULL,
-    list        = FALSE
+    list        = FALSE,
+    ...
 ){
 
-  cbm4_results <- cbm4_results_processor(cbm4_results)
+  cbm4_results <- cbm4_results_processor(cbm4_results, ...)
 
   if (list) return(
     data.table::as.data.table(cbm4_results$views)[, .(name, column_names)][
