@@ -4,16 +4,17 @@
 
 `CBM4r` is an R package interface to [CBM4](https://github.com/cat-cfs/cbm4) Python applications working with [CBM4 spatial datasets](https://github.com/cat-cfs/tech_docs/tree/main/dev/cbm4/structure#cbm4-spatial-datasets).
 
-### Set up
+## Getting started
 
 Install R package from Github:
 
 ``` r
-remotes::install_github("PredictiveEcology/CBM4r")
+remotes::install_github("PredictiveEcology/CBM4r", build_vignettes = TRUE)
 ```
 
-### Documentation
+View vignettes:
 
-- [CBM4r Reference Manual](inst/docs/CBM4r_Reference_Manual.md)
-- [CBM4r Example: Saskatchewan](inst/docs/CBM4r_Examples-SK.md)
+``` r
+browseVignettes("CBM4r")
 
+```

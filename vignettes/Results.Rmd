@@ -1,0 +1,134 @@
+---
+title: "Reading results with the SQLResultsProcessor"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reading results with the SQLResultsProcessor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  message  = FALSE, 
+  results  = "hide", 
+  fig.show = "hide",
+  eval     = FALSE
+)
+```
+
+```{r setup}
+library(CBM4r)
+```
+
+## Getting started
+
+### Initialize the CBM4 virtual environment
+
+```{r use_virtualeenv}
+# Use the CBM4 virtual environment
+# See `vignette("Getting-started", package = "CBM4r")`
+reticulate::use_virtualenv("r-CBM4")
+```
+
+### Set CBM4 simulation data source
+
+```{r paths}
+# Set CBM4 output data directory path
+cbm4_data <- "cbm4_data"
+```
+
+All results functions can accept `cbm4_data` or `cbm4_results` as input. 
+Most functions will read `cbm4_data` into a `SQLResultsProcessor` object as the first step,
+so calling `cbm4_results_processor` directly is more efficient when reading multiple results.
+
+```{r results_processor}
+# Get CBM4 SQLResultsProcessor
+cbm4_results <- cbm4_results_processor(cbm4_data)
+```
+
+## Read results
+
+See the [CBM4 SQL Results Processor documentation](https://github.com/cat-cfs/tech_docs/blob/main/dev/cbm4/results/sql_results_processor.md) for more information about the `SQLResultsProcessor`.
+
+### Direct query the SQL Results Processor
+
+```{r results_query}
+# See list of available views to query
+data.table::as.data.table(cbm4_results$views)[, c("name", "column_names")]
+
+# Example: get cohort pool totals in the first and last timesteps
+cbm4_results_query(cbm4_results, "SELECT * FROM spatial_pool_indicators WHERE timestep == 1 ORDER BY raster_index")
+cbm4_results_query(cbm4_results, "SELECT * FROM spatial_pool_indicators WHERE timestep == (SELECT MAX(timestep) FROM simulation) ORDER BY raster_index")
+
+# Example: get cohort pool summaries in the first and last timesteps
+cbm4_results_query(cbm4_results, "SELECT * FROM spatial_composite_pool_indicators WHERE timestep == 1 ORDER BY raster_index")
+cbm4_results_query(cbm4_results, "SELECT * FROM spatial_composite_pool_indicators WHERE timestep == (SELECT MAX(timestep) FROM simulation) ORDER BY raster_index")
+```
+
+### Results by timestep
+
+```{r results_totals}
+# See list of views that can be read into a summary table
+cbm4_results_totals(cbm4_results, list = TRUE)
+
+# Read pools totals by timestep
+cbm4_results_totals(
+  cbm4_results,
+  view_name = "composite_pool_indicators",
+  units     = "t"
+)
+cbm4_results_totals(
+  cbm4_results,
+  view_name = "composite_pool_indicators",
+  units     = "Mt"
+)
+
+# Read flux totals by timestep
+cbm4_results_totals(
+  cbm4_results,
+  view_name = "composite_flux_indicators",
+  units     = "t"
+)
+cbm4_results_totals(
+  cbm4_results,
+  view_name = "composite_flux_indicators",
+  units     = "Mt"
+)
+```
+
+### Results by pixel
+
+```{r results_raster}
+# See list of views with columns that can be read into a a raster
+cbm4_results_raster(cbm4_results, list = TRUE)
+
+# Read Net Primary Productivity (NPP) raster
+rastNPP <- cbm4_results_raster(
+  cbm4_results, 
+  view_name   = "spatial_composite_flux_indicators",
+  view_column = "Ecosystem Indicators - Productivity - Net Primary Productivity (NPP)",
+  timesteps   = 1:2
+)
+terra::plot(
+  rastNPP,
+  main       = c("timestep 1: NPP (tC/ha)", "timestep 2: NPP (tC/ha)"),
+  type       = "continuous",
+  col        = colorRampPalette(c("lightgreen", "darkgreen"))(10),
+  breaks     = seq(0, ceiling(max(terra::values(rastNPP), na.rm = TRUE)), length.out = 10),
+  background = "darkgrey",
+  axes       = FALSE
+)
+```
+
+### Study area grid
+
+```{r results_grid}
+# Get study area grid
+cbm4_results_grid(cbm4_results)
+
+# Get study area chunk processing key
+cbm4_results_grid_key(cbm4_results)
+```
+

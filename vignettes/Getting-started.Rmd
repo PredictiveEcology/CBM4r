@@ -1,0 +1,36 @@
+---
+title: "Getting started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  message  = FALSE, 
+  results  = "hide", 
+  fig.show = "hide",
+  eval     = FALSE
+)
+```
+
+```{r setup}
+library(CBM4r)
+```
+
+Create the CBM4 virtual environment:
+
+```{r virtualeenv_create}
+cbm4_virtualenv_create("r-CBM4")
+```
+
+Use the CBM4 virtual environment:
+
+```{r use_virtualeenv}
+reticulate::use_virtualenv("r-CBM4")
+```
+
