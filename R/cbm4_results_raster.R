@@ -54,11 +54,14 @@ cbm4_results_raster <- function(
   if (is.null(timesteps)) timesteps <- unique(queryTbl$timestep)
 
   cbm4_rast <- do.call(c, lapply(timesteps, function(t){
-    cbm4_rast_t <- terra::deepcopy(cbm4_grid)
-    with(queryTbl[timestep == t,], terra::set.values(cbm4_rast_t, pixel_index, value))
-    cbm4_rast_t
+    t_rast <- terra::rast(cbm4_grid, vals = NA)
+    t_vals <- queryTbl[timestep == t,]
+    if (nrow(t_vals) > 0){
+      terra::set.values(t_rast, t_vals$pixel_index, t_vals$value)
+    }
+    t_rast
   }))
-  names(cbm4_rast) <- timesteps
+  if (length(timesteps) > 0) names(cbm4_rast) <- timesteps
 
   return(cbm4_rast)
 }
