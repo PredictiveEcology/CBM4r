@@ -4,7 +4,7 @@
 #' Read simulation results by timestep.
 #'
 #' @inheritParams cbm4_results_view
-#' @param units character. "t", "Mt", or "t/ha".
+#' @param units character. "t/ha", "t", "Mt".
 #'
 #' @return `data.table`
 #' @export

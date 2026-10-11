@@ -119,36 +119,54 @@ cbm4_results_timestep(
 )
 ```
 
+### Results by cohort
+
+```{r results_cohort}
+# See list of views with that can be read into a cohort summary
+cbm4_results_cohort(cbm4_results, list = TRUE)
+
+# Read pools totals by cohort
+cbm4_results_cohort(
+  cbm4_results,
+  view_name = "spatial_pool_indicators"
+)
+
+# Read pools summaries by cohort
+cbm4_results_cohort(
+  cbm4_results,
+  view_name = "spatial_composite_pool_indicators"
+)
+
+# Read flux summaries by cohort
+cbm4_results_cohort(
+  cbm4_results,
+  view_name = "spatial_composite_flux_indicators"
+)
+
+```
+
 ### Results by pixel
 
 ```{r results_pixel}
 # See list of views with that can be read into a pixel summary
 cbm4_results_pixel(cbm4_results, list = TRUE)
 
-# Read pools totals by pixel
+# Read pools totals by cohort
+cbm4_results_pixel(
+  cbm4_results,
+  view_name = "spatial_pool_indicators"
+)
+
+# Read pools summaries by pixel
 cbm4_results_pixel(
   cbm4_results,
   view_name = "spatial_composite_pool_indicators"
 )
 
-# Read pool totals by pixel for the first timestep
-cbm4_results_pixel(
-  cbm4_results,
-  view_name = "spatial_composite_pool_indicators",
-  timesteps = 1
-)
-
-# Read flux totals by pixel
+# Read flux summaries by pixel
 cbm4_results_pixel(
   cbm4_results,
   view_name = "spatial_composite_flux_indicators"
-)
-
-# Read flux totals by pixel for the first timestep
-cbm4_results_pixel(
-  cbm4_results,
-  view_name = "spatial_composite_flux_indicators",
-  timesteps = 1
 )
 ```
 

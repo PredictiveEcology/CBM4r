@@ -51,6 +51,69 @@ for (project in projects) test_that(paste("cbm4_results_grid_key:", project$test
   expect_equal(names(grid_key_crds), c("pixel_index", "chunk_index", "raster_index", "x", "y"))
 })
 
+for (project in projects[1]) test_that(paste("cbm4_results_cohort with list = TRUE:", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  testthat::skip_if(is.null(cbm4_results))
+
+  # Check listing options
+  expect_s3_class(cbm4_results_cohort(cbm4_data,    list = TRUE), "data.table")
+  expect_s3_class(cbm4_results_cohort(cbm4_results, list = TRUE), "data.table")
+})
+
+for (project in projects[2:3]) test_that(paste("cbm4_results_cohort:", project$test), {
+
+  cbm4_data    <- project$cbm4_data
+  cbm4_results <- project$cbm4_results
+  testthat::skip_if(is.null(cbm4_results))
+
+  cohort_views <- cbm4_results_cohort(cbm4_results, list = TRUE)
+  for (view_name in cohort_views$name){
+
+    resByCohort <- cbm4_results_cohort(
+      cbm4_results,
+      view_name = view_name,
+      units     = "t/ha"
+    )
+
+    expect_s3_class(resByCohort, "data.frame")
+    expect_equal(data.table::key(resByCohort), c("timestep", "pixel_index", "species", "prodClass"))
+    expect_gt(ncol(resByCohort), 4)
+
+    # Check subset by timestep
+    if (nrow(resByCohort) > 0){
+      expect_all_equal(cbm4_results_cohort(
+        cbm4_results,
+        view_name = view_name,
+        timesteps = 1
+      )$timestep, 1)
+    }
+
+    # Check setting units
+    expect_equal(
+      cbm4_results_cohort(cbm4_results, view_name = view_name, units = "t")[, -c("timestep", "pixel_index", "species", "prodClass", "area")],
+      resByCohort[, -c("timestep", "pixel_index", "species", "prodClass")] * (project$grid_meta$area[[1]] / 10000),
+      tolerance = 0.000001)
+
+    expect_equal(
+      cbm4_results_cohort(cbm4_results, view_name = view_name, units = "Mt")[, -c("timestep", "pixel_index", "species", "prodClass", "area")],
+      resByCohort[, -c("timestep", "pixel_index", "species", "prodClass")] * (project$grid_meta$area[[1]] / 10000) / 10^6,
+      tolerance = 0.000001)
+
+    # Check using cbm4_data
+    expect_equal(
+      resByCohort,
+      cbm4_results_cohort(
+        cbm4_results,
+        view_name   = view_name,
+        timesteps   = timesteps,
+        units       = "t/ha"
+      )
+    )
+  }
+})
+
 for (project in projects[1]) test_that(paste("cbm4_results_pixel with list = TRUE:", project$test), {
 
   cbm4_data    <- project$cbm4_data
@@ -71,32 +134,33 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$te
   pixel_views <- cbm4_results_pixel(cbm4_results, list = TRUE)
   for (view_name in pixel_views$name){
 
-    for (timesteps in list(NULL, 1)){
+    resByPixel <- cbm4_results_pixel(
+      cbm4_results,
+      view_name = view_name
+    )
 
-      resByPixel <- cbm4_results_pixel(
+    expect_s3_class(resByPixel, "data.frame")
+    expect_equal(data.table::key(resByPixel), c("timestep", "pixel_index"))
+    expect_gt(ncol(resByPixel), 2)
+
+    # Check subset by timestep
+    if (nrow(resByPixel) > 0){
+      expect_all_equal(cbm4_results_pixel(
+        cbm4_results,
+        view_name = view_name,
+        timesteps = 1
+      )$timestep, 1)
+    }
+
+    # Check using cbm4_data
+    expect_equal(
+      resByPixel,
+      cbm4_results_pixel(
         cbm4_results,
         view_name   = view_name,
         timesteps   = timesteps
       )
-
-      expect_s3_class(resByPixel, "data.frame")
-      expect_equal(data.table::key(resByPixel), c("timestep", "pixel_index"))
-      expect_gt(ncol(resByPixel), 2)
-
-      if (nrow(resByPixel) > 0 & identical(timesteps, 1)){
-        expect_all_equal(resByPixel$timestep, 1)
-      }
-
-      # Check using cbm4_data
-      expect_equal(
-        resByPixel,
-        cbm4_results_pixel(
-          cbm4_results,
-          view_name   = view_name,
-          timesteps   = timesteps
-        )
-      )
-    }
+    )
   }
 })
 

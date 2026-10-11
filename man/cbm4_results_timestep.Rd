@@ -9,8 +9,8 @@ cbm4_results_timestep(
   view_name,
   view_col = NULL,
   timesteps = NULL,
-  list = FALSE,
   units = "t",
+  list = FALSE,
   ...
 )
 }
@@ -26,9 +26,9 @@ The vector can have names to use as column aliases.}
 
 \item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
 
-\item{list}{logical. Return a table of available views.}
+\item{units}{character. "t/ha", "t", "Mt".}
 
-\item{units}{character. "t", "Mt", or "t/ha".}
+\item{list}{logical. Return a table of available views.}
 
 \item{...}{arguments to \code{\link{SQLResultsProcessor}}}
 }
