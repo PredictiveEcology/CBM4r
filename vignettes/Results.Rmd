@@ -69,29 +69,29 @@ cbm4_results_query(cbm4_results, "SELECT * FROM spatial_composite_pool_indicator
 
 ### Results by timestep
 
-```{r results_totals}
+```{r results_timestep}
 # See list of views that can be read into a summary table
-cbm4_results_totals(cbm4_results, list = TRUE)
+cbm4_results_timestep(cbm4_results, list = TRUE)
 
 # Read pools totals by timestep
-cbm4_results_totals(
+cbm4_results_timestep(
   cbm4_results,
   view_name = "composite_pool_indicators",
   units     = "t"
 )
-cbm4_results_totals(
+cbm4_results_timestep(
   cbm4_results,
   view_name = "composite_pool_indicators",
   units     = "Mt"
 )
 
 # Read flux totals by timestep
-cbm4_results_totals(
+cbm4_results_timestep(
   cbm4_results,
   view_name = "composite_flux_indicators",
   units     = "t"
 )
-cbm4_results_totals(
+cbm4_results_timestep(
   cbm4_results,
   view_name = "composite_flux_indicators",
   units     = "Mt"

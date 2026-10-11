@@ -1,7 +1,7 @@
 
-#' CBM4 results totals
+#' CBM4 results timestep
 #'
-#' Read simulation results into a table with carbon totals per timestep.
+#' Read simulation results by timestep.
 #'
 #' @template cbm4_results
 #' @param view_name character. `SQLResultsProcessor` view name.
@@ -14,13 +14,15 @@
 #'
 #' @return `data.table`
 #' @export
-cbm4_results_totals <- function(cbm4_results, view_name, view_columns = NULL, timesteps = NULL,
-                                units = "t", list = FALSE, ...){
-
-  unitOpts <- c("t", "Mt", "t/ha")
-  if (!units %in% unitOpts) stop(
-    "invalid unit ", shQuote(units),
-    ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
+cbm4_results_timestep <- function(
+    cbm4_results,
+    view_name,
+    view_columns = NULL,
+    timesteps    = NULL,
+    units        = "t",
+    list         = FALSE,
+    ...
+){
 
   cbm4_results <- SQLResultsProcessor(cbm4_results, ...)
 
@@ -28,6 +30,11 @@ cbm4_results_totals <- function(cbm4_results, view_name, view_columns = NULL, ti
     data.table::as.data.table(cbm4_results$views)[, .(name, column_names)][
       grepl("_indicators$", name) & !grepl("age_indicators", name) & !grepl("^spatial_", name)]
   )
+
+  unitOpts <- c("t", "Mt", "t/ha")
+  if (!units %in% unitOpts) stop(
+    "invalid unit ", shQuote(units),
+    ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
 
   if (is.null(view_columns)){
     view_columns <- setdiff(

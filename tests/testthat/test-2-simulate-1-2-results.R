@@ -112,17 +112,17 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$te
   }
 })
 
-for (project in projects[1]) test_that(paste("cbm4_results_totals with list = TRUE:", project$test), {
+for (project in projects[1]) test_that(paste("cbm4_results_timestep with list = TRUE:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   testthat::skip_if(is.null(cbm4_results))
 
-  expect_s3_class(cbm4_results_totals(cbm4_data,    list = TRUE), "data.table")
-  expect_s3_class(cbm4_results_totals(cbm4_results, list = TRUE), "data.table")
+  expect_s3_class(cbm4_results_timestep(cbm4_data,    list = TRUE), "data.table")
+  expect_s3_class(cbm4_results_timestep(cbm4_results, list = TRUE), "data.table")
 })
 
-for (project in projects[2:3]) test_that(paste("cbm4_results_totals:", project$test), {
+for (project in projects[2:3]) test_that(paste("cbm4_results_timestep:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -147,7 +147,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_totals:", project$t
 
   for (view_name in names(total_view_columns)){
 
-    resTotals <- cbm4_results_totals(cbm4_results, view_name = view_name)
+    resTotals <- cbm4_results_timestep(cbm4_results, view_name = view_name)
 
     expect_s3_class(resTotals, "data.frame")
     expect_gt(ncol(resTotals), 2)
@@ -155,17 +155,17 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_totals:", project$t
 
     # Check setting units
     expect_equal(
-      cbm4_results_totals(cbm4_results, view_name = view_name, units = "Mt")[, -c("timestep")],
+      cbm4_results_timestep(cbm4_results, view_name = view_name, units = "Mt")[, -c("timestep")],
       resTotals[, -c("timestep")] / 10^6,
       tolerance = 0.000001)
 
     expect_equal(
-      cbm4_results_totals(cbm4_results, view_name = view_name, units = "t/ha")[, -c("timestep", "area")],
+      cbm4_results_timestep(cbm4_results, view_name = view_name, units = "t/ha")[, -c("timestep", "area")],
       resTotals[, -c("timestep")] / ((project$grid_meta$area[[1]] / 10000) * length(unique(project$cohorts$pixel_index))),
       tolerance = 0.000001)
 
     # Check subsetting columns and timesteps
-    resTotals <- cbm4_results_totals(
+    resTotals <- cbm4_results_timestep(
       cbm4_results,
       view_name    = view_name,
       view_columns = total_view_columns[[view_name]],
@@ -177,7 +177,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_totals:", project$t
     expect_equal(resTotals$timestep, intersect(total_view_timesteps[[view_name]], 1:2))
 
     # Check using cbm4_data
-    expect_equal(resTotals, cbm4_results_totals(
+    expect_equal(resTotals, cbm4_results_timestep(
       project$cbm4_data,
       view_name    = view_name,
       view_columns = total_view_columns[[view_name]],

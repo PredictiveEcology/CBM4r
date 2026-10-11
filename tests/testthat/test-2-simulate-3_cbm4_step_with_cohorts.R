@@ -55,8 +55,8 @@ for (project in projects) test_that(paste("cbm4_step_with_cohorts: no change in 
     cbm4_results <- SQLResultsProcessor(project$cbm4_data)
     for (view_name in c("pool_indicators", "flux_indicators", "disturbance_indicators")){
       expect_equal(
-        cbm4_results_totals(cbm4_results,     view_name, timesteps = timestep),
-        cbm4_results_totals(template_results, view_name, timesteps = timestep),
+        cbm4_results_timestep(cbm4_results,     view_name, timesteps = timestep),
+        cbm4_results_timestep(template_results, view_name, timesteps = timestep),
         tolerance = 0.000001
       )
     }
@@ -70,7 +70,7 @@ for (project in projects[2]) test_that(paste("cbm4_step_with_cohorts: 1/2 biomas
 
   # Read template results
   template_results <- SQLResultsProcessor(file.path(testDirs$temp$outputs, project$template_name))
-  template_pools   <- cbm4_results_totals(template_results, "pool_indicators", timesteps = timestep)
+  template_pools   <- cbm4_results_timestep(template_results, "pool_indicators", timesteps = timestep)
 
   # Read cohort data from previous timestep
   cohorts <- cbm4_read_cohorts(
@@ -97,7 +97,7 @@ for (project in projects[2]) test_that(paste("cbm4_step_with_cohorts: 1/2 biomas
   # Expect less carbon in pools after the step
   cbm4_results <- SQLResultsProcessor(project$cbm4_data)
   expect_true(all(
-    cbm4_results_totals(cbm4_results, "pool_indicators", timesteps = timestep)[, -1] <
+    cbm4_results_timestep(cbm4_results, "pool_indicators", timesteps = timestep)[, -1] <
       template_pools[, -1]
   ))
 })

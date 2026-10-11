@@ -77,11 +77,11 @@ for (project in projects) test_that(paste("Increment classifiers can be partiall
 
   cbm4_results <- SQLResultsProcessor(project$cbm4_data)
 
-  view_names <- cbm4_results_totals(template_results, list = TRUE)$name
+  view_names <- cbm4_results_timestep(template_results, list = TRUE)$name
   for (view_name in view_names){
     expect_equal(
-      cbm4_results_totals(cbm4_results,     view_name, timesteps = 1),
-      cbm4_results_totals(template_results, view_name, timesteps = 1),
+      cbm4_results_timestep(cbm4_results,     view_name, timesteps = 1),
+      cbm4_results_timestep(template_results, view_name, timesteps = 1),
       tolerance = 0.000001
     )
   }

@@ -76,13 +76,13 @@ for (project in projects) test_that(paste("Disturbance filters can exclude cohor
 
   # No softwood harvested
   expect_equal(
-    sum(cbm4_results_totals(cbm4_results, "disturbance_indicators", "DisturbanceSoftProduction")$DisturbanceSoftProduction),
+    sum(cbm4_results_timestep(cbm4_results, "disturbance_indicators", "DisturbanceSoftProduction")$DisturbanceSoftProduction),
     0)
 
   for (view_name in c("pool_indicators", "flux_indicators", "disturbance_indicators")){
     expect_equal(
-      cbm4_results_totals(cbm4_results,     view_name, timesteps = 1:2),
-      cbm4_results_totals(template_results, view_name, timesteps = 1:2),
+      cbm4_results_timestep(cbm4_results,     view_name, timesteps = 1:2),
+      cbm4_results_timestep(template_results, view_name, timesteps = 1:2),
       tolerance = 0.000001
     )
   }
