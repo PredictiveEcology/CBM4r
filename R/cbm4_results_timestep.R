@@ -13,8 +13,8 @@ cbm4_results_timestep <- function(
     view_name,
     view_col  = NULL,
     timesteps = NULL,
-    list      = FALSE,
     units     = "t",
+    list      = FALSE,
     ...
 ){
 
@@ -33,28 +33,31 @@ cbm4_results_timestep <- function(
     timesteps    = timesteps
   )
 
-  unitOpts <- c("t", "Mt", "t/ha")
-  if (!units %in% unitOpts) stop(
-    "invalid unit ", shQuote(units),
-    ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
+  if (units != "t"){
 
-  view_col <- setdiff(names(queryTbl), "timestep")
+    unitOpts <- c("t/ha", "t", "Mt")
+    if (!units %in% unitOpts) stop(
+      "invalid unit ", shQuote(units),
+      ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
 
-  if (units == "Mt"){
-    queryTbl <- queryTbl[, lapply(.SD, function(x) x / 10^6), .SDcols = view_col, by = "timestep"]
-  }
+    view_col <- setdiff(names(queryTbl), "timestep")
 
-  if (units == "t/ha"){
+    if (units == "Mt"){
+      queryTbl <- queryTbl[, (view_col) := lapply(.SD, function(x) x / 10^6), .SDcols = view_col]
+    }
 
-    tAreas <- cbm4_results_query(cbm4_results, paste(
-      "SELECT timestep, SUM(area) AS area FROM age_indicators",
-      if (!is.null(timesteps)) sprintf("WHERE timestep IN (%s)", paste(timesteps, collapse = ", ")),
-      "GROUP BY timestep"
-    ))
-    queryTbl[tAreas, area := area, on = "timestep"]
-    data.table::setcolorder(queryTbl, c("timestep", "area"))
+    if (units == "t/ha"){
 
-    queryTbl <- queryTbl[, lapply(.SD, function(x) x / area), .SDcols = view_col, by = c("timestep", "area")]
+      tAreas <- cbm4_results_query(cbm4_results, c(
+        "SELECT timestep, SUM(\"inventory.area\" * cohort_proportion) AS area FROM simulation",
+        if (!is.null(timesteps)) sprintf("WHERE timestep IN (%s)", paste(timesteps, collapse = ", ")),
+        "GROUP BY timestep"
+      ))
+
+      queryTbl <- queryTbl[tAreas, area := area, on = "timestep"]
+      data.table::setcolorder(queryTbl, c(data.table::key(queryTbl), "area"))
+      queryTbl <- queryTbl[, (view_col) := lapply(.SD, function(x) x / area), .SDcols = view_col]
+    }
   }
 
   data.table::setkey(queryTbl, timestep)
