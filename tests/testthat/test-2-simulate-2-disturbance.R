@@ -37,7 +37,7 @@ for (test in names(projects)){
                  dataset_names = "step_parameters")
 }
 
-template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, "SK_w_dist"))
+template_results <- SQLResultsProcessor(file.path(testDirs$temp$outputs, "SK_w_dist"))
 
 
 ## SIMULATE ----
@@ -72,7 +72,7 @@ for (project in projects) test_that(paste("cbm4_step:", project$test), {
 
 for (project in projects) test_that(paste("Disturbance filters can exclude cohorts:", project$test), {
 
-  cbm4_results <- cbm4_results_processor(project$cbm4_data)
+  cbm4_results <- SQLResultsProcessor(project$cbm4_data)
 
   # No softwood harvested
   expect_equal(

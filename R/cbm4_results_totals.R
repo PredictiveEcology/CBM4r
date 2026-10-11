@@ -10,7 +10,7 @@
 #' @param units character. "t", "Mt", or "t/ha".
 #' @template timesteps
 #' @param list logical. Return a table of options.
-#' @param ... arguments to \code{\link{cbm4_results_processor}}
+#' @param ... arguments to \code{\link{SQLResultsProcessor}}
 #'
 #' @return `data.table`
 #' @export
@@ -22,7 +22,7 @@ cbm4_results_totals <- function(cbm4_results, view_name, view_columns = NULL, ti
     "invalid unit ", shQuote(units),
     ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
 
-  cbm4_results <- cbm4_results_processor(cbm4_results, ...)
+  cbm4_results <- SQLResultsProcessor(cbm4_results, ...)
 
   if (list) return(
     data.table::as.data.table(cbm4_results$views)[, .(name, column_names)][

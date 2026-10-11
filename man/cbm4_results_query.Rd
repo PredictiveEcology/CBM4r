@@ -9,11 +9,11 @@ cbm4_results_query(cbm4_results, query = NULL, ...)
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
 Path to CBM4 spatial datasets directory
-or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
+or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProcessor}}.}
 
 \item{query}{character. SQL query}
 
-\item{...}{arguments to \code{\link{cbm4_results_processor}}}
+\item{...}{arguments to \code{\link{SQLResultsProcessor}}}
 }
 \value{
 \code{data.table}

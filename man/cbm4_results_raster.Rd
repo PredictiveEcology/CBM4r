@@ -17,7 +17,7 @@ cbm4_results_raster(
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
 Path to CBM4 spatial datasets directory
-or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
+or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProcessor}}.}
 
 \item{view_name}{character. \code{SQLResultsProcessor} view name.
 If NULL the function will return an empty study area grid.}
@@ -32,7 +32,7 @@ This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta
 
 \item{list}{logical. Return a table of options.}
 
-\item{...}{arguments to \code{\link{cbm4_results_processor}}}
+\item{...}{arguments to \code{\link{SQLResultsProcessor}}}
 }
 \value{
 \code{SpatRaster}

@@ -9,7 +9,7 @@ cbm4_read_cohorts(cbm4_results, timestep, grid_meta = NULL)
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
 Path to CBM4 spatial datasets directory
-or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
+or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProcessor}}.}
 
 \item{timestep}{integer. Simulation timestep with 1 representing the first year.}
 

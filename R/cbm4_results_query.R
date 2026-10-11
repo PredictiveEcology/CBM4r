@@ -5,7 +5,7 @@
 #'
 #' @template cbm4_results
 #' @param query character. SQL query
-#' @param ... arguments to \code{\link{cbm4_results_processor}}
+#' @param ... arguments to \code{\link{SQLResultsProcessor}}
 #'
 #' @return `data.table`
 #' @export
@@ -15,7 +15,7 @@ cbm4_results_query <- function(cbm4_results, query = NULL, ...){
   on.exit(unlink(tmpDir, recursive = TRUE))
 
   data.table::data.table(
-    cbm4_results_processor(cbm4_results, ...)$query(paste(c(
+    SQLResultsProcessor(cbm4_results, ...)$query(paste(c(
       sprintf("SET temp_directory = '%s';", tmpDir),
       query
     ), collapse = " "))

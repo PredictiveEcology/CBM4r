@@ -16,8 +16,8 @@ for (test in names(projects)){
 ## RESULTS ----
 
 for (test in names(projects)){
-  projects[[test]]$cbm4_results <- tryCatch(cbm4_results_processor(projects[[test]]$cbm4_data), error = function(e) NULL)
-  test_that(paste("cbm4_results_processor:", projects[[test]]$test), {
+  projects[[test]]$cbm4_results <- tryCatch(SQLResultsProcessor(projects[[test]]$cbm4_data), error = function(e) NULL)
+  test_that(paste("SQLResultsProcessor:", projects[[test]]$test), {
     expect_s3_class(projects[[test]]$cbm4_results, "cbm4.app.spatial.results.sql_results_processor.SQLResultsProcessor")
   })
 }

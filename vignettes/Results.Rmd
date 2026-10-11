@@ -41,11 +41,11 @@ cbm4_data <- "cbm4_data"
 
 All results functions can accept `cbm4_data` or `cbm4_results` as input. 
 Most functions will read `cbm4_data` into a `SQLResultsProcessor` object as the first step,
-so calling `cbm4_results_processor` directly is more efficient when reading multiple results.
+so calling `SQLResultsProcessor` directly is more efficient when reading multiple results.
 
 ```{r results_processor}
 # Get CBM4 SQLResultsProcessor
-cbm4_results <- cbm4_results_processor(cbm4_data)
+cbm4_results <- SQLResultsProcessor(cbm4_data)
 ```
 
 ## Read results

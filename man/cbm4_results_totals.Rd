@@ -17,7 +17,7 @@ cbm4_results_totals(
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
 Path to CBM4 spatial datasets directory
-or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
+or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProcessor}}.}
 
 \item{view_name}{character. \code{SQLResultsProcessor} view name.}
 
@@ -30,7 +30,7 @@ The vector can have names to use as column aliases.}
 
 \item{list}{logical. Return a table of options.}
 
-\item{...}{arguments to \code{\link{cbm4_results_processor}}}
+\item{...}{arguments to \code{\link{SQLResultsProcessor}}}
 }
 \value{
 \code{data.table}

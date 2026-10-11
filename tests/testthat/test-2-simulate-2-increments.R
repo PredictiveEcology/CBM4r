@@ -23,7 +23,7 @@ for (test in names(projects)){
                  dataset_names = c("inventory", "disturbance"))
 }
 
-template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, "SK_wo_dist"))
+template_results <- SQLResultsProcessor(file.path(testDirs$temp$outputs, "SK_wo_dist"))
 
 
 ## SIMULATE ----
@@ -75,7 +75,7 @@ for (project in projects) test_that(paste("cbm4_step:", project$test), {
 
 for (project in projects) test_that(paste("Increment classifiers can be partially specified:", project$test), {
 
-  cbm4_results <- cbm4_results_processor(project$cbm4_data)
+  cbm4_results <- SQLResultsProcessor(project$cbm4_data)
 
   view_names <- cbm4_results_totals(template_results, list = TRUE)$name
   for (view_name in view_names){
