@@ -67,6 +67,27 @@ cbm4_results_query(cbm4_results, "SELECT * FROM spatial_composite_pool_indicator
 cbm4_results_query(cbm4_results, "SELECT * FROM spatial_composite_pool_indicators WHERE timestep == (SELECT MAX(timestep) FROM simulation) ORDER BY raster_index")
 ```
 
+### Read SQL Results Processor views
+
+```{r results_query}
+# See list of available views to query
+cbm4_results_view(cbm4_results, list = TRUE)
+
+# Example: get cohort pool totals in the first timestep
+cbm4_results_view(
+  cbm4_results,
+  view_name = "spatial_pool_indicators",
+  timesteps = 1
+)
+
+# Example: get cohort pool summaries in the first timestep
+cbm4_results_view(
+  cbm4_results,
+  view_name = "spatial_composite_pool_indicators",
+  timesteps = 1
+)
+```
+
 ### Results by timestep
 
 ```{r results_timestep}
@@ -107,9 +128,9 @@ cbm4_results_pixel(cbm4_results, list = TRUE)
 # Read Net Primary Productivity (NPP) raster
 rastNPP <- cbm4_results_pixel(
   cbm4_results, 
-  view_name   = "spatial_composite_flux_indicators",
-  view_column = "Ecosystem Indicators - Productivity - Net Primary Productivity (NPP)",
-  timesteps   = 1:2
+  view_name  = "spatial_composite_flux_indicators",
+  view_col   = "Ecosystem Indicators - Productivity - Net Primary Productivity (NPP)",
+  timesteps  = 1:2
 )
 terra::plot(
   rastNPP,

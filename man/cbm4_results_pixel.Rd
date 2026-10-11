@@ -7,7 +7,7 @@
 cbm4_results_pixel(
   cbm4_results,
   view_name = NULL,
-  view_column = NULL,
+  view_col = NULL,
   timesteps = NULL,
   grid_meta = NULL,
   list = FALSE,
@@ -22,7 +22,7 @@ or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProces
 \item{view_name}{character. \code{SQLResultsProcessor} view name.
 If NULL the function will return an empty study area grid.}
 
-\item{view_column}{character. \code{SQLResultsProcessor} view column name.}
+\item{view_col}{character. \code{SQLResultsProcessor} view column name.}
 
 \item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
 
@@ -30,7 +30,7 @@ If NULL the function will return an empty study area grid.}
 May not be required but can be provided for efficiency.
 This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
-\item{list}{logical. Return a table of options.}
+\item{list}{logical. Return a table of available views.}
 
 \item{...}{arguments to \code{\link{SQLResultsProcessor}}}
 }

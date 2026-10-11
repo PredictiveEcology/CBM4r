@@ -92,9 +92,9 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$te
 
     resRast <- cbm4_results_pixel(
       cbm4_results,
-      view_name   = view_name,
-      view_column = rast_view_columns[[view_name]],
-      timesteps   = 1
+      view_name = view_name,
+      view_col  = rast_view_columns[[view_name]],
+      timesteps = 1
     )
 
     expect_true(terra::compareGeom(resRast, project$grid_rast))
@@ -104,9 +104,9 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$te
     expect_equal(terra::values(resRast), terra::values(
       cbm4_results_pixel(
         project$cbm4_data,
-        view_name   = view_name,
-        view_column = rast_view_columns[[view_name]],
-        timesteps   = 1
+        view_name = view_name,
+        view_col  = rast_view_columns[[view_name]],
+        timesteps = 1
       )
     ))
   }
@@ -167,9 +167,9 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_timestep:", project
     # Check subsetting columns and timesteps
     resTotals <- cbm4_results_timestep(
       cbm4_results,
-      view_name    = view_name,
-      view_columns = total_view_columns[[view_name]],
-      timesteps    = 1:2
+      view_name = view_name,
+      view_col  = total_view_columns[[view_name]],
+      timesteps = 1:2
     )
 
     expect_s3_class(resTotals, "data.frame")
@@ -179,9 +179,10 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_timestep:", project
     # Check using cbm4_data
     expect_equal(resTotals, cbm4_results_timestep(
       project$cbm4_data,
-      view_name    = view_name,
-      view_columns = total_view_columns[[view_name]],
-      timesteps    = 1:2
+      view_name = view_name,
+      view_col  = total_view_columns[[view_name]],
+      timesteps = 1:2
     ))
   }
 })
+

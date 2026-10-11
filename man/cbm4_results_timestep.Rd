@@ -7,10 +7,10 @@
 cbm4_results_timestep(
   cbm4_results,
   view_name,
-  view_columns = NULL,
+  view_col = NULL,
   timesteps = NULL,
-  units = "t",
   list = FALSE,
+  units = "t",
   ...
 )
 }
@@ -21,14 +21,14 @@ or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProces
 
 \item{view_name}{character. \code{SQLResultsProcessor} view name.}
 
-\item{view_columns}{character. \code{SQLResultsProcessor} view column names.
+\item{view_col}{character. \code{SQLResultsProcessor} view column names.
 The vector can have names to use as column aliases.}
 
 \item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
 
-\item{units}{character. "t", "Mt", or "t/ha".}
+\item{list}{logical. Return a table of available views.}
 
-\item{list}{logical. Return a table of options.}
+\item{units}{character. "t", "Mt", or "t/ha".}
 
 \item{...}{arguments to \code{\link{SQLResultsProcessor}}}
 }

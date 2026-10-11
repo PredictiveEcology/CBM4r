@@ -3,24 +3,21 @@
 #'
 #' Read simulation results by pixel with carbon in tonnes per hectare (t/ha).
 #'
-#' @template cbm4_results
+#' @inheritParams cbm4_results_view
 #' @param view_name character. `SQLResultsProcessor` view name.
 #' If NULL the function will return an empty study area grid.
-#' @param view_column character. `SQLResultsProcessor` view column name.
+#' @param view_col character. `SQLResultsProcessor` view column name.
 #' @template grid_meta_optional
-#' @template timesteps
-#' @param list logical. Return a table of options.
-#' @param ... arguments to \code{\link{SQLResultsProcessor}}
 #'
 #' @return `SpatRaster`
 #' @export
 cbm4_results_pixel <- function(
     cbm4_results,
-    view_name   = NULL,
-    view_column = NULL,
-    timesteps   = NULL,
-    grid_meta   = NULL,
-    list        = FALSE,
+    view_name = NULL,
+    view_col  = NULL,
+    timesteps = NULL,
+    grid_meta = NULL,
+    list      = FALSE,
     ...
 ){
 
@@ -36,29 +33,29 @@ cbm4_results_pixel <- function(
 
   if (is.null(view_name)) return(cbm4_grid)
 
-  querySQL <- sprintf(paste(
-    "SELECT timestep, chunk_index, raster_index,",
-    "SUM(\"%1$s\") AS value",
-    "FROM %2$s",
-    if (!is.null(timesteps)) sprintf("WHERE timestep IN (%s)", paste(timesteps, collapse = ", ")),
-    "GROUP BY timestep, chunk_index, raster_index",
-    "ORDER BY timestep, chunk_index, raster_index"
-  ), view_column, view_name)
+  if (length(view_col) > 1) stop("view_col must be length 1")
 
-  queryTbl <- tryCatch(
-    cbm4_results_query(cbm4_results, querySQL),
-    error = function(e) stop(e$message, "\n", "Call cbm_results_raster with list = TRUE to view options")
+  queryTbl <- cbm4_results_view(
+    cbm4_results = cbm4_results,
+    view_name    = view_name,
+    view_col     = setNames(view_col, "value"),
+    group_by     = c("timestep", "chunk_index", "raster_index"),
+    timesteps    = timesteps
   )
+
   queryTbl <- queryTbl[grid_meta, pixel_index := pixel_index, on = c("chunk_index", "raster_index")]
 
   if (is.null(timesteps)) timesteps <- unique(queryTbl$timestep)
 
   cbm4_rast <- do.call(c, lapply(timesteps, function(t){
-    cbm4_rast_t <- terra::deepcopy(cbm4_grid)
-    with(queryTbl[timestep == t,], terra::set.values(cbm4_rast_t, pixel_index, value))
-    cbm4_rast_t
+    t_rast <- terra::rast(cbm4_grid, vals = NA)
+    t_vals <- queryTbl[timestep == t,]
+    if (nrow(t_vals) > 0){
+      terra::set.values(t_rast, t_vals$pixel_index, t_vals$value)
+    }
+    t_rast
   }))
-  names(cbm4_rast) <- timesteps
+  if (length(timesteps) > 0) names(cbm4_rast) <- timesteps
 
   return(cbm4_rast)
 }

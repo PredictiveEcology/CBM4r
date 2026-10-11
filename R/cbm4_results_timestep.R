@@ -3,24 +3,18 @@
 #'
 #' Read simulation results by timestep.
 #'
-#' @template cbm4_results
-#' @param view_name character. `SQLResultsProcessor` view name.
-#' @param view_columns character. `SQLResultsProcessor` view column names.
-#' The vector can have names to use as column aliases.
+#' @inheritParams cbm4_results_view
 #' @param units character. "t", "Mt", or "t/ha".
-#' @template timesteps
-#' @param list logical. Return a table of options.
-#' @param ... arguments to \code{\link{SQLResultsProcessor}}
 #'
 #' @return `data.table`
 #' @export
 cbm4_results_timestep <- function(
     cbm4_results,
     view_name,
-    view_columns = NULL,
-    timesteps    = NULL,
-    units        = "t",
-    list         = FALSE,
+    view_col  = NULL,
+    timesteps = NULL,
+    list      = FALSE,
+    units     = "t",
     ...
 ){
 
@@ -31,36 +25,23 @@ cbm4_results_timestep <- function(
       grepl("_indicators$", name) & !grepl("age_indicators", name) & !grepl("^spatial_", name)]
   )
 
+  queryTbl <- cbm4_results_view(
+    cbm4_results = cbm4_results,
+    view_name    = view_name,
+    view_col     = view_col,
+    group_by     = "timestep",
+    timesteps    = timesteps
+  )
+
   unitOpts <- c("t", "Mt", "t/ha")
   if (!units %in% unitOpts) stop(
     "invalid unit ", shQuote(units),
     ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
 
-  if (is.null(view_columns)){
-    view_columns <- setdiff(
-      cbm4_results$views[cbm4_results$views$name == view_name,]$column_names[[1]], c(
-        gsub("^(inventory|classifiers|state)\\.", "", cbm4_results$get_columns("simulation")),
-        "disturbance_type_id", "disturbance_type"
-      ))
-  }
-  if (is.null(names(view_columns))) names(view_columns) <- view_columns
-
-  querySQL <- paste(
-    "SELECT timestep,",
-    paste(sprintf("SUM(\"%s\") AS \"%s\"", view_columns, names(view_columns)), collapse = ", "),
-    "FROM", view_name,
-    if (!is.null(timesteps)) sprintf("WHERE timestep IN (%s)", paste(timesteps, collapse = ", ")),
-    "GROUP BY timestep",
-    "ORDER BY timestep"
-  )
-
-  queryTbl <- tryCatch(
-    cbm4_results_query(cbm4_results, querySQL),
-    error = function(e) stop(e$message, "\n", "Call cbm_results_totals with list = TRUE to view options")
-  )
+  view_col <- setdiff(names(queryTbl), "timestep")
 
   if (units == "Mt"){
-    queryTbl <- queryTbl[, lapply(.SD, function(x) x / 10^6), .SDcols = names(view_columns), by = "timestep"]
+    queryTbl <- queryTbl[, lapply(.SD, function(x) x / 10^6), .SDcols = view_col, by = "timestep"]
   }
 
   if (units == "t/ha"){
@@ -73,7 +54,7 @@ cbm4_results_timestep <- function(
     queryTbl[tAreas, area := area, on = "timestep"]
     data.table::setcolorder(queryTbl, c("timestep", "area"))
 
-    queryTbl <- queryTbl[, lapply(.SD, function(x) x / area), .SDcols = names(view_columns), by = c("timestep", "area")]
+    queryTbl <- queryTbl[, lapply(.SD, function(x) x / area), .SDcols = view_col, by = c("timestep", "area")]
   }
 
   data.table::setkey(queryTbl, timestep)
