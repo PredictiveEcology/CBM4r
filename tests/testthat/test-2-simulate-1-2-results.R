@@ -51,29 +51,29 @@ for (project in projects) test_that(paste("cbm4_results_grid_key:", project$test
   expect_equal(names(grid_key_crds), c("pixel_index", "chunk_index", "raster_index", "x", "y"))
 })
 
-for (project in projects[1]) test_that(paste("cbm4_results_raster with list = TRUE:", project$test), {
+for (project in projects[1]) test_that(paste("cbm4_results_pixel with list = TRUE:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   testthat::skip_if(is.null(cbm4_results))
 
   # Check listing options
-  expect_s3_class(cbm4_results_raster(cbm4_data,    list = TRUE), "data.table")
-  expect_s3_class(cbm4_results_raster(cbm4_results, list = TRUE), "data.table")
+  expect_s3_class(cbm4_results_pixel(cbm4_data,    list = TRUE), "data.table")
+  expect_s3_class(cbm4_results_pixel(cbm4_results, list = TRUE), "data.table")
 })
 
-for (project in projects) test_that(paste("cbm4_results_raster without data:", project$test), {
+for (project in projects) test_that(paste("cbm4_results_pixel without data:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   testthat::skip_if(is.null(cbm4_results))
 
   # Check creating empty grid
-  expect_true(terra::compareGeom(cbm4_results_raster(cbm4_data),    project$grid_rast))
-  expect_true(terra::compareGeom(cbm4_results_raster(cbm4_results), project$grid_rast))
+  expect_true(terra::compareGeom(cbm4_results_pixel(cbm4_data),    project$grid_rast))
+  expect_true(terra::compareGeom(cbm4_results_pixel(cbm4_results), project$grid_rast))
 })
 
-for (project in projects[2:3]) test_that(paste("cbm4_results_raster:", project$test), {
+for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -90,7 +90,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_raster:", project$t
 
   for (view_name in names(rast_view_columns)){
 
-    resRast <- cbm4_results_raster(
+    resRast <- cbm4_results_pixel(
       cbm4_results,
       view_name   = view_name,
       view_column = rast_view_columns[[view_name]],
@@ -102,7 +102,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_raster:", project$t
 
     # Check using cbm4_data
     expect_equal(terra::values(resRast), terra::values(
-      cbm4_results_raster(
+      cbm4_results_pixel(
         project$cbm4_data,
         view_name   = view_name,
         view_column = rast_view_columns[[view_name]],

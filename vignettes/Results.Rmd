@@ -100,12 +100,12 @@ cbm4_results_totals(
 
 ### Results by pixel
 
-```{r results_raster}
+```{r results_pixel}
 # See list of views with columns that can be read into a a raster
-cbm4_results_raster(cbm4_results, list = TRUE)
+cbm4_results_pixel(cbm4_results, list = TRUE)
 
 # Read Net Primary Productivity (NPP) raster
-rastNPP <- cbm4_results_raster(
+rastNPP <- cbm4_results_pixel(
   cbm4_results, 
   view_name   = "spatial_composite_flux_indicators",
   view_column = "Ecosystem Indicators - Productivity - Net Primary Productivity (NPP)",

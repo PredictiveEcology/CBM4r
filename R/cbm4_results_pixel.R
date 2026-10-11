@@ -1,7 +1,7 @@
 
-#' CBM4 results raster
+#' CBM4 results pixel
 #'
-#' Read simulation results into a raster with carbon in tonnes per hectare (t/ha).
+#' Read simulation results by pixel with carbon in tonnes per hectare (t/ha).
 #'
 #' @template cbm4_results
 #' @param view_name character. `SQLResultsProcessor` view name.
@@ -14,7 +14,7 @@
 #'
 #' @return `SpatRaster`
 #' @export
-cbm4_results_raster <- function(
+cbm4_results_pixel <- function(
     cbm4_results,
     view_name   = NULL,
     view_column = NULL,
