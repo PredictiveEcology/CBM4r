@@ -69,7 +69,7 @@ cbm4_results_query(cbm4_results, "SELECT * FROM spatial_composite_pool_indicator
 
 ### Read SQL Results Processor views
 
-```{r results_query}
+```{r results_views}
 # See list of available views to query
 cbm4_results_view(cbm4_results, list = TRUE)
 
@@ -91,7 +91,7 @@ cbm4_results_view(
 ### Results by timestep
 
 ```{r results_timestep}
-# See list of views that can be read into a summary table
+# See list of views that can be read into a timestep summary
 cbm4_results_timestep(cbm4_results, list = TRUE)
 
 # Read pools totals by timestep
@@ -122,15 +122,46 @@ cbm4_results_timestep(
 ### Results by pixel
 
 ```{r results_pixel}
-# See list of views with columns that can be read into a a raster
+# See list of views with that can be read into a pixel summary
 cbm4_results_pixel(cbm4_results, list = TRUE)
 
+# Read pools totals by pixel
+cbm4_results_pixel(
+  cbm4_results,
+  view_name = "spatial_composite_pool_indicators"
+)
+
+# Read pool totals by pixel for the first timestep
+cbm4_results_pixel(
+  cbm4_results,
+  view_name = "spatial_composite_pool_indicators",
+  timesteps = 1
+)
+
+# Read flux totals by pixel
+cbm4_results_pixel(
+  cbm4_results,
+  view_name = "spatial_composite_flux_indicators"
+)
+
+# Read flux totals by pixel for the first timestep
+cbm4_results_pixel(
+  cbm4_results,
+  view_name = "spatial_composite_flux_indicators",
+  timesteps = 1
+)
+```
+
+Pixel results can be read as a terra `SpatRaster`.
+
+```{r results_pixel_rast}
 # Read Net Primary Productivity (NPP) raster
 rastNPP <- cbm4_results_pixel(
   cbm4_results, 
   view_name  = "spatial_composite_flux_indicators",
   view_col   = "Ecosystem Indicators - Productivity - Net Primary Productivity (NPP)",
-  timesteps  = 1:2
+  timesteps  = 1:2,
+  rast       = TRUE
 )
 terra::plot(
   rastNPP,

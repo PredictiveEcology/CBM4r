@@ -62,18 +62,45 @@ for (project in projects[1]) test_that(paste("cbm4_results_pixel with list = TRU
   expect_s3_class(cbm4_results_pixel(cbm4_results, list = TRUE), "data.table")
 })
 
-for (project in projects) test_that(paste("cbm4_results_pixel without data:", project$test), {
+for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
   testthat::skip_if(is.null(cbm4_results))
 
-  # Check creating empty grid
-  expect_true(terra::compareGeom(cbm4_results_pixel(cbm4_data),    project$grid_rast))
-  expect_true(terra::compareGeom(cbm4_results_pixel(cbm4_results), project$grid_rast))
+  pixel_views <- cbm4_results_pixel(cbm4_results, list = TRUE)
+  for (view_name in pixel_views$name){
+
+    for (timesteps in list(NULL, 1)){
+
+      resByPixel <- cbm4_results_pixel(
+        cbm4_results,
+        view_name   = view_name,
+        timesteps   = timesteps
+      )
+
+      expect_s3_class(resByPixel, "data.frame")
+      expect_equal(data.table::key(resByPixel), c("timestep", "pixel_index"))
+      expect_gt(ncol(resByPixel), 2)
+
+      if (nrow(resByPixel) > 0 & identical(timesteps, 1)){
+        expect_all_equal(resByPixel$timestep, 1)
+      }
+
+      # Check using cbm4_data
+      expect_equal(
+        resByPixel,
+        cbm4_results_pixel(
+          cbm4_results,
+          view_name   = view_name,
+          timesteps   = timesteps
+        )
+      )
+    }
+  }
 })
 
-for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$test), {
+for (project in projects[2:3]) test_that(paste("cbm4_results_pixel with rast = TRUE:", project$test), {
 
   cbm4_data    <- project$cbm4_data
   cbm4_results <- project$cbm4_results
@@ -94,21 +121,12 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$te
       cbm4_results,
       view_name = view_name,
       view_col  = rast_view_columns[[view_name]],
-      timesteps = 1
+      timesteps = 1,
+      rast      = TRUE
     )
 
     expect_true(terra::compareGeom(resRast, project$grid_rast))
     expect_equal(names(resRast), "1")
-
-    # Check using cbm4_data
-    expect_equal(terra::values(resRast), terra::values(
-      cbm4_results_pixel(
-        project$cbm4_data,
-        view_name = view_name,
-        view_col  = rast_view_columns[[view_name]],
-        timesteps = 1
-      )
-    ))
   }
 })
 
@@ -150,6 +168,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_timestep:", project
     resTotals <- cbm4_results_timestep(cbm4_results, view_name = view_name)
 
     expect_s3_class(resTotals, "data.frame")
+    expect_equal(data.table::key(resTotals), "timestep")
     expect_gt(ncol(resTotals), 2)
     expect_equal(resTotals$timestep, total_view_timesteps[[view_name]])
 
