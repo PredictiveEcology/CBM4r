@@ -22,13 +22,13 @@ cbm4_results_timestep <- function(
 
   if (list) return(
     data.table::as.data.table(cbm4_results$views)[, .(name, column_names)][
-      grepl("_indicators$", name) & !grepl("age_indicators", name) & !grepl("^spatial_", name)]
+      !grepl("^spatial_", name) & grepl("_indicators$", name) & !grepl("age_indicators", name)]
   )
 
   queryTbl <- cbm4_results_view(
     cbm4_results = cbm4_results,
     view         = view,
-    select       = select,
+    select       = unlist(unname(select)),
     group_by     = "timestep",
     timesteps    = timesteps
   )
@@ -40,10 +40,13 @@ cbm4_results_timestep <- function(
       "invalid unit ", shQuote(units),
       ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
 
-    select <- setdiff(names(queryTbl), "timestep")
+    pools <- intersect(
+      .cbm4_results_view_pool_columns(cbm4_results, view),
+      names(queryTbl)
+    )
 
     if (units == "Mt"){
-      queryTbl <- queryTbl[, (select) := lapply(.SD, function(x) x / 10^6), .SDcols = select]
+      queryTbl <- queryTbl[, (pools) := lapply(.SD, function(x) x / 10^6), .SDcols = pools]
     }
 
     if (units == "t/ha"){
@@ -56,11 +59,14 @@ cbm4_results_timestep <- function(
 
       queryTbl <- queryTbl[tAreas, area := area, on = "timestep"]
       data.table::setcolorder(queryTbl, c(data.table::key(queryTbl), "area"))
-      queryTbl <- queryTbl[, (select) := lapply(.SD, function(x) x / area), .SDcols = select]
+      queryTbl <- queryTbl[, (pools) := lapply(.SD, function(x) x / area), .SDcols = pools]
     }
   }
 
   data.table::setkey(queryTbl, timestep)
+  if (!is.null(select) && !is.null(names(select))){
+    data.table::setnames(queryTbl, unlist(unname(select)), names(select))
+  }
   return(queryTbl)
 }
 

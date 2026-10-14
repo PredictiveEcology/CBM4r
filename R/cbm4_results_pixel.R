@@ -1,11 +1,12 @@
 
 #' CBM4 results pixel
 #'
-#' Read simulation results by pixel with carbon in tonnes per hectare (t/ha).
+#' Read simulation results by pixel.
 #'
 #' @inheritParams cbm4_results_view
-#' @param rast logical. Return results as a terra `SpatRaster`.
+#' @param units character. "t/ha", "t", "Mt".
 #' @template grid_meta_optional
+#' @param rast logical. Return results as a terra `SpatRaster`.
 #'
 #' @return `data.table` or `SpatRaster`
 #' @export
@@ -14,6 +15,7 @@ cbm4_results_pixel <- function(
     view,
     select    = NULL,
     timesteps = NULL,
+    units     = "t/ha",
     grid_meta = NULL,
     rast      = FALSE,
     list      = FALSE,
@@ -24,7 +26,7 @@ cbm4_results_pixel <- function(
 
   if (list) return(
     data.table::as.data.table(cbm4_results$views)[, .(name, column_names)][
-      grepl("_indicators$", name) & !grepl("age_indicators", name) & grepl("^spatial_", name)]
+      grepl("^spatial_.*_indicators$", name) & !grepl("age_indicators", name)]
   )
 
   queryTbl <- cbm4_results_view(
@@ -34,6 +36,29 @@ cbm4_results_pixel <- function(
     group_by     = c("timestep", "chunk_index", "raster_index"),
     timesteps    = timesteps
   )
+
+  if (units != "t/ha"){
+
+    unitOpts <- c("t/ha", "t", "Mt")
+    if (!units %in% unitOpts) stop(
+      "invalid unit ", shQuote(units),
+      ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
+
+    pools <- setdiff(names(queryTbl), data.table::key(queryTbl))
+
+    # Get area
+    queryTbl <- queryTbl[cbm4_results_view(cbm4_results, "area"), area := area, on = c("chunk_index", "raster_index")]
+
+    # Convert to t
+    queryTbl[, (pools) := lapply(.SD, function(x) x * area), .SDcols = pools]
+
+    # Convert to Mt
+    if (units == "Mt"){
+      queryTbl[, (pools) := lapply(.SD, function(x) x / 10^6), .SDcols = pools]
+    }
+
+    queryTbl[, area := NULL]
+  }
 
   if (is.null(grid_meta)) grid_meta <- cbm4_results_grid_key(cbm4_results)
   queryTbl <- queryTbl[grid_meta, pixel_index := pixel_index, on = c("chunk_index", "raster_index")]

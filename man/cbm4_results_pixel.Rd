@@ -9,6 +9,7 @@ cbm4_results_pixel(
   view,
   select = NULL,
   timesteps = NULL,
+  units = "t/ha",
   grid_meta = NULL,
   rast = FALSE,
   list = FALSE,
@@ -27,6 +28,8 @@ The vector can have names to use as column aliases.}
 
 \item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
 
+\item{units}{character. "t/ha", "t", "Mt".}
+
 \item{grid_meta}{data.table. Grid metadata.
 May not be required but can be provided for efficiency.
 This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
@@ -41,5 +44,5 @@ This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta
 \code{data.table} or \code{SpatRaster}
 }
 \description{
-Read simulation results by pixel with carbon in tonnes per hectare (t/ha).
+Read simulation results by pixel.
 }

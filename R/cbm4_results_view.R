@@ -30,7 +30,7 @@ cbm4_results_view <- function(
   if (list) return(data.table::as.data.table(cbm4_results$views)[, .(name, column_names)])
 
   if (!is.null(group_by)){
-    if (is.null(select)) select <- .cbm4_results_view_columns(cbm4_results, view)
+    if (is.null(select)) select <- .cbm4_results_view_pool_columns(cbm4_results, view)
     if (is.null(names(select))) names(select) <- select
   }
 
@@ -61,7 +61,7 @@ cbm4_results_view <- function(
   return(queryTbl)
 }
 
-.cbm4_results_view_columns <- function(cbm4_results, view_name){
+.cbm4_results_view_pool_columns <- function(cbm4_results, view_name){
 
   sim_cols       <- cbm4_results$get_columns("simulation")
   cohort_id_cols <- sim_cols[!grepl("^pools\\.", sim_cols)]
