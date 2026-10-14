@@ -11,7 +11,7 @@
 #' @export
 cbm4_results_pixel <- function(
     cbm4_results,
-    view_name,
+    view,
     select    = NULL,
     timesteps = NULL,
     grid_meta = NULL,
@@ -29,7 +29,7 @@ cbm4_results_pixel <- function(
 
   queryTbl <- cbm4_results_view(
     cbm4_results = cbm4_results,
-    view_name    = view_name,
+    view         = view,
     select       = select,
     group_by     = c("timestep", "chunk_index", "raster_index"),
     timesteps    = timesteps

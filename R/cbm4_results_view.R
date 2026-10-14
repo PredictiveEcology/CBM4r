@@ -4,10 +4,11 @@
 #' Get a CBM4 SQLResultsProcessor view.
 #'
 #' @template cbm4_results
-#' @param view_name character. `SQLResultsProcessor` view name.
-#' @param select character. `SQLResultsProcessor` view column names.
+#' @param view character. `SQLResultsProcessor` view name.
+#' @param select character. View column names.
 #' The vector can have names to use as column aliases.
-#' @param group_by character. Columns to group by. Pool columns will be aggregated with `SUM`.
+#' @param group_by character. Columns to group by.
+#' Pool columns will be aggregated with `SUM`.
 #' @template timesteps
 #' @param list logical. Return a table of available views.
 #' @param ... arguments to \code{\link{SQLResultsProcessor}}
@@ -16,7 +17,7 @@
 #' @export
 cbm4_results_view <- function(
     cbm4_results,
-    view_name,
+    view,
     select    = NULL,
     group_by  = NULL,
     timesteps = NULL,
@@ -29,7 +30,7 @@ cbm4_results_view <- function(
   if (list) return(data.table::as.data.table(cbm4_results$views)[, .(name, column_names)])
 
   if (!is.null(group_by)){
-    if (is.null(select)) select <- .cbm4_results_view_columns(cbm4_results, view_name)
+    if (is.null(select)) select <- .cbm4_results_view_columns(cbm4_results, view)
     if (is.null(names(select))) names(select) <- select
   }
 
@@ -42,7 +43,7 @@ cbm4_results_view <- function(
           if (!is.null(names(select))) sprintf("AS \"%s\"", names(select))
         )) |> paste(collapse = ", ")
     }else "*",
-    "FROM", view_name,
+    "FROM", view,
     if (!is.null(timesteps)) sprintf("WHERE timestep IN (%s)", paste(timesteps, collapse = ", ")),
     if (!is.null(group_by)) paste(
       "GROUP BY", paste(group_by, collapse = ", "),

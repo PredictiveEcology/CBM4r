@@ -6,7 +6,7 @@
 \usage{
 cbm4_results_view(
   cbm4_results,
-  view_name,
+  view,
   select = NULL,
   group_by = NULL,
   timesteps = NULL,
@@ -19,12 +19,13 @@ cbm4_results_view(
 Path to CBM4 spatial datasets directory
 or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProcessor}}.}
 
-\item{view_name}{character. \code{SQLResultsProcessor} view name.}
+\item{view}{character. \code{SQLResultsProcessor} view name.}
 
-\item{select}{character. \code{SQLResultsProcessor} view column names.
+\item{select}{character. View column names.
 The vector can have names to use as column aliases.}
 
-\item{group_by}{character. Columns to group by. Pool columns will be aggregated with \code{SUM}.}
+\item{group_by}{character. Columns to group by.
+Pool columns will be aggregated with \code{SUM}.}
 
 \item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
 

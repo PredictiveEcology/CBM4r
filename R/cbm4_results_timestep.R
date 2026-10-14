@@ -10,7 +10,7 @@
 #' @export
 cbm4_results_timestep <- function(
     cbm4_results,
-    view_name,
+    view,
     select    = NULL,
     timesteps = NULL,
     units     = "t",
@@ -27,7 +27,7 @@ cbm4_results_timestep <- function(
 
   queryTbl <- cbm4_results_view(
     cbm4_results = cbm4_results,
-    view_name    = view_name,
+    view         = view,
     select       = select,
     group_by     = "timestep",
     timesteps    = timesteps

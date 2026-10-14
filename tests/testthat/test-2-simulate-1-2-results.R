@@ -69,12 +69,12 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_cohort:", project$t
   testthat::skip_if(is.null(cbm4_results))
 
   cohort_views <- cbm4_results_cohort(cbm4_results, list = TRUE)
-  for (view_name in cohort_views$name){
+  for (view in cohort_views$name){
 
     resByCohort <- cbm4_results_cohort(
       cbm4_results,
-      view_name = view_name,
-      units     = "t/ha"
+      view  = view,
+      units = "t/ha"
     )
 
     expect_s3_class(resByCohort, "data.frame")
@@ -85,19 +85,19 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_cohort:", project$t
     if (nrow(resByCohort) > 0){
       expect_all_equal(cbm4_results_cohort(
         cbm4_results,
-        view_name = view_name,
+        view      = view,
         timesteps = 1
       )$timestep, 1)
     }
 
     # Check setting units
     expect_equal(
-      cbm4_results_cohort(cbm4_results, view_name = view_name, units = "t")[, -c("timestep", "pixel_index", "species", "prodClass", "area")],
+      cbm4_results_cohort(cbm4_results, view = view, units = "t")[, -c("timestep", "pixel_index", "species", "prodClass", "area")],
       resByCohort[, -c("timestep", "pixel_index", "species", "prodClass")] * (project$grid_meta$area[[1]] / 10000),
       tolerance = 0.000001)
 
     expect_equal(
-      cbm4_results_cohort(cbm4_results, view_name = view_name, units = "Mt")[, -c("timestep", "pixel_index", "species", "prodClass", "area")],
+      cbm4_results_cohort(cbm4_results, view = view, units = "Mt")[, -c("timestep", "pixel_index", "species", "prodClass", "area")],
       resByCohort[, -c("timestep", "pixel_index", "species", "prodClass")] * (project$grid_meta$area[[1]] / 10000) / 10^6,
       tolerance = 0.000001)
 
@@ -106,9 +106,8 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_cohort:", project$t
       resByCohort,
       cbm4_results_cohort(
         cbm4_results,
-        view_name   = view_name,
-        timesteps   = timesteps,
-        units       = "t/ha"
+        view  = view,
+        units = "t/ha"
       )
     )
   }
@@ -132,11 +131,11 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$te
   testthat::skip_if(is.null(cbm4_results))
 
   pixel_views <- cbm4_results_pixel(cbm4_results, list = TRUE)
-  for (view_name in pixel_views$name){
+  for (view in pixel_views$name){
 
     resByPixel <- cbm4_results_pixel(
       cbm4_results,
-      view_name = view_name
+      view = view
     )
 
     expect_s3_class(resByPixel, "data.frame")
@@ -147,7 +146,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$te
     if (nrow(resByPixel) > 0){
       expect_all_equal(cbm4_results_pixel(
         cbm4_results,
-        view_name = view_name,
+        view      = view,
         timesteps = 1
       )$timestep, 1)
     }
@@ -155,11 +154,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel:", project$te
     # Check using cbm4_data
     expect_equal(
       resByPixel,
-      cbm4_results_pixel(
-        cbm4_results,
-        view_name   = view_name,
-        timesteps   = timesteps
-      )
+      cbm4_results_pixel(cbm4_results, view = view)
     )
   }
 })
@@ -179,12 +174,12 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel with rast = T
     "spatial_composite_disturbance_indicators" = "Ecosystem Transfers - Ecosystem to Forest Products - Total Harvest (Biomass + Snags)"
   )
 
-  for (view_name in names(rast_view_columns)){
+  for (view in names(rast_view_columns)){
 
     resRast <- cbm4_results_pixel(
       cbm4_results,
-      view_name = view_name,
-      select    = rast_view_columns[[view_name]],
+      view      = view,
+      select    = rast_view_columns[[view]],
       timesteps = 1,
       rast      = TRUE
     )
@@ -227,43 +222,43 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_timestep:", project
     "composite_disturbance_indicators" = if (!is.null(project$dist_events)) 1:2 else integer()
   )
 
-  for (view_name in names(total_view_columns)){
+  for (view in names(total_view_columns)){
 
-    resTotals <- cbm4_results_timestep(cbm4_results, view_name = view_name)
+    resTotals <- cbm4_results_timestep(cbm4_results, view = view)
 
     expect_s3_class(resTotals, "data.frame")
     expect_equal(data.table::key(resTotals), "timestep")
     expect_gt(ncol(resTotals), 2)
-    expect_equal(resTotals$timestep, total_view_timesteps[[view_name]])
+    expect_equal(resTotals$timestep, total_view_timesteps[[view]])
 
     # Check setting units
     expect_equal(
-      cbm4_results_timestep(cbm4_results, view_name = view_name, units = "Mt")[, -c("timestep")],
+      cbm4_results_timestep(cbm4_results, view = view, units = "Mt")[, -c("timestep")],
       resTotals[, -c("timestep")] / 10^6,
       tolerance = 0.000001)
 
     expect_equal(
-      cbm4_results_timestep(cbm4_results, view_name = view_name, units = "t/ha")[, -c("timestep", "area")],
+      cbm4_results_timestep(cbm4_results, view = view, units = "t/ha")[, -c("timestep", "area")],
       resTotals[, -c("timestep")] / ((project$grid_meta$area[[1]] / 10000) * length(unique(project$cohorts$pixel_index))),
       tolerance = 0.000001)
 
     # Check subsetting columns and timesteps
     resTotals <- cbm4_results_timestep(
       cbm4_results,
-      view_name = view_name,
-      select    = total_view_columns[[view_name]],
+      view      = view,
+      select    = total_view_columns[[view]],
       timesteps = 1:2
     )
 
     expect_s3_class(resTotals, "data.frame")
-    expect_equal(names(resTotals), c("timestep", total_view_columns[[view_name]]))
-    expect_equal(resTotals$timestep, intersect(total_view_timesteps[[view_name]], 1:2))
+    expect_equal(names(resTotals), c("timestep", total_view_columns[[view]]))
+    expect_equal(resTotals$timestep, intersect(total_view_timesteps[[view]], 1:2))
 
     # Check using cbm4_data
     expect_equal(resTotals, cbm4_results_timestep(
       project$cbm4_data,
-      view_name = view_name,
-      select    = total_view_columns[[view_name]],
+      view      = view,
+      select    = total_view_columns[[view]],
       timesteps = 1:2
     ))
   }
