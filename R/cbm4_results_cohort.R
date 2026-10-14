@@ -12,7 +12,7 @@
 cbm4_results_cohort <- function(
     cbm4_results,
     view_name,
-    view_col  = NULL,
+    select    = NULL,
     timesteps = NULL,
     grid_meta = NULL,
     units     = "t/ha",
@@ -33,7 +33,7 @@ cbm4_results_cohort <- function(
   queryTbl <- cbm4_results_view(
     cbm4_results = cbm4_results,
     view_name    = view_name,
-    view_col     = view_col,
+    select       = select,
     group_by     = c("timestep", "chunk_index", "raster_index", classifiers),
     timesteps    = timesteps
   )
@@ -45,18 +45,18 @@ cbm4_results_cohort <- function(
       "invalid unit ", shQuote(units),
       ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
 
-    view_col <- setdiff(names(queryTbl), data.table::key(queryTbl))
+    select <- setdiff(names(queryTbl), data.table::key(queryTbl))
 
     # Get area
     queryTbl <- queryTbl[cbm4_results_view(cbm4_results, "area"), area := area, on = c("chunk_index", "raster_index")]
     data.table::setcolorder(queryTbl, c(data.table::key(queryTbl), "area"))
 
     # Convert to t
-    queryTbl[, (view_col) := lapply(.SD, function(x) x * area), .SDcols = view_col]
+    queryTbl[, (select) := lapply(.SD, function(x) x * area), .SDcols = select]
 
     # Convert to Mt
     if (units == "Mt"){
-      queryTbl[, (view_col) := lapply(.SD, function(x) x / 10^6), .SDcols = view_col]
+      queryTbl[, (select) := lapply(.SD, function(x) x / 10^6), .SDcols = select]
     }
   }
 

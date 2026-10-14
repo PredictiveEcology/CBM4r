@@ -184,7 +184,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_pixel with rast = T
     resRast <- cbm4_results_pixel(
       cbm4_results,
       view_name = view_name,
-      view_col  = rast_view_columns[[view_name]],
+      select    = rast_view_columns[[view_name]],
       timesteps = 1,
       rast      = TRUE
     )
@@ -251,7 +251,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_timestep:", project
     resTotals <- cbm4_results_timestep(
       cbm4_results,
       view_name = view_name,
-      view_col  = total_view_columns[[view_name]],
+      select    = total_view_columns[[view_name]],
       timesteps = 1:2
     )
 
@@ -263,7 +263,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_timestep:", project
     expect_equal(resTotals, cbm4_results_timestep(
       project$cbm4_data,
       view_name = view_name,
-      view_col  = total_view_columns[[view_name]],
+      select    = total_view_columns[[view_name]],
       timesteps = 1:2
     ))
   }

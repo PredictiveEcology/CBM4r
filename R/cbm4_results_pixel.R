@@ -12,7 +12,7 @@
 cbm4_results_pixel <- function(
     cbm4_results,
     view_name,
-    view_col  = NULL,
+    select    = NULL,
     timesteps = NULL,
     grid_meta = NULL,
     rast      = FALSE,
@@ -30,7 +30,7 @@ cbm4_results_pixel <- function(
   queryTbl <- cbm4_results_view(
     cbm4_results = cbm4_results,
     view_name    = view_name,
-    view_col     = view_col,
+    select       = select,
     group_by     = c("timestep", "chunk_index", "raster_index"),
     timesteps    = timesteps
   )
@@ -49,8 +49,8 @@ cbm4_results_pixel <- function(
 
     cbm4_grid <- cbm4_results_grid(cbm4_results)
 
-    if (length(view_col) != 1) stop("view_col must be length 1 if rast = TRUE")
-    data.table::setnames(queryTbl, view_col, "value")
+    if (length(select) != 1) stop("select must be length 1 if rast = TRUE")
+    data.table::setnames(queryTbl, select, "value")
 
     if (is.null(timesteps)) timesteps <- unique(queryTbl$timestep)
 

@@ -7,7 +7,7 @@
 cbm4_results_view(
   cbm4_results,
   view_name,
-  view_col = NULL,
+  select = NULL,
   group_by = NULL,
   timesteps = NULL,
   list = FALSE,
@@ -21,7 +21,7 @@ or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProces
 
 \item{view_name}{character. \code{SQLResultsProcessor} view name.}
 
-\item{view_col}{character. \code{SQLResultsProcessor} view column names.
+\item{select}{character. \code{SQLResultsProcessor} view column names.
 The vector can have names to use as column aliases.}
 
 \item{group_by}{character. Columns to group by. Pool columns will be aggregated with \code{SUM}.}

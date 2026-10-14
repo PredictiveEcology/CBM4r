@@ -5,7 +5,7 @@
 #'
 #' @template cbm4_results
 #' @param view_name character. `SQLResultsProcessor` view name.
-#' @param view_col character. `SQLResultsProcessor` view column names.
+#' @param select character. `SQLResultsProcessor` view column names.
 #' The vector can have names to use as column aliases.
 #' @param group_by character. Columns to group by. Pool columns will be aggregated with `SUM`.
 #' @template timesteps
@@ -17,7 +17,7 @@
 cbm4_results_view <- function(
     cbm4_results,
     view_name,
-    view_col  = NULL,
+    select    = NULL,
     group_by  = NULL,
     timesteps = NULL,
     list      = FALSE,
@@ -29,17 +29,17 @@ cbm4_results_view <- function(
   if (list) return(data.table::as.data.table(cbm4_results$views)[, .(name, column_names)])
 
   if (!is.null(group_by)){
-    if (is.null(view_col)) view_col <- .cbm4_results_view_columns(cbm4_results, view_name)
-    if (is.null(names(view_col))) names(view_col) <- view_col
+    if (is.null(select)) select <- .cbm4_results_view_columns(cbm4_results, view_name)
+    if (is.null(names(select))) names(select) <- select
   }
 
   querySQL <- paste(
     "SELECT",
-    if (!is.null(view_col)){
+    if (!is.null(select)){
       c(shQuote(group_by),
         paste(
-          sprintf(ifelse(is.null(group_by), "\"%s\"", "SUM(\"%s\")"), view_col),
-          if (!is.null(names(view_col))) sprintf("AS \"%s\"", names(view_col))
+          sprintf(ifelse(is.null(group_by), "\"%s\"", "SUM(\"%s\")"), select),
+          if (!is.null(names(select))) sprintf("AS \"%s\"", names(select))
         )) |> paste(collapse = ", ")
     }else "*",
     "FROM", view_name,

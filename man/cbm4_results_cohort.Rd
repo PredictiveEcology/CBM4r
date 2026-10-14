@@ -7,7 +7,7 @@
 cbm4_results_cohort(
   cbm4_results,
   view_name,
-  view_col = NULL,
+  select = NULL,
   timesteps = NULL,
   grid_meta = NULL,
   units = "t/ha",
@@ -22,7 +22,7 @@ or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProces
 
 \item{view_name}{character. \code{SQLResultsProcessor} view name.}
 
-\item{view_col}{character. \code{SQLResultsProcessor} view column names.
+\item{select}{character. \code{SQLResultsProcessor} view column names.
 The vector can have names to use as column aliases.}
 
 \item{timesteps}{integer. Simulation timesteps with 1 representing the first year.}
