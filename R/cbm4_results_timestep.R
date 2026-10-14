@@ -50,15 +50,7 @@ cbm4_results_timestep <- function(
     }
 
     if (units == "t/ha"){
-
-      tAreas <- cbm4_results_query(cbm4_results, c(
-        "SELECT timestep, SUM(\"inventory.area\" * cohort_proportion) AS area FROM simulation",
-        if (!is.null(timesteps)) sprintf("WHERE timestep IN (%s)", paste(timesteps, collapse = ", ")),
-        "GROUP BY timestep"
-      ))
-
-      queryTbl <- queryTbl[tAreas, area := area, on = "timestep"]
-      data.table::setcolorder(queryTbl, c(data.table::key(queryTbl), "area"))
+      area <- cbm4_results_query(cbm4_results, "SELECT SUM(area) AS area FROM area")$area
       queryTbl <- queryTbl[, (pools) := lapply(.SD, function(x) x / area), .SDcols = pools]
     }
   }
