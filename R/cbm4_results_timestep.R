@@ -1,0 +1,66 @@
+
+#' CBM4 results timestep
+#'
+#' Read simulation results by timestep.
+#'
+#' @inheritParams cbm4_results_view
+#' @param units character. "t/ha", "t", "Mt".
+#'
+#' @return `data.table`
+#' @export
+cbm4_results_timestep <- function(
+    cbm4_results,
+    view,
+    select    = NULL,
+    timesteps = NULL,
+    units     = "t",
+    list      = FALSE,
+    ...
+){
+
+  cbm4_results <- SQLResultsProcessor(cbm4_results, ...)
+
+  if (list) return(
+    data.table::as.data.table(cbm4_results$views)[, .(name, column_names)][
+      !grepl("^spatial_", name) & grepl("_indicators$", name) & !grepl("age_indicators", name)]
+  )
+
+  queryTbl <- cbm4_results_view(
+    cbm4_results = cbm4_results,
+    view         = view,
+    select       = unlist(unname(select)),
+    group_by     = "timestep",
+    timesteps    = timesteps
+  )
+
+  if (units != "t"){
+
+    unitOpts <- c("t/ha", "t", "Mt")
+    if (!units %in% unitOpts) stop(
+      "invalid unit ", shQuote(units),
+      ". Choose from: ", paste(shQuote(unitOpts), collapse = ", "))
+
+    pools <- intersect(
+      .cbm4_results_view_pool_columns(cbm4_results, view),
+      names(queryTbl)
+    )
+
+    if (units == "Mt"){
+      queryTbl <- queryTbl[, (pools) := lapply(.SD, function(x) x / 10^6), .SDcols = pools]
+    }
+
+    if (units == "t/ha"){
+      area <- cbm4_results_query(cbm4_results, "SELECT SUM(area) AS area FROM area")$area
+      queryTbl <- queryTbl[, (pools) := lapply(.SD, function(x) x / area), .SDcols = pools]
+    }
+  }
+
+  data.table::setkey(queryTbl, timestep)
+  if (!is.null(select) && !is.null(names(select))){
+    data.table::setnames(queryTbl, unlist(unname(select)), names(select))
+  }
+  return(queryTbl)
+}
+
+
+

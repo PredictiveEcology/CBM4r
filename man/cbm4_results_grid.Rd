@@ -9,7 +9,7 @@ cbm4_results_grid(cbm4_results, dataset_name = "simulation")
 \arguments{
 \item{cbm4_results}{character or \code{SQLResultsProcessor}.
 Path to CBM4 spatial datasets directory
-or a \code{SQLResultsProcessor} object created with \code{\link{cbm4_results_processor}}.}
+or a \code{SQLResultsProcessor} object created with \code{\link{SQLResultsProcessor}}.}
 
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}

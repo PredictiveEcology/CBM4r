@@ -21,7 +21,7 @@ for (test in names(projects)){
 
 for (project in projects) test_that(paste("cbm4_write_simulation:", project$test), {
 
-  template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, project$template_name))
+  template_results <- SQLResultsProcessor(file.path(testDirs$temp$outputs, project$template_name))
 
   # Initiate datasets
   cbm4_write_inventory(
@@ -65,11 +65,11 @@ for (project in projects) test_that(paste("cbm4_write_simulation:", project$test
   cbm4_step(project$cbm4_data, timestep = 2)
 
   # Expect results to match template project exactly
-  cbm4_results <- cbm4_results_processor(project$cbm4_data)
+  cbm4_results <- SQLResultsProcessor(project$cbm4_data)
   for (view_name in c("pool_indicators", "flux_indicators", "disturbance_indicators")){
-    template_view <- cbm4_results_totals(template_results, view_name)
+    template_view <- cbm4_results_timestep(template_results, view_name)
     expect_equal(
-      cbm4_results_totals(cbm4_results, view_name)[, .SD, .SDcols = names(template_view)],
+      cbm4_results_timestep(cbm4_results, view_name)[, .SD, .SDcols = names(template_view)],
       template_view,
       tolerance = 0.000001
     )

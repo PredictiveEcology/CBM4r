@@ -37,7 +37,7 @@ for (test in names(projects)){
                  dataset_names = "step_parameters")
 }
 
-template_results <- cbm4_results_processor(file.path(testDirs$temp$outputs, "SK_w_dist"))
+template_results <- SQLResultsProcessor(file.path(testDirs$temp$outputs, "SK_w_dist"))
 
 
 ## SIMULATE ----
@@ -72,17 +72,17 @@ for (project in projects) test_that(paste("cbm4_step:", project$test), {
 
 for (project in projects) test_that(paste("Disturbance filters can exclude cohorts:", project$test), {
 
-  cbm4_results <- cbm4_results_processor(project$cbm4_data)
+  cbm4_results <- SQLResultsProcessor(project$cbm4_data)
 
   # No softwood harvested
   expect_equal(
-    sum(cbm4_results_totals(cbm4_results, "disturbance_indicators", "DisturbanceSoftProduction")$DisturbanceSoftProduction),
+    sum(cbm4_results_timestep(cbm4_results, "disturbance_indicators", "DisturbanceSoftProduction")$DisturbanceSoftProduction),
     0)
 
   for (view_name in c("pool_indicators", "flux_indicators", "disturbance_indicators")){
     expect_equal(
-      cbm4_results_totals(cbm4_results,     view_name, timesteps = 1:2),
-      cbm4_results_totals(template_results, view_name, timesteps = 1:2),
+      cbm4_results_timestep(cbm4_results,     view_name, timesteps = 1:2),
+      cbm4_results_timestep(template_results, view_name, timesteps = 1:2),
       tolerance = 0.000001
     )
   }

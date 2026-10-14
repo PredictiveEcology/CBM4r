@@ -1,12 +1,12 @@
 
-#' CBM4 results processor
+#' SQL Results Processor
 #'
 #' @template cbm4_data
 #' @template max_workers
-#' @param views logical. Require views to be available
+#' @param views logical. Require all views to be available
 #' @return `SQLResultsProcessor`
 #' @export
-cbm4_results_processor <- function(
+SQLResultsProcessor <- function(
     cbm4_data,
     max_workers = NULL,
     views       = TRUE
