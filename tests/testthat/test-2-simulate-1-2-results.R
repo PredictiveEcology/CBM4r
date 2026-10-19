@@ -292,7 +292,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_timestep:", project
       tolerance = 0.000001)
 
     expect_equal(
-      cbm4_results_timestep(cbm4_results, view = view, units = "t/ha")[, -c("timestep", "area")],
+      cbm4_results_timestep(cbm4_results, view = view, units = "t/ha")[, -c("timestep")],
       resByT[, -c("timestep")] / ((project$grid_meta$area[[1]] / 10000) * length(unique(project$cohorts$pixel_index))),
       tolerance = 0.000001)
 
