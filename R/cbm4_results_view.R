@@ -37,7 +37,7 @@ cbm4_results_view <- function(
   querySQL <- paste(
     "SELECT",
     if (!is.null(select)){
-      c(shQuote(group_by),
+      c(group_by,
         paste(
           sprintf(ifelse(is.null(group_by), "\"%s\"", "SUM(\"%s\")"), select),
           if (!is.null(names(select))) sprintf("AS \"%s\"", names(select))
