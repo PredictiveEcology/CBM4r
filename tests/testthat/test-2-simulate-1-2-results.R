@@ -111,7 +111,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_cohort:", project$t
       select = select
     )
     expect_equal(names(resByCohortSelect),
-                 c("timestep", "pixel_index", "species", "prodClass", select))
+                 c("timestep", "pixel_index", "species", "prodClass", "age", select))
 
     resByCohortSelectRename <- cbm4_results_cohort(
       cbm4_results,
@@ -119,7 +119,7 @@ for (project in projects[2:3]) test_that(paste("cbm4_results_cohort:", project$t
       select = setNames(select, c("colA", "colB"))
     )
     expect_equal(names(resByCohortSelectRename),
-                 c("timestep", "pixel_index", "species", "prodClass", "colA", "colB"))
+                 c("timestep", "pixel_index", "species", "prodClass", "age", "colA", "colB"))
 
     expect_equal(resByCohortSelect, resByCohortSelectRename, ignore_attr = TRUE)
 

@@ -36,7 +36,7 @@ cbm4_results_cohort <- function(
     select       = if (!is.null(select)) unique(c(
       "timestep", "chunk_index", "raster_index",
       if (units != "t/ha" && "area" %in% subset(cbm4_results$views, name == view)$column_names[[1]]) "area",
-      classifiers,
+      classifiers, "age",
       unlist(unname(select))
     )),
     timesteps    = timesteps
@@ -74,6 +74,7 @@ cbm4_results_cohort <- function(
   queryTbl <- queryTbl[grid_meta, pixel_index := pixel_index, on = c("chunk_index", "raster_index")]
   queryTbl[, c("chunk_index", "raster_index") := NULL]
   data.table::setkeyv(queryTbl, c("timestep", "pixel_index", classifiers))
+  data.table::setorderv(queryTbl, c(data.table::key(queryTbl), intersect(names(queryTbl), "age")))
   data.table::setcolorder(queryTbl, c(data.table::key(queryTbl), intersect(names(queryTbl), "area")))
 
   if (!is.null(select) && !is.null(names(select))){
