@@ -3,10 +3,11 @@ arrow_space_dataset_write_table <- function(
     dataset_dir = NULL,
     dataset_name,
     table_data,
-    table_name   = NULL,
-    schema       = NULL,
-    no_factors   = TRUE,
+    table_name = NULL,
+    schema = NULL,
+    no_factors = TRUE,
     existing_data_behavior = "delete_matching",
+    max_partitions = 10^6,
     dataset_path = file.path(dataset_dir, dataset_name),
     ...
 ){
@@ -41,7 +42,11 @@ arrow_space_dataset_write_table <- function(
       )) table_data <- table_data$cast(table_schema)
     }
 
-    arrow::write_dataset(table_data, table_path, existing_data_behavior = existing_data_behavior, ...)
+    arrow::write_dataset(
+      table_data, table_path,
+      existing_data_behavior = existing_data_behavior,
+      max_partitions = max_partitions,
+      ...)
 
   }else{
     dir.create(table_path, recursive = TRUE, showWarnings = FALSE)
