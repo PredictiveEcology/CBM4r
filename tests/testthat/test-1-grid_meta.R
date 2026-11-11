@@ -49,22 +49,29 @@ test_that("cbm4_grid_meta and cbm4_set_grid_meta", {
     eco_boundary_id = 6,
     chunk_size      = 2
   )
-  expect_equal(grid_meta[,        .SD, .SDcols = setdiff(names(grid_meta), "chunk_index")],
-               grid_meta_chunks[, .SD, .SDcols = setdiff(names(grid_meta), "chunk_index")])
-  expect_equal(grid_meta_chunks$chunk_index, do.call(c, lapply(1:32, rep, 2)) - 1)
+  expect_equal(grid_meta[,        .SD, .SDcols = setdiff(names(grid_meta), c("chunk_index", "raster_index"))],
+               grid_meta_chunks[, .SD, .SDcols = setdiff(names(grid_meta), c("chunk_index", "raster_index"))])
 
-  # cbm4_grid_meta with chunk_meta
-  grid_meta_chunks <- cbm4_grid_meta(
-    grid_rast       = grid_rast,
-    admin_boundary  = "Saskatchewan",
-    eco_boundary_id = 6,
-    chunk_meta      = data.table::fread(system.file("testdata/SK/cohorts.csv", package = "CBM4r")),
-    chunk_size      = 1
-  )
-  expect_equal(grid_meta[,        .SD, .SDcols = setdiff(names(grid_meta), "chunk_index")],
-               grid_meta_chunks[, .SD, .SDcols = setdiff(names(grid_meta), "chunk_index")])
-  expect_equal(grid_meta_chunks$chunk_index, c(0, NA, 0, 1, rep(NA, 60)))
-
+  expect_equal(grid_meta_chunks$chunk_index, c(
+     0,  0,  1,  1,  2,  2,  3,  3,
+     0,  0,  1,  1,  2,  2,  3,  3,
+     4,  4,  5,  5,  6,  6,  7,  7,
+     4,  4,  5,  5,  6,  6,  7,  7,
+     8,  8,  9,  9, 10, 10, 11, 11,
+     8,  8,  9,  9, 10, 10, 11, 11,
+    12, 12, 13, 13, 14, 14, 15, 15,
+    12, 12, 13, 13, 14, 14, 15, 15
+  ))
+  expect_equal(grid_meta_chunks$raster_index, c(
+    0, 1, 0, 1, 0, 1, 0, 1,
+    2, 3, 2, 3, 2, 3, 2, 3,
+    0, 1, 0, 1, 0, 1, 0, 1,
+    2, 3, 2, 3, 2, 3, 2, 3,
+    0, 1, 0, 1, 0, 1, 0, 1,
+    2, 3, 2, 3, 2, 3, 2, 3,
+    0, 1, 0, 1, 0, 1, 0, 1,
+    2, 3, 2, 3, 2, 3, 2, 3
+  ))
 })
 
 test_that("cbm4_set_grid_meta with admin_abbrev", {

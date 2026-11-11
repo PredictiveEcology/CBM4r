@@ -8,7 +8,6 @@ cbm4_set_grid_meta(
   grid_meta,
   grid_rast = NULL,
   chunk_size = NULL,
-  chunk_meta = NULL,
   def_afforestation_pre_type = "None",
   def_historic_disturbance_type = "Wildfire",
   def_last_pass_disturbance_type = "Wildfire",
@@ -27,10 +26,7 @@ Optional columns: \code{chunk_index}, \code{raster_index},
 
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
 
-\item{chunk_size}{integer. Number of pixels or \code{chunk_meta} groups in each processing chunk.}
-
-\item{chunk_meta}{data.table. Table to use to group pixels by shared characteristics.
-Required columns: \code{pixel_index} and at least one other column.}
+\item{chunk_size}{integer. Number of grid rows and columns in each processing chunk.}
 
 \item{def_afforestation_pre_type}{character. Land use before forestation.
 Defined in CBM defaults database tables 'afforestation_pre_type'}

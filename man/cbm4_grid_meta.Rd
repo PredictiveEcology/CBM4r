@@ -10,7 +10,6 @@ cbm4_grid_meta(
   eco_boundary = NULL,
   eco_boundary_id = NULL,
   chunk_size = NULL,
-  chunk_meta = NULL,
   def_afforestation_pre_type = "None",
   def_historic_disturbance_type = "Wildfire",
   def_last_pass_disturbance_type = "Wildfire",
@@ -27,10 +26,7 @@ cbm4_grid_meta(
 
 \item{eco_boundary_id}{integer. Canada ecozone ID. Provide this or \code{eco_boundary}.}
 
-\item{chunk_size}{integer. Number of pixels or \code{chunk_meta} groups in each processing chunk.}
-
-\item{chunk_meta}{data.table. Table to use to group pixels by shared characteristics.
-Required columns: \code{pixel_index} and at least one other column.}
+\item{chunk_size}{integer. Number of grid rows and columns in each processing chunk.}
 
 \item{def_afforestation_pre_type}{character. Land use before forestation.
 Defined in CBM defaults database tables 'afforestation_pre_type'}

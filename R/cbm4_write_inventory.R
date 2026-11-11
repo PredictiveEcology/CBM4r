@@ -17,6 +17,7 @@ cbm4_write_inventory <- function(
     classifiers     = NULL,
     grid_meta       = NULL,
     grid_rast       = NULL,
+    chunk_size      = NULL,
     dataset_name    = "inventory",
     dataset_path    = file.path(cbm4_data, dataset_name),
     cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -28,12 +29,15 @@ cbm4_write_inventory <- function(
 
     if (length(classifiers) == 0) stop(">=1 classifiers are required.")
 
+    if ((is.null(chunk_size) || is.na(chunk_size)) &&
+         data.table::uniqueN(grid_meta$chunk_index) > 1) stop("chunk_size required")
+
     cbm4_write_geo(
       cbm4_data,
       dataset_name    = dataset_name,
       dataset_path    = dataset_path,
-      grid_meta       = grid_meta,
       grid_rast       = grid_rast,
+      chunk_size      = chunk_size,
       cbm_defaults_db = cbm_defaults_db,
       partitions      = cbm4_schema(c("cohort_index", "chunk_index")),
       tags            = list(classifier = classifiers),

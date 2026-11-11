@@ -5,8 +5,8 @@
 #' @param dataset_name character. name of `arrow_space` dataset directory.
 #' @param dataset_path character. Path to `arrow_space` dataset.
 #' Defaults to `file.path(dataset_dir, dataset_name)`
-#' @param grid_rast terra `SpatRaster`. Grid defining the study area.
-#' @param grid_chunks integer. Number of parallel processing chunks.
+#' @template grid_rast
+#' @template chunk_size
 #' @param partitions character. TODO
 #' @param tags character. TODO
 #' @param ... unused
@@ -15,7 +15,7 @@ arrow_space_dataset_write_geo <- function(
     dataset_dir  = NULL,
     dataset_name,
     grid_rast,
-    grid_chunks  = 1,
+    chunk_size   = NULL,
     partitions   = NULL,
     tags         = NULL,
     dataset_path = file.path(dataset_dir, dataset_name),
@@ -28,7 +28,7 @@ arrow_space_dataset_write_geo <- function(
   if (!is.null(tags)) pd <- reticulate::import("pandas")
 
   geo_metadata <- arrow_space_dataset_geo_metadata(grid_rast)
-  geo_bounds   <- arrow_space_dataset_bounds(grid_rast, grid_chunks)
+  geo_bounds   <- arrow_space_dataset_bounds(grid_rast, chunk_size)
 
   arrow_space$dataset_common$create_empty(
 
@@ -72,20 +72,34 @@ arrow_space_dataset_write_geo <- function(
   return(invisible())
 }
 
-arrow_space_dataset_bounds <- function(grid_rast, grid_chunks = 1){
+arrow_space_dataset_bounds <- function(grid_rast, chunk_size = NULL){
 
   if (is.null(grid_rast)) stop("grid_rast is NULL")
   if (!inherits(grid_rast, "SpatRaster")) grid_rast <- tryCatch(
     terra::rast(grid_rast), error = function(e) stop(
       "failed to read grid_rast as SpatRaster: ", e$message))
 
-  data.table::data.table(
-    chunk_index = 0:(grid_chunks - 1),
-    x_off       = 0,
-    y_off       = 0,
-    x_size      = ncol(grid_rast),
-    y_size      = nrow(grid_rast)
-  )
+  if (is.null(chunk_size) || is.na(chunk_size)){
+
+    data.table::data.table(
+      chunk_index = 0,
+      x_off       = 0,
+      y_off       = 0,
+      x_size      = terra::ncol(grid_rast),
+      y_size      = terra::nrow(grid_rast)
+    )
+
+  }else{
+
+    bounds <- terra::getTileExtents(grid_rast, chunk_size) |>
+      data.table::as.data.table()
+    bounds[, chunk_index := .I - 1]
+    bounds[, x_off  := xmin - terra::xmin(grid_rast)]
+    bounds[, y_off  := ymin - terra::ymin(grid_rast)]
+    bounds[, x_size := xmax - xmin]
+    bounds[, y_size := ymax - ymin]
+    bounds[, .(chunk_index, x_off, y_off, x_size, y_size)]
+  }
 }
 
 arrow_space_dataset_geo_metadata <- function(grid_rast){

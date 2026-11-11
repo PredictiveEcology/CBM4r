@@ -10,6 +10,7 @@ cbm4_write_inventory(
   classifiers = NULL,
   grid_meta = NULL,
   grid_rast = NULL,
+  chunk_size = NULL,
   dataset_name = "inventory",
   dataset_path = file.path(cbm4_data, dataset_name),
   cbm_defaults_db = getOption("CBM4r.db.path"),
@@ -30,6 +31,8 @@ Column names of cohort inventory identifiers.}
 This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
 
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
+
+\item{chunk_size}{integer. Number of grid rows and columns in each processing chunk.}
 
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}

@@ -5,8 +5,8 @@
 #'
 #' @template cbm4_data
 #' @template dataset_name
-#' @template grid_meta
 #' @template grid_rast
+#' @template chunk_size
 #' @template dataset_path
 #' @param ... arguments to \code{\link{arrow_space_dataset_write_geo}}
 #'
@@ -15,8 +15,8 @@
 cbm4_write_geo <- function(
     cbm4_data = NULL,
     dataset_name,
-    grid_meta,
     grid_rast,
+    chunk_size = NULL,
     dataset_path = file.path(cbm4_data, dataset_name),
     ...
 ){
@@ -25,7 +25,7 @@ cbm4_write_geo <- function(
     dataset_name = dataset_name,
     dataset_path = dataset_path,
     grid_rast    = grid_rast,
-    grid_chunks  = sum(!is.na(unique(grid_meta$chunk_index))),
+    chunk_size   = chunk_size,
     ...
   )
 }

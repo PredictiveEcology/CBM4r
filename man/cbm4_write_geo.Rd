@@ -7,8 +7,8 @@
 cbm4_write_geo(
   cbm4_data = NULL,
   dataset_name,
-  grid_meta,
   grid_rast,
+  chunk_size = NULL,
   dataset_path = file.path(cbm4_data, dataset_name),
   ...
 )
@@ -21,10 +21,9 @@ May be omitted if full paths to datasets are provided.}
 \item{dataset_name}{character.
 Name of the CBM4 spatial parquet dataset.}
 
-\item{grid_meta}{data.table. Grid metadata.
-This table can be created with \code{cbm4_grid_meta} or \code{cbm4_set_grid_meta}.}
-
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
+
+\item{chunk_size}{integer. Number of grid rows and columns in each processing chunk.}
 
 \item{dataset_path}{character.
 Path to the CBM4 spatial parquet dataset.

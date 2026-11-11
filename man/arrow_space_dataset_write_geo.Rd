@@ -8,7 +8,7 @@ arrow_space_dataset_write_geo(
   dataset_dir = NULL,
   dataset_name,
   grid_rast,
-  grid_chunks = 1,
+  chunk_size = NULL,
   partitions = NULL,
   tags = NULL,
   dataset_path = file.path(dataset_dir, dataset_name),
@@ -22,7 +22,7 @@ arrow_space_dataset_write_geo(
 
 \item{grid_rast}{terra \code{SpatRaster}. Grid defining the study area.}
 
-\item{grid_chunks}{integer. Number of parallel processing chunks.}
+\item{chunk_size}{integer. Number of grid rows and columns in each processing chunk.}
 
 \item{partitions}{character. TODO}
 

@@ -11,9 +11,7 @@
 #' Optional columns: `chunk_index`, `raster_index`,
 #' `afforestation_pre_type`, `historic_disturbance_type`, `last_pass_disturbance_type`.
 #' @template grid_rast
-#' @param chunk_size integer. Number of pixels or `chunk_meta` groups in each processing chunk.
-#' @param chunk_meta data.table. Table to use to group pixels by shared characteristics.
-#' Required columns: `pixel_index` and at least one other column.
+#' @template chunk_size
 #' @template cbm_defaults_db
 #' @param def_afforestation_pre_type character. Land use before forestation.
 #' Defined in CBM defaults database tables 'afforestation_pre_type'
@@ -29,7 +27,6 @@ cbm4_set_grid_meta <- function(
     grid_meta,
     grid_rast = NULL,
     chunk_size = NULL,
-    chunk_meta = NULL,
     def_afforestation_pre_type     = "None",
     def_historic_disturbance_type  = "Wildfire",
     def_last_pass_disturbance_type = "Wildfire",
@@ -42,22 +39,26 @@ cbm4_set_grid_meta <- function(
 
   if (!is.null(chunk_size) && !is.na(chunk_size)){
 
-    if (!is.null(chunk_meta)){
+    if (is.null(grid_rast)) stop("grid_rast required to set chunks")
 
-      check_table_columns_all("chunk_meta", chunk_meta, "pixel_index")
-      chunk_groups <- data.table::as.data.table(chunk_meta)[
-        , chunk_index := ceiling(.GRP / chunk_size) - 1, by = setdiff(names(chunk_meta), "pixel_index")]
+    t <- terra::getTileExtents(grid_rast, chunk_size)
 
-      if ("chunk_index" %in% names(grid_meta)) grid_meta[, chunk_index := NULL]
-      grid_meta[chunk_groups, chunk_index := chunk_index, on = "pixel_index"]
-      rm(chunk_groups)
+    if ("chunk_index"  %in% names(grid_meta)) grid_meta[, chunk_index  := NULL]
+    if ("raster_index" %in% names(grid_meta)) grid_meta[, raster_index := NULL]
+    grid_meta[, c("x", "y") := as.data.frame(terra::xyFromCell(grid_rast, pixel_index))]
 
-    }else{
+    grid_meta[
+      data.table::rbindlist(lapply(1:nrow(t), function(i){
+        tile <- terra::crop(terra::rast(grid_rast), t[i,])
+        xy <- terra::xyFromCell(tile, 1:terra::ncell(tile)) |> data.table::as.data.table()
+        xy[, chunk_index  := i - 1]
+        xy[, raster_index := .I - 1]
+        xy
+      })),
+      c("chunk_index", "raster_index") := .(chunk_index, raster_index), on = c("x", "y")]
 
-      grid_meta[, chunk_index := ceiling(1:nrow(grid_meta) / chunk_size) - 1]
-    }
-
-    grid_meta[, raster_index := pixel_index - 1]
+    grid_meta[, x := NULL]
+    grid_meta[, y := NULL]
   }
 
   if (!"chunk_index"  %in% names(grid_meta)) data.table::set(grid_meta, j = "chunk_index",  value = 0L)
