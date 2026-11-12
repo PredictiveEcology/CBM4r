@@ -42,8 +42,8 @@ for (project in projects) test_that(paste("cbm4_results_grid_key:", project$test
   grid_key <- cbm4_results_grid_key(cbm4_results)
 
   expect_equal(names(grid_key), c("pixel_index", "chunk_index", "raster_index"))
-  expect_equal(grid_key$pixel_index,  unique(project$cohorts$pixel_index))
-  expect_equal(grid_key$raster_index, unique(project$cohorts$pixel_index) - 1)
+  expect_equal(grid_key$pixel_index,  1:terra::ncell(project$grid_rast))
+  expect_equal(grid_key$raster_index, (1:terra::ncell(project$grid_rast)) - 1)
 
   expect_equal(grid_key, cbm4_results_grid_key(cbm4_data))
 

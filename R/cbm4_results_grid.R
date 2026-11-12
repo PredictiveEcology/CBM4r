@@ -68,14 +68,6 @@ cbm4_results_grid_key <- function(
       table_name   = "chunks"
     )
 
-    raster_index <- arrow::open_dataset(file.path(cbm4_results, dataset_name, paste0(dataset_name, "-raster_index")))
-    if ("timestep" %in% names(raster_index)) raster_index <- dplyr::filter(raster_index, timestep < 2)
-    grid_key <- raster_index |>
-      dplyr::select(chunk_index, raster_index) |>
-      dplyr::collect() |>
-      unique() |>
-      data.table::as.data.table()
-
   }else{
 
     grid_chunks <- reticulate::py_get_attr(cbm4_results, "_results_dataset")[[
@@ -89,47 +81,41 @@ cbm4_results_grid_key <- function(
         y_size      = grid_chunks[[1]]$y_size
       )
     }))
-
-    grid_key <- cbm4_results_query(cbm4_results, c(
-      "SELECT chunk_index, raster_index FROM raster_index WHERE timestep = 0"
-    ))
   }
 
-  grid_key <- cbind(grid_key, data.table::rbindlist(lapply(unique(grid_key$chunk_index), function(ch){
 
-    chunk <- grid_chunks[ch + 1,]
+  grid_key <- data.table::rbindlist(lapply(grid_chunks$chunk_index, function(ch){
+
+    chunk <- grid_chunks[chunk_index == ch]
 
     chunk_ext <- list(
-      xmin  = cbm4_grid_info$ext$xmin + (cbm4_grid_info$res[[1]] * chunk$x_off),
-      ymin  = cbm4_grid_info$ext$ymin + (cbm4_grid_info$res[[2]] * chunk$y_off)
+      xmin  = cbm4_grid_info$ext$xmin + chunk$x_off,
+      ymin  = cbm4_grid_info$ext$ymin + chunk$y_off
     )
-    chunk_ext$xmax <- chunk_ext$xmin + (cbm4_grid_info$res[[1]] * chunk$x_size)
-    chunk_ext$ymax <- chunk_ext$ymin + (cbm4_grid_info$res[[2]] * chunk$y_size)
+    chunk_ext$xmax <- chunk_ext$xmin + chunk$x_size
+    chunk_ext$ymax <- chunk_ext$ymin + chunk$y_size
 
     chunk_rast <- terra::rast(
-      xmin  = chunk_ext$xmin,
-      ymin  = chunk_ext$ymin,
-      xmax  = chunk_ext$xmax,
-      ymax  = chunk_ext$ymax,
-      ncols = chunk$x_size,
-      nrows = chunk$y_size,
-      crs   = cbm4_grid_info$crs
+      xmin = chunk_ext$xmin,
+      ymin = chunk_ext$ymin,
+      xmax = chunk_ext$xmax,
+      ymax = chunk_ext$ymax,
+      res  = cbm4_grid_info$res,
+      crs  = cbm4_grid_info$crs
     )
 
     data.table::as.data.table(
-      terra::xyFromCell(chunk_rast, grid_key[chunk_index == ch]$raster_index + 1)
-    )
-  })))
+      terra::crds(chunk_rast)
+    )[, chunk_index := ch][, raster_index := .I - 1]
+  }))
 
   grid_key <- data.table::as.data.table(terra::crds(cbm4_grid))[
     , pixel_index := 1:.N][grid_key, on = c("x", "y")]
   data.table::setkey(grid_key, pixel_index)
+  data.table::setcolorder(grid_key, c("pixel_index", "chunk_index", "raster_index", "x", "y"))
+  if (!coords) grid_key[, c("x", "y") := NULL]
 
-  if (coords){
-    grid_key[, .(pixel_index, chunk_index, raster_index, x, y)]
-  }else{
-    grid_key[, .(pixel_index, chunk_index, raster_index)]
-  }
+  grid_key
 }
 
 
