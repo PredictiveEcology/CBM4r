@@ -41,7 +41,7 @@ cbm4_set_grid_meta <- function(
 
     if (is.null(grid_rast)) stop("grid_rast required to set chunks")
 
-    t <- terra::getTileExtents(grid_rast, chunk_size)
+    t <- suppressWarnings(terra::getTileExtents(grid_rast, chunk_size))
 
     if ("chunk_index"  %in% names(grid_meta)) grid_meta[, chunk_index  := NULL]
     if ("raster_index" %in% names(grid_meta)) grid_meta[, raster_index := NULL]

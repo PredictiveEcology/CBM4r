@@ -91,7 +91,7 @@ arrow_space_dataset_bounds <- function(grid_rast, chunk_size = NULL){
 
   }else{
 
-    bounds <- terra::getTileExtents(grid_rast, chunk_size) |>
+    bounds <- suppressWarnings(terra::getTileExtents(grid_rast, chunk_size)) |>
       data.table::as.data.table()
     bounds[, chunk_index := .I - 1]
     bounds[, x_off  := xmin - terra::xmin(grid_rast)]
