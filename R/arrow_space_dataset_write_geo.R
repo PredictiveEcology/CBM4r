@@ -94,11 +94,10 @@ arrow_space_dataset_bounds <- function(grid_rast, chunk_size = NULL){
     bounds <- suppressWarnings(terra::getTileExtents(grid_rast, chunk_size)) |>
       data.table::as.data.table()
     bounds[, chunk_index := .I - 1]
-    bounds[, x_off  := xmin - terra::xmin(grid_rast)]
-    bounds[, y_off  := ymin - terra::ymin(grid_rast)]
-    bounds[, x_size := xmax - xmin]
-    bounds[, y_size := ymax - ymin]
-    bounds[, .(chunk_index, x_off, y_off, x_size, y_size)]
+    bounds[, x_off  := (xmin - terra::xmin(grid_rast)) / terra::res(grid_rast)[[1]]]
+    bounds[, y_off  := (terra::ymax(grid_rast) - ymax) / terra::res(grid_rast)[[2]]]
+    bounds[, x_size := (xmax - xmin) / terra::res(grid_rast)[[1]]]
+    bounds[, y_size := (ymax - ymin) / terra::res(grid_rast)[[2]]]
     bounds <- bounds[, .(chunk_index, x_off, y_off, x_size, y_size)]
   }
   bounds[, (names(bounds)) := lapply(.SD, as.integer)]

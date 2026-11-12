@@ -75,25 +75,24 @@ cbm4_results_grid_key <- function(
     grid_chunks <- data.table::rbindlist(lapply(1:length(grid_chunks), function(i){
       data.table::data.table(
         chunk_index = i - 1,
-        x_off       = grid_chunks[[1]]$x_off,
-        x_size      = grid_chunks[[1]]$x_size,
-        y_off       = grid_chunks[[1]]$y_off,
-        y_size      = grid_chunks[[1]]$y_size
+        x_off       = grid_chunks[[i]]$x_off,
+        x_size      = grid_chunks[[i]]$x_size,
+        y_off       = grid_chunks[[i]]$y_off,
+        y_size      = grid_chunks[[i]]$y_size
       )
     }))
   }
-
 
   grid_key <- data.table::rbindlist(lapply(grid_chunks$chunk_index, function(ch){
 
     chunk <- grid_chunks[chunk_index == ch]
 
     chunk_ext <- list(
-      xmin  = cbm4_grid_info$ext$xmin + chunk$x_off,
-      ymin  = cbm4_grid_info$ext$ymin + chunk$y_off
+      xmin  = cbm4_grid_info$ext$xmin + (chunk$x_off * cbm4_grid_info$res[[1]]),
+      ymax  = cbm4_grid_info$ext$ymax - (chunk$y_off * cbm4_grid_info$res[[2]])
     )
-    chunk_ext$xmax <- chunk_ext$xmin + chunk$x_size
-    chunk_ext$ymax <- chunk_ext$ymin + chunk$y_size
+    chunk_ext$xmax <- chunk_ext$xmin + (chunk$x_size * cbm4_grid_info$res[[1]])
+    chunk_ext$ymin <- chunk_ext$ymax - (chunk$y_size * cbm4_grid_info$res[[2]])
 
     chunk_rast <- terra::rast(
       xmin = chunk_ext$xmin,

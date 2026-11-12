@@ -8,7 +8,7 @@ testInputs <- list(
   ),
   grid_rast = data.table::data.table(
     ncol = 2, nrow = 2,
-    xmin = 0, xmax = 2, ymin = 0, ymax = 2,
+    xmin = 2, xmax = 6, ymin = 2, ymax = 6,
     crs = "local"
   ),
 
