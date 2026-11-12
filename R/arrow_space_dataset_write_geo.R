@@ -81,7 +81,7 @@ arrow_space_dataset_bounds <- function(grid_rast, chunk_size = NULL){
 
   if (is.null(chunk_size) || is.na(chunk_size)){
 
-    data.table::data.table(
+    bounds <- data.table::data.table(
       chunk_index = 0,
       x_off       = 0,
       y_off       = 0,
@@ -99,7 +99,10 @@ arrow_space_dataset_bounds <- function(grid_rast, chunk_size = NULL){
     bounds[, x_size := xmax - xmin]
     bounds[, y_size := ymax - ymin]
     bounds[, .(chunk_index, x_off, y_off, x_size, y_size)]
+    bounds <- bounds[, .(chunk_index, x_off, y_off, x_size, y_size)]
   }
+  bounds[, (names(bounds)) := lapply(.SD, as.integer)]
+  bounds
 }
 
 arrow_space_dataset_geo_metadata <- function(grid_rast){

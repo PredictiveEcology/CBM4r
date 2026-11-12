@@ -22,6 +22,46 @@ for (test in names(projects)){
   })
 }
 
+for (project in projects) test_that(paste("to_raster:", project$test), {
+
+  ## There is currently an error getting formals in reticulate for the to_raster function.
+  ## Use a Python script to check that to_raster will work on the results.
+
+  cbm4_data   <- project$cbm4_data
+  to_rast_dir <- file.path(testDirs$temp$outputs, "to_raster", project$test)
+  to_rast_py  <- file.path(testDirs$temp$outputs, "to_raster", "raster_index.py")
+
+  pyLns <- c(
+    "from cbm4.app.spatial.spatial_cbm3.spreadsheet_runner import SpreadsheetRunner",
+    "from cbm4.app.spatial.results.sql_results_processor import SQLResultsProcessor",
+    "",
+    sprintf("results_processor = SQLResultsProcessor.for_simulation(\"%s\")", gsub("\\\\", "/", cbm4_data)),
+    "",
+    "results_processor.to_raster(",
+    "    \"\"\"",
+    "    SELECT",
+    "        timestep, chunk_index, raster_index,",
+    "        raster_index AS raster_index",
+    "    FROM raster_index",
+    "    GROUP BY timestep, chunk_index, raster_index",
+    "    \"\"\",",
+    sprintf("    r\"%s\",", gsub("\\\\", "/", to_rast_dir)),
+    "    multiband = False,",
+    "    timesteps = [0],",
+    "    max_vrt_workers = 1",
+    ")"
+  )
+  dir.create(to_rast_dir, recursive = TRUE)
+  writeLines(pyLns, to_rast_py)
+  reticulate::py_run_file(to_rast_py)
+
+  out_rast_path <- list.files(to_rast_dir, pattern = "\\.(tif|tiff)$", ignore.case = TRUE, full.names = TRUE)
+  expect_equal(length(out_rast_path), 1)
+  out_rast <- terra::rast(out_rast_path)
+  expect_equal(terra::values(out_rast, mat = FALSE), c(0, NA, 2, 3))
+
+})
+
 for (project in projects) test_that(paste("cbm4_results_grid:", project$test), {
 
   cbm4_data    <- project$cbm4_data
