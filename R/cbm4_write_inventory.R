@@ -142,21 +142,18 @@ cbm4_format_inventory <- function(
   # Join with pixel table
   dataFull <- merge(cohorts, grid_meta[, .SD, .SDcols = gridCols], by = "pixel_index", all.x = TRUE)
 
-  # Set cohort_index
-  if (!"cohort_index" %in% names(dataFull)){
-    if (anyDuplicated(dataFull$pixel_index) == 0){
-      dataFull[, cohort_index := 0L]
-    }else{
-      dataFull[, cohort_index := .GRP - 1L, by = c(classifiers, "age")]
-    }
-  }
-
   # Drop columns
   col_ignore <- c("pixel_index", intersect(col_ignore, names(cohorts)))
   if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
   # Set index
   dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("index", "raster_index", "cohort_index", "area"))]
+
+  # Set cohort_index
+  if (!"cohort_index" %in% names(dataFull)){
+    data.table::setorder(dataFull, chunk_index, raster_index, index)
+    dataFull[, cohort_index := data.table::rowid(chunk_index, raster_index) - 1]
+  }
 
   # Set area
   if (is.integer(dataFull$area)) dataFull[, area := as.numeric(area)]
