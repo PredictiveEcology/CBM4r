@@ -156,7 +156,7 @@ cbm4_format_inventory <- function(
   if (length(col_ignore) > 0) dataFull[, eval(col_ignore) := NULL]
 
   # Set index
-  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("raster_index", "area"))]
+  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("index", "raster_index", "cohort_index", "area"))]
 
   # Set area
   if (is.integer(dataFull$area)) dataFull[, area := as.numeric(area)]

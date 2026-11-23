@@ -189,7 +189,7 @@ cbm4_format_simulation <- function(
   dataFull[, timestep := as.integer(timestep)]
 
   # Set index
-  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("raster_index", "area"))]
+  dataFull[, index := .GRP - 1L, by = setdiff(names(dataFull), c("index", "raster_index", "cohort_index", "area"))]
 
   # Set area
   if (is.integer(dataFull$area)) dataFull[, area := as.numeric(area)]
