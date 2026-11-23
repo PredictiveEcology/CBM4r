@@ -109,7 +109,11 @@ cbm4_virtualenv_create <- function(envname, version = NULL, upgrade = FALSE, qui
 cbm4_versions <- function(version = NULL){
 
   vers <- list(
-
+    "4.3.4" = list(
+      python   = ">=3.12",
+      gdal_win = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
+      cbm4     = "e2d47b78bee6243f184b0655c41ed4ca2ca6f3dd" # 2026-11-20
+    ),
     "3.3.0" = list(
       python       = ">=3.12",
       gdal_win     = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.10.25/gdal-3.11.4-cp312-cp312-win_amd64.whl",
